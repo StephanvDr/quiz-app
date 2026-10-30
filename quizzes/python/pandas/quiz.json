@@ -1,0 +1,9 @@
+{
+  "title": "Pandas",
+  "category": "Python",
+  "badge": "pd",
+  "language": "python",
+  "description": "Read pandas code and predict the result, or pick the call that does the job: selecting, cleaning, grouping, joining, reshaping, I/O and LLM data prep.",
+  "note": "Every snippet assumes `import pandas as pd` and `import numpy as np`. Answers are checked by running the code on pandas 3.0; where pandas 2.x behaves differently, the explanation says so.",
+  "prelude": ["import pandas as pd", "import numpy as np"]
+}

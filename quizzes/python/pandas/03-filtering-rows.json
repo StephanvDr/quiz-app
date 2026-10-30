@@ -1,0 +1,187 @@
+{
+  "topic": "Filtering rows",
+  "questions": [
+    {
+      "id": "mask-tolist",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2, 3]})",
+        "print((df['a'] > 1).tolist())"
+      ],
+      "options": ["`[False, True, True]`", "`[2, 3]`", "`[1, 2]`", "`True`"],
+      "answer": 0,
+      "explanation": "Comparing a column with a value works element by element and returns a boolean Series, often called a **mask**. Passing the mask to `df[...]` keeps the rows where it is `True`.",
+      "check": "output"
+    },
+    {
+      "id": "filter-keeps-index",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'n': [5, 15, 25]})",
+        "print(df[df['n'] > 10].index.tolist())"
+      ],
+      "options": ["`[1, 2]`", "`[0, 1]`", "`[15, 25]`", "`[False, True, True]`"],
+      "answer": 0,
+      "explanation": "Filtering keeps each row's original index label, so the result has labels 1 and 2. Chain `.reset_index(drop=True)` when you want a fresh `0, 1, ...` index.",
+      "check": "output"
+    },
+    {
+      "id": "and-with-parentheses",
+      "difficulty": "easy",
+      "question": "Which expression keeps the rows where `age` is over 30 **and** `city` is `'NY'`?",
+      "code": ["df = pd.DataFrame({'age': [25, 35, 45], 'city': ['NY', 'LA', 'NY']})"],
+      "options": [
+        "`df[(df['age'] > 30) & (df['city'] == 'NY')]`",
+        "`df[df['age'] > 30 and df['city'] == 'NY']`",
+        "`df[(df['age'] > 30) && (df['city'] == 'NY')]`",
+        "`df.where((df['age'] > 30) & (df['city'] == 'NY'))`"
+      ],
+      "answer": 0,
+      "explanation": "Combine masks with `&` (and), `|` (or) and `~` (not), and wrap each comparison in parentheses. Python's `and` needs a single True or False, so on a Series it raises `ValueError: The truth value of a Series is ambiguous`. `&&` isn't Python, and `where` keeps every row, blanking out the ones that fail.",
+      "check": "options"
+    },
+    {
+      "id": "precedence-trap",
+      "difficulty": "hard",
+      "question": "The parentheses are missing. What happens?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 5], 'b': [2, 6]})",
+        "print(df[df['a'] > 2 & df['b'] > 3])"
+      ],
+      "options": ["`ValueError`", "`TypeError`", "It prints the row where `a` is 5", "It prints an empty DataFrame"],
+      "answer": 0,
+      "explanation": "`&` binds tighter than `>`, so Python reads this as `df['a'] > (2 & df['b']) > 3`. That's a chained comparison, which Python evaluates with `and`, and `and` on a Series raises `ValueError: The truth value of a Series is ambiguous`. Write `(df['a'] > 2) & (df['b'] > 3)`.",
+      "check": "output"
+    },
+    {
+      "id": "isin",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'city': ['NY', 'LA', 'SF', 'NY']})",
+        "print(df[df['city'].isin(['NY', 'SF'])].index.tolist())"
+      ],
+      "options": ["`[0, 2, 3]`", "`[0, 2]`", "`[1]`", "`[0, 1, 2]`"],
+      "answer": 0,
+      "explanation": "`isin(values)` is True wherever the value appears in the list, which makes it the pandas version of SQL's `IN (...)`. Rows 0, 2 and 3 hold `NY` or `SF`.",
+      "check": "output"
+    },
+    {
+      "id": "not-isin",
+      "difficulty": "easy",
+      "question": "Which expression keeps the rows whose `city` is **not** `NY` or `SF`?",
+      "code": ["df = pd.DataFrame({'city': ['NY', 'LA', 'SF', 'NY']})"],
+      "options": [
+        "`df[~df['city'].isin(['NY', 'SF'])]`",
+        "`df[not df['city'].isin(['NY', 'SF'])]`",
+        "`df[!df['city'].isin(['NY', 'SF'])]`",
+        "`df[df['city'].notin(['NY', 'SF'])]`"
+      ],
+      "answer": 0,
+      "explanation": "`~` flips a boolean mask. Python's `not` asks the whole Series for one truth value and raises, `!` isn't Python, and there is no `notin` method.",
+      "check": "options"
+    },
+    {
+      "id": "between-inclusive",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 5, 10, 15])",
+        "print(s[s.between(5, 10)].tolist())"
+      ],
+      "options": ["`[5, 10]`", "`[5]`", "`[1, 5, 10]`", "`[10, 15]`"],
+      "answer": 0,
+      "explanation": "`between(left, right)` includes both ends by default (`inclusive='both'`). Pass `inclusive='left'`, `'right'` or `'neither'` to change that.",
+      "check": "output"
+    },
+    {
+      "id": "query-variable",
+      "difficulty": "medium",
+      "question": "Which `query` call compares `price` with the Python variable `limit`?",
+      "code": [
+        "df = pd.DataFrame({'price': [5, 15, 25]})",
+        "limit = 10"
+      ],
+      "options": [
+        "`df.query('price > @limit')`",
+        "`df.query('price > limit')`",
+        "`df.query('price > $limit')`",
+        "`df.query('price > {limit}')`"
+      ],
+      "answer": 0,
+      "explanation": "Inside a `query` string, bare names refer to columns. Prefix a Python variable with `@` to use it. Without the `@`, pandas looks for a column called `limit` and raises `UndefinedVariableError`.",
+      "check": "options"
+    },
+    {
+      "id": "query-backticks",
+      "difficulty": "hard",
+      "question": "The column name contains a space. Which `query` call works?",
+      "code": ["df = pd.DataFrame({'unit price': [5, 15]})"],
+      "options": [
+        "`` df.query('`unit price` > 10') ``",
+        "`df.query('unit price > 10')`",
+        "`df.query('\"unit price\" > 10')`",
+        "`df.query('[unit price] > 10')`"
+      ],
+      "answer": 0,
+      "explanation": "Inside a query string, wrap column names that aren't valid Python identifiers in backticks. Double quotes make a plain string literal, and square brackets are SQL Server syntax.",
+      "check": "options"
+    },
+    {
+      "id": "or-filter",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'x': [1, 2, 3, 4]})",
+        "print(df[(df['x'] < 2) | (df['x'] > 3)]['x'].tolist())"
+      ],
+      "options": ["`[1, 4]`", "`[2, 3]`", "`[]`", "`[1, 2, 3, 4]`"],
+      "answer": 0,
+      "explanation": "`|` keeps a row when either side is True: 1 is below 2, and 4 is above 3.",
+      "check": "output"
+    },
+    {
+      "id": "where-keeps-shape",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 2, 3, 4])",
+        "print(s.where(s > 2).tolist())"
+      ],
+      "options": ["`[nan, nan, 3.0, 4.0]`", "`[3, 4]`", "`[False, False, True, True]`", "`[1.0, 2.0, nan, nan]`"],
+      "answer": 0,
+      "explanation": "`where(cond)` keeps the shape: values where the condition holds stay, and the rest become `NaN`, which also turns the integers into floats. To drop rows instead, filter with `s[s > 2]`.",
+      "check": "output"
+    },
+    {
+      "id": "mask-replace",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 2, 3, 4])",
+        "print(s.mask(s > 2, 0).tolist())"
+      ],
+      "options": ["`[1, 2, 0, 0]`", "`[0, 0, 3, 4]`", "`[3, 4]`", "`[1, 2]`"],
+      "answer": 0,
+      "explanation": "`mask` is the mirror image of `where`: it **replaces** values where the condition is True, here with 0. `s.where(s <= 2, 0)` gives the same result.",
+      "check": "output"
+    },
+    {
+      "id": "notna-filter",
+      "difficulty": "easy",
+      "question": "Which expression keeps only the rows where `email` is present?",
+      "code": ["df = pd.DataFrame({'email': ['a@x.com', None, 'c@x.com']})"],
+      "options": [
+        "`df[df['email'].notna()]`",
+        "`df[df['email'] != np.nan]`",
+        "`df[df['email'].isna()]`",
+        "`df.dropna(how='all', axis=1)`"
+      ],
+      "answer": 0,
+      "explanation": "Test for missing values with `isna()` and `notna()`. Comparing with `np.nan` doesn't work because `NaN != NaN` is True, so `!= np.nan` keeps every row. `df.dropna(subset=['email'])` is another way to write the answer.",
+      "check": "options"
+    }
+  ]
+}

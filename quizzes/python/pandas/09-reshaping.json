@@ -1,0 +1,208 @@
+{
+  "topic": "Reshaping: pivot, melt and stack",
+  "questions": [
+    {
+      "id": "pivot-shape",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'date': ['d1', 'd1', 'd2'], 'city': ['NY', 'LA', 'NY'], 'temp': [20, 25, 22]})",
+        "wide = df.pivot(index='date', columns='city', values='temp')",
+        "print(wide.shape, wide.columns.tolist())"
+      ],
+      "options": [
+        "`(2, 2) ['LA', 'NY']`",
+        "`(2, 2) ['NY', 'LA']`",
+        "`(3, 2) ['LA', 'NY']`",
+        "`(2, 3) ['date', 'LA', 'NY']`"
+      ],
+      "answer": 0,
+      "explanation": "`pivot` turns long data wide: each unique `date` becomes a row, each unique `city` a column (sorted), and `temp` fills the cells. The pair (d2, LA) has no value, so that cell is `NaN`.",
+      "check": "output"
+    },
+    {
+      "id": "pivot-duplicates",
+      "difficulty": "medium",
+      "question": "Two rows share the same date and city. What does `pivot` do?",
+      "code": [
+        "df = pd.DataFrame({'date': ['d1', 'd1'], 'city': ['NY', 'NY'], 'temp': [20, 22]})",
+        "df.pivot(index='date', columns='city', values='temp')"
+      ],
+      "options": ["`ValueError`", "It keeps the last value, 22", "It averages them to 21.0", "It keeps the first value, 20"],
+      "answer": 0,
+      "explanation": "`pivot` only reshapes and never aggregates, so duplicate index/column pairs raise `ValueError: Index contains duplicate entries, cannot reshape`. Use `pivot_table`, which aggregates (with the mean by default).",
+      "check": "output"
+    },
+    {
+      "id": "pivot-table-mean",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'city': ['NY', 'NY', 'LA'], 'temp': [20, 22, 25]})",
+        "print(df.pivot_table(index='city', values='temp').loc['NY', 'temp'])"
+      ],
+      "options": ["`21.0`", "`42`", "`22`", "`20`"],
+      "answer": 0,
+      "explanation": "`pivot_table` aggregates duplicates, and its default `aggfunc` is `'mean'`: (20 + 22) / 2 = 21.0. Pass `aggfunc='sum'`, `'count'` and so on for other summaries.",
+      "check": "output"
+    },
+    {
+      "id": "pivot-table-sum-fill",
+      "difficulty": "medium",
+      "question": "Which call builds a store × month table of total `sales`, with 0 where a store sold nothing?",
+      "code": ["df = pd.DataFrame({'store': ['A', 'A', 'B'], 'month': ['Jan', 'Feb', 'Jan'], 'sales': [5, 3, 7]})"],
+      "options": [
+        "`df.pivot_table(index='store', columns='month', values='sales', aggfunc='sum', fill_value=0)`",
+        "`df.pivot(index='store', columns='month', values='sales', aggfunc='sum')`",
+        "`df.pivot_table(index='store', columns='month', values='sales', agg='sum', fill_value=0)`",
+        "`df.groupby('store', 'month')['sales'].sum()`"
+      ],
+      "answer": 0,
+      "explanation": "`pivot_table` takes `aggfunc=` and `fill_value=`. `pivot` has no `aggfunc`, the keyword isn't `agg`, and `groupby` needs a **list** of keys. The groupby route would be `df.groupby(['store', 'month'])['sales'].sum().unstack(fill_value=0)`.",
+      "check": "options"
+    },
+    {
+      "id": "melt-shape",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'id': [1, 2], 'jan': [10, 20], 'feb': [30, 40]})",
+        "long = df.melt(id_vars='id', var_name='month', value_name='sales')",
+        "print(long.shape, long.columns.tolist())"
+      ],
+      "options": [
+        "`(4, 3) ['id', 'month', 'sales']`",
+        "`(2, 3) ['id', 'jan', 'feb']`",
+        "`(4, 2) ['month', 'sales']`",
+        "`(6, 2) ['variable', 'value']`"
+      ],
+      "answer": 0,
+      "explanation": "`melt` turns wide data long, the reverse of `pivot`. `id` stays as it is and every other column becomes rows: 2 ids × 2 months = 4 rows. Without `var_name` and `value_name`, the new columns would be called `variable` and `value`.",
+      "check": "output"
+    },
+    {
+      "id": "melt-order",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'id': [1, 2], 'jan': [10, 20], 'feb': [30, 40]})",
+        "print(df.melt(id_vars='id')['variable'].tolist())"
+      ],
+      "options": [
+        "`['jan', 'jan', 'feb', 'feb']`",
+        "`['jan', 'feb', 'jan', 'feb']`",
+        "`['feb', 'feb', 'jan', 'jan']`",
+        "`['id', 'jan', 'feb']`"
+      ],
+      "answer": 0,
+      "explanation": "`melt` works column by column: all the `jan` rows first, then all the `feb` rows. Sort afterwards, for example by `id`, if you need a different order.",
+      "check": "output"
+    },
+    {
+      "id": "stack-index",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2], 'b': [3, 4]}, index=['x', 'y'])",
+        "print(df.stack().index.tolist())"
+      ],
+      "options": [
+        "`[('x', 'a'), ('x', 'b'), ('y', 'a'), ('y', 'b')]`",
+        "`[('a', 'x'), ('a', 'y'), ('b', 'x'), ('b', 'y')]`",
+        "`['x', 'y']`",
+        "`['a', 'b']`"
+      ],
+      "answer": 0,
+      "explanation": "`stack()` moves the columns into a new inner index level, giving a Series with a (row, column) MultiIndex. It works row by row: x's values first, then y's.",
+      "check": "output"
+    },
+    {
+      "id": "unstack-levels",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "idx = pd.MultiIndex.from_tuples([('x', 'a'), ('x', 'b'), ('y', 'a'), ('y', 'b')])",
+        "s = pd.Series([1, 2, 3, 4], index=idx)",
+        "print(s.unstack().columns.tolist(), s.unstack(0).columns.tolist())"
+      ],
+      "options": [
+        "`['a', 'b'] ['x', 'y']`",
+        "`['x', 'y'] ['a', 'b']`",
+        "`['a', 'b'] ['a', 'b']`",
+        "`['x', 'y'] ['x', 'y']`"
+      ],
+      "answer": 0,
+      "explanation": "`unstack()` moves the **innermost** index level (`a` and `b`) into the columns. `unstack(0)` moves the outermost level (`x` and `y`) instead.",
+      "check": "output"
+    },
+    {
+      "id": "explode-list-column",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'id': [1, 2], 'tags': [['a', 'b'], ['c']]})",
+        "out = df.explode('tags')",
+        "print(out['id'].tolist(), out.index.tolist())"
+      ],
+      "options": [
+        "`[1, 1, 2] [0, 0, 1]`",
+        "`[1, 1, 2] [0, 1, 2]`",
+        "`[1, 2] [0, 1]`",
+        "`[1, 2, 2] [0, 1, 1]`"
+      ],
+      "answer": 0,
+      "explanation": "`explode` gives each list element its own row and repeats the other columns. The original index label repeats too; pass `ignore_index=True` to get a fresh index.",
+      "check": "output"
+    },
+    {
+      "id": "get-dummies",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'color': ['red', 'blue', 'red']})",
+        "print(pd.get_dummies(df, columns=['color']).columns.tolist())"
+      ],
+      "options": [
+        "`['color_blue', 'color_red']`",
+        "`['color_red', 'color_blue']`",
+        "`['blue', 'red']`",
+        "`['color', 'color_blue', 'color_red']`"
+      ],
+      "answer": 0,
+      "explanation": "`get_dummies` one-hot encodes: one column per category, named `<column>_<value>` in sorted order, and the original column is dropped. The new columns hold True/False.",
+      "check": "output"
+    },
+    {
+      "id": "crosstab-counts",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'plan': ['pro', 'free', 'pro', 'pro'], 'churned': ['yes', 'no', 'no', 'yes']})",
+        "ct = pd.crosstab(df['plan'], df['churned'])",
+        "print(ct.loc['pro', 'yes'], ct.loc['free', 'no'])"
+      ],
+      "options": ["`2 1`", "`1 2`", "`3 1`", "`2 0`"],
+      "answer": 0,
+      "explanation": "`crosstab` counts how often each combination occurs, with rows from the first argument and columns from the second. Two `pro` users churned and one `free` user didn't. Add `normalize='index'` to get row percentages.",
+      "check": "output"
+    },
+    {
+      "id": "reset-index-drop",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'v': [1, 2]}, index=[10, 20])",
+        "print(df.reset_index().columns.tolist(), df.reset_index(drop=True).columns.tolist())"
+      ],
+      "options": [
+        "`['index', 'v'] ['v']`",
+        "`['v'] ['v']`",
+        "`['index', 'v'] ['index', 'v']`",
+        "`['v'] ['index', 'v']`"
+      ],
+      "answer": 0,
+      "explanation": "`reset_index()` moves the old index into a column (named `index` when the index has no name) and puts a fresh `0..n-1` index in its place. `drop=True` throws the old index away instead.",
+      "check": "output"
+    }
+  ]
+}

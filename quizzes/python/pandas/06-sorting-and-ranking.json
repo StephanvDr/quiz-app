@@ -1,0 +1,156 @@
+{
+  "topic": "Sorting and ranking",
+  "questions": [
+    {
+      "id": "sort-descending",
+      "difficulty": "easy",
+      "question": "Which expression sorts `df` by `score`, highest first?",
+      "code": ["df = pd.DataFrame({'name': ['a', 'b', 'c'], 'score': [70, 95, 80]})"],
+      "options": [
+        "`df.sort_values('score', ascending=False)`",
+        "`df.sort_values('score', descending=True)`",
+        "`df.sort('score', ascending=False)`",
+        "`df.sort_values('score').reverse()`"
+      ],
+      "answer": 0,
+      "explanation": "`sort_values(by, ascending=True)` is the method, and it has no `descending` flag. `DataFrame.sort` was removed long ago, and DataFrames have no `reverse()` (though `df.sort_values('score')[::-1]` works).",
+      "check": "options"
+    },
+    {
+      "id": "sort-two-keys",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'team': ['b', 'a', 'b', 'a'], 'pts': [5, 7, 9, 3]})",
+        "out = df.sort_values(['team', 'pts'], ascending=[True, False])",
+        "print(out['pts'].tolist())"
+      ],
+      "options": ["`[7, 3, 9, 5]`", "`[3, 7, 5, 9]`", "`[9, 7, 5, 3]`", "`[5, 9, 3, 7]`"],
+      "answer": 0,
+      "explanation": "The rows are sorted by `team` A to Z first, then by `pts` high to low within each team: team `a` gives 7 then 3, and team `b` gives 9 then 5. The `ascending` list pairs up with the column list.",
+      "check": "output"
+    },
+    {
+      "id": "sort-nan-last",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([3, None, 1])",
+        "print(s.sort_values().tolist())"
+      ],
+      "options": ["`[1.0, 3.0, nan]`", "`[nan, 1.0, 3.0]`", "`[1.0, 3.0]`", "`[3.0, 1.0, nan]`"],
+      "answer": 0,
+      "explanation": "Missing values go last by default (`na_position='last'`), whichever direction you sort. Use `na_position='first'` to put them on top.",
+      "check": "output"
+    },
+    {
+      "id": "sort-keeps-index",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([30, 10, 20])",
+        "print(s.sort_values().index.tolist())"
+      ],
+      "options": ["`[1, 2, 0]`", "`[0, 1, 2]`", "`[2, 0, 1]`", "`[10, 20, 30]`"],
+      "answer": 0,
+      "explanation": "Sorting moves each value **with** its index label: 10 had label 1, 20 had label 2 and 30 had label 0. Pass `ignore_index=True` to get a fresh `0..n-1` index.",
+      "check": "output"
+    },
+    {
+      "id": "sort-index",
+      "difficulty": "easy",
+      "question": "Which expression sorts `df` by its row labels?",
+      "code": ["df = pd.DataFrame({'v': [1, 2, 3]}, index=['c', 'a', 'b'])"],
+      "options": [
+        "`df.sort_index()`",
+        "`df.sort_values('index')`",
+        "`df.sort_values(axis='index')`",
+        "`df.order_index()`"
+      ],
+      "answer": 0,
+      "explanation": "`sort_index()` sorts by the index labels, while `sort_values(by)` sorts by column values. The index isn't a column called `'index'`, so `sort_values('index')` raises `KeyError`.",
+      "check": "options"
+    },
+    {
+      "id": "nlargest",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series({'a': 5, 'b': 9, 'c': 7, 'd': 1})",
+        "print(s.nlargest(2).index.tolist())"
+      ],
+      "options": ["`['b', 'c']`", "`['a', 'b']`", "`['c', 'b']`", "`[9, 7]`"],
+      "answer": 0,
+      "explanation": "`nlargest(n)` returns the n biggest values, largest first, with their labels. It's shorthand for `sort_values(ascending=False).head(n)`. On a DataFrame you name the column: `df.nlargest(2, 'score')`.",
+      "check": "output"
+    },
+    {
+      "id": "rank-average",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([10, 20, 20, 30])",
+        "print(s.rank().tolist())"
+      ],
+      "options": [
+        "`[1.0, 2.5, 2.5, 4.0]`",
+        "`[1.0, 2.0, 2.0, 3.0]`",
+        "`[1.0, 2.0, 3.0, 4.0]`",
+        "`[1.0, 2.0, 2.0, 4.0]`"
+      ],
+      "answer": 0,
+      "explanation": "By default, tied values share the **average** of the ranks they span: the two 20s take ranks 2 and 3, so both get 2.5. Other choices for `method=` are `'min'` (1, 2, 2, 4), `'dense'` (1, 2, 2, 3) and `'first'` (1, 2, 3, 4).",
+      "check": "output"
+    },
+    {
+      "id": "rank-dense-desc",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([10, 20, 20, 30])",
+        "print(s.rank(method='dense', ascending=False).tolist())"
+      ],
+      "options": [
+        "`[3.0, 2.0, 2.0, 1.0]`",
+        "`[4.0, 2.5, 2.5, 1.0]`",
+        "`[1.0, 2.0, 2.0, 3.0]`",
+        "`[4.0, 2.0, 2.0, 1.0]`"
+      ],
+      "answer": 0,
+      "explanation": "`ascending=False` gives rank 1 to the largest value. `dense` gives tied values the same rank and leaves no gap after them: 30 is 1, both 20s are 2 and 10 is 3.",
+      "check": "output"
+    },
+    {
+      "id": "idxmax",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([3, 9, 4], index=['x', 'y', 'z'])",
+        "print(s.idxmax(), s.max())"
+      ],
+      "options": ["`y 9`", "`1 9`", "`9 y`", "`z 9`"],
+      "answer": 0,
+      "explanation": "`idxmax()` returns the **label** of the largest value, and `max()` returns the value itself. `argmax()` would return its position, 1.",
+      "check": "output"
+    },
+    {
+      "id": "sort-key-case",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['banana', 'apple', 'Cherry'])",
+        "print(s.sort_values().tolist())",
+        "print(s.sort_values(key=lambda x: x.str.lower()).tolist())"
+      ],
+      "options": [
+        "['Cherry', 'apple', 'banana']\n['apple', 'banana', 'Cherry']",
+        "['apple', 'banana', 'Cherry']\n['apple', 'banana', 'Cherry']",
+        "['apple', 'banana', 'Cherry']\n['Cherry', 'apple', 'banana']",
+        "['Cherry', 'apple', 'banana']\n['Cherry', 'apple', 'banana']"
+      ],
+      "answer": 0,
+      "explanation": "Plain string sorting compares character codes, and every uppercase letter comes before every lowercase one, so `'Cherry'` sorts first. `key=` transforms the values before comparing (it receives the whole Series), which makes the second sort case-insensitive.",
+      "check": "output"
+    }
+  ]
+}

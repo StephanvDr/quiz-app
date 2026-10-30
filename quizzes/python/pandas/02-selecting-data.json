@@ -1,0 +1,176 @@
+{
+  "topic": "Selecting with [], loc and iloc",
+  "questions": [
+    {
+      "id": "bracket-series-vs-frame",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2], 'b': [3, 4]})",
+        "print(type(df['a']).__name__, type(df[['a']]).__name__)"
+      ],
+      "options": ["`Series DataFrame`", "`DataFrame DataFrame`", "`Series Series`", "`DataFrame Series`"],
+      "answer": 0,
+      "explanation": "One label in `[]` returns that column as a Series. A list of labels, even a list of one, returns a DataFrame. Double brackets are how you keep a 2-D result.",
+      "check": "output"
+    },
+    {
+      "id": "loc-vs-iloc-slice",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([10, 20, 30, 40], index=['a', 'b', 'c', 'd'])",
+        "print(s.loc['a':'c'].tolist(), s.iloc[0:2].tolist())"
+      ],
+      "options": [
+        "`[10, 20, 30] [10, 20]`",
+        "`[10, 20] [10, 20]`",
+        "`[10, 20, 30] [10, 20, 30]`",
+        "`[10, 20] [10, 20, 30]`"
+      ],
+      "answer": 0,
+      "explanation": "Label slices with `loc` include **both** ends, so `'a':'c'` returns a, b and c. Position slices with `iloc` work like Python lists and leave out the end, so `0:2` returns positions 0 and 1.",
+      "check": "output"
+    },
+    {
+      "id": "loc-label-not-position",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'v': [10, 20, 30]}, index=[2, 0, 1])",
+        "print(df.loc[0, 'v'], df.iloc[0, 0])"
+      ],
+      "options": ["`20 10`", "`10 10`", "`10 20`", "`20 20`"],
+      "answer": 0,
+      "explanation": "`loc` looks up labels: the row **labeled** 0 is the second row, which holds 20. `iloc` looks up positions: position 0 is the first row, which holds 10. Integer labels make the two easy to mix up.",
+      "check": "output"
+    },
+    {
+      "id": "loc-rows-and-columns",
+      "difficulty": "easy",
+      "question": "Which expression returns rows 0 to 1 with only the columns `a` and `c`?",
+      "code": ["df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})"],
+      "options": [
+        "`df.loc[0:1, ['a', 'c']]`",
+        "`df.iloc[0:1, ['a', 'c']]`",
+        "`df[0:1, ['a', 'c']]`",
+        "`df.loc[[0, 1], 'a':'c']`"
+      ],
+      "answer": 0,
+      "explanation": "`loc[rows, columns]` takes labels on both axes, and its slice `0:1` includes row 1. `iloc` only accepts positions, plain `df[...]` doesn't take a row-and-column pair, and the slice `'a':'c'` would include column `b` too.",
+      "check": "options"
+    },
+    {
+      "id": "at-scalar",
+      "difficulty": "medium",
+      "question": "Which expression returns the single value in the row labeled 1, column `b`?",
+      "code": ["df = pd.DataFrame({'a': [1, 2], 'b': [3, 4]})"],
+      "options": ["`df.at[1, 'b']`", "`df.iat[1, 'b']`", "`df.at['b', 1]`", "`df.loc['b'][1]`"],
+      "answer": 0,
+      "explanation": "`at[row_label, column_label]` is the fast accessor for one value, and `iat[row_position, column_position]` is its positional twin, which only takes integers. As with `loc`, the row comes first.",
+      "check": "options"
+    },
+    {
+      "id": "iloc-last-row",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})",
+        "print(df.iloc[-1].tolist())"
+      ],
+      "options": ["`[3, 6]`", "`[4, 5, 6]`", "`[1, 4]`", "`[6]`"],
+      "answer": 0,
+      "explanation": "`iloc` accepts negative positions like a Python list, so `-1` is the last row. A single row comes back as a Series of that row's values: 3 from `a` and 6 from `b`.",
+      "check": "output"
+    },
+    {
+      "id": "multiple-columns",
+      "difficulty": "easy",
+      "question": "Which expression selects the columns `a` and `b`?",
+      "code": ["df = pd.DataFrame({'a': [1, 2], 'b': [3, 4], 'c': [5, 6]})"],
+      "options": ["`df[['a', 'b']]`", "`df['a', 'b']`", "`df.loc[['a', 'b']]`", "`df.iloc[['a', 'b']]`"],
+      "answer": 0,
+      "explanation": "Pass a **list** of column names inside the brackets. `df['a', 'b']` looks for one column named by the tuple `('a', 'b')`, and `loc` with a single argument selects rows, not columns.",
+      "check": "options"
+    },
+    {
+      "id": "iloc-column-slice",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2], 'b': [3, 4], 'c': [5, 6]})",
+        "print(df.iloc[:, 1:].columns.tolist())"
+      ],
+      "options": ["`['b', 'c']`", "`['a']`", "`['a', 'b']`", "`['c']`"],
+      "answer": 0,
+      "explanation": "In `iloc[rows, columns]`, `:` keeps every row and `1:` keeps the columns from position 1 to the end, which are `b` and `c`.",
+      "check": "output"
+    },
+    {
+      "id": "loc-enlarge",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2]})",
+        "df.loc[5] = 9",
+        "print(df.index.tolist())"
+      ],
+      "options": ["`[0, 1, 5]`", "`[0, 1, 2]`", "`KeyError`", "`[0, 1, 2, 3, 4, 5]`"],
+      "answer": 0,
+      "explanation": "Assigning to a `loc` label that doesn't exist adds a row with that label, which pandas calls setting with enlargement. Labels don't have to be consecutive, so the index becomes `[0, 1, 5]`.",
+      "check": "output"
+    },
+    {
+      "id": "iloc-cannot-enlarge",
+      "difficulty": "medium",
+      "question": "What happens when this runs?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2]})",
+        "df.iloc[5] = 9"
+      ],
+      "options": ["`IndexError`", "`KeyError`", "A row labeled `5` is added", "Rows 2 to 5 are added, filled with `9`"],
+      "answer": 0,
+      "explanation": "`iloc` can only address positions that already exist, so position 5 raises `IndexError: iloc cannot enlarge its target object`. To add a row by label, use `loc`.",
+      "check": "output"
+    },
+    {
+      "id": "getitem-int-label-index",
+      "difficulty": "hard",
+      "question": "In pandas 3, what does this print?",
+      "code": [
+        "s = pd.Series([10, 20, 30], index=['a', 'b', 'c'])",
+        "print(s[0])"
+      ],
+      "options": ["`KeyError`", "`10`", "`a`", "`IndexError`"],
+      "answer": 0,
+      "explanation": "In pandas 3, `s[...]` on a Series looks up labels, and there is no label `0`. Older versions fell back to position 0 and returned 10, with a deprecation warning in pandas 2.x. Use `s.iloc[0]` for positions and `s.loc['a']` (or `s['a']`) for labels.",
+      "check": "output"
+    },
+    {
+      "id": "loc-mask-and-column",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2, 3], 'b': [10, 20, 30]})",
+        "print(df.loc[df['a'] > 1, 'b'].tolist())"
+      ],
+      "options": ["`[20, 30]`", "`[2, 3]`", "`[False, True, True]`", "`[10, 20, 30]`"],
+      "answer": 0,
+      "explanation": "`loc` accepts a boolean mask for the rows and a label for the column in one call. It's also the safe way to **assign** to a filtered subset: `df.loc[df['a'] > 1, 'b'] = 0`.",
+      "check": "output"
+    },
+    {
+      "id": "loc-assign-subset",
+      "difficulty": "medium",
+      "question": "Which statement sets `b` to 0 in the rows where `a` > 1, changing `df` itself?",
+      "options": [
+        "`df.loc[df['a'] > 1, 'b'] = 0`",
+        "`df[df['a'] > 1]['b'] = 0`",
+        "`df['b'][df['a'] > 1] = 0`",
+        "`df.loc[df['a'] > 1]['b'] = 0`"
+      ],
+      "answer": 0,
+      "explanation": "Do the row filter and the column pick in **one** `loc` call. The other three are chained assignments: the first indexing step produces a new object, and the assignment lands on that object instead of `df`. Under Copy-on-Write, the only mode in pandas 3, they never change `df` and pandas warns with `ChainedAssignmentError`."
+    }
+  ]
+}

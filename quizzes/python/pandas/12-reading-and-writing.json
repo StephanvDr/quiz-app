@@ -1,0 +1,192 @@
+{
+  "topic": "Reading and writing files",
+  "questions": [
+    {
+      "id": "read-csv-usecols",
+      "difficulty": "easy",
+      "question": "Which call reads only the `date` and `amount` columns from a wide CSV file?",
+      "options": [
+        "`pd.read_csv('sales.csv', usecols=['date', 'amount'])`",
+        "`pd.read_csv('sales.csv', columns=['date', 'amount'])`",
+        "`pd.read_csv('sales.csv', select=['date', 'amount'])`",
+        "`pd.read_csv('sales.csv', fields=['date', 'amount'])`"
+      ],
+      "answer": 0,
+      "explanation": "`usecols` makes the parser skip the other columns entirely, which saves memory and time on wide files. `read_csv` has no `columns`, `select` or `fields` parameter; `columns=` belongs to writers such as `to_csv`."
+    },
+    {
+      "id": "read-csv-empty-field",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from io import StringIO",
+        "csv = 'id,price\\n1,9.5\\n2,\\n'",
+        "df = pd.read_csv(StringIO(csv))",
+        "print(df['price'].tolist())"
+      ],
+      "options": ["`[9.5, nan]`", "`[9.5, '']`", "`[9.5, 0.0]`", "`[9.5]`"],
+      "answer": 0,
+      "explanation": "An empty field is read as missing (`NaN`). `StringIO` wraps a string so `read_csv` can read it like a file, which is handy in tests and examples.",
+      "check": "output"
+    },
+    {
+      "id": "read-csv-leading-zeros",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from io import StringIO",
+        "csv = 'zip,city\\n01234,Boston\\n'",
+        "a = pd.read_csv(StringIO(csv))",
+        "b = pd.read_csv(StringIO(csv), dtype={'zip': str})",
+        "print(a['zip'][0], b['zip'][0])"
+      ],
+      "options": ["`1234 01234`", "`01234 01234`", "`1234 1234`", "`01234 1234`"],
+      "answer": 0,
+      "explanation": "`read_csv` infers types, so `01234` looks like a number and loses its leading zero. Set `dtype=` for codes such as zip codes, phone numbers and IDs that must stay text.",
+      "check": "output"
+    },
+    {
+      "id": "read-csv-parse-dates",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from io import StringIO",
+        "csv = 'day,qty\\n2024-01-01,3\\n2024-01-02,5\\n'",
+        "df = pd.read_csv(StringIO(csv), parse_dates=['day'])",
+        "print(df['day'].dt.day_name().tolist())"
+      ],
+      "options": ["`['Monday', 'Tuesday']`", "`AttributeError`", "`['2024-01-01', '2024-01-02']`", "`[1, 2]`"],
+      "answer": 0,
+      "explanation": "`parse_dates` converts the listed columns to datetimes while reading, so `.dt` works right away (1 January 2024 was a Monday). Without it, `day` would hold text and `.dt` would raise `AttributeError`.",
+      "check": "output"
+    },
+    {
+      "id": "read-csv-sep-header",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from io import StringIO",
+        "data = '1;Ann\\n2;Bob\\n'",
+        "df = pd.read_csv(StringIO(data), sep=';', header=None, names=['id', 'name'])",
+        "print(df.shape, df.columns.tolist())"
+      ],
+      "options": [
+        "`(2, 2) ['id', 'name']`",
+        "`(1, 2) ['1', 'Ann']`",
+        "`(2, 1) ['id;name']`",
+        "`(2, 2) [0, 1]`"
+      ],
+      "answer": 0,
+      "explanation": "`sep=';'` sets the delimiter, `header=None` says the first line is data rather than column names, and `names=` supplies the names. Without `header=None`, the row `1;Ann` would become the header.",
+      "check": "output"
+    },
+    {
+      "id": "read-csv-na-values",
+      "difficulty": "medium",
+      "question": "How many missing values does `score` end up with?",
+      "code": [
+        "from io import StringIO",
+        "data = 'id,score\\n1,N/A\\n2,-\\n3,7\\n'",
+        "df = pd.read_csv(StringIO(data), na_values=['-'])",
+        "print(df['score'].isna().sum())"
+      ],
+      "options": ["`2`", "`1`", "`0`", "`3`"],
+      "answer": 0,
+      "explanation": "pandas already treats common markers such as an empty field, `NA`, `N/A`, `null` and `NaN` as missing. `na_values` **adds** markers, here `-`, so both `N/A` and `-` become `NaN`.",
+      "check": "output"
+    },
+    {
+      "id": "read-csv-index-col",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from io import StringIO",
+        "data = 'id,v\\na,1\\nb,2\\n'",
+        "df = pd.read_csv(StringIO(data), index_col='id')",
+        "print(df.loc['b', 'v'], df.columns.tolist())"
+      ],
+      "options": ["`2 ['v']`", "`2 ['id', 'v']`", "`1 ['v']`", "`KeyError`"],
+      "answer": 0,
+      "explanation": "`index_col='id'` turns that column into the row index while reading. It's no longer a regular column, and you can look rows up by id with `loc`.",
+      "check": "output"
+    },
+    {
+      "id": "to-csv-string",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2]})",
+        "print(df.to_csv(index=False))"
+      ],
+      "options": ["a\n1\n2", ",a\n0,1\n1,2", "`a,1,2`", "`None`"],
+      "answer": 0,
+      "explanation": "Without a path, `to_csv` **returns** the CSV text instead of writing a file. `index=False` leaves out the index column, which is usually what you want; with the index you'd get the `,a` / `0,1` layout.",
+      "check": "output"
+    },
+    {
+      "id": "to-csv-no-index",
+      "difficulty": "easy",
+      "question": "Which call writes `df` to `out.csv` without the index column?",
+      "options": [
+        "`df.to_csv('out.csv', index=False)`",
+        "`df.to_csv('out.csv', header=False)`",
+        "`df.to_csv('out.csv', drop_index=True)`",
+        "`df.write_csv('out.csv')`"
+      ],
+      "answer": 0,
+      "explanation": "`index=False` skips the index. Otherwise the file gains an unnamed first column, which comes back as `Unnamed: 0` when you read it again. `header=False` drops the column names instead, and `write_csv` is the Polars method."
+    },
+    {
+      "id": "read-csv-chunksize",
+      "difficulty": "medium",
+      "question": "The CSV is too big for memory. Which call lets you process it 100,000 rows at a time?",
+      "options": [
+        "`pd.read_csv('big.csv', chunksize=100_000)`",
+        "`pd.read_csv('big.csv', nrows=100_000)`",
+        "`pd.read_csv('big.csv', batch_size=100_000)`",
+        "`pd.read_csv('big.csv', chunks=100_000)`"
+      ],
+      "answer": 0,
+      "explanation": "With `chunksize`, `read_csv` returns a reader you loop over, getting a DataFrame of up to 100,000 rows each time: `for chunk in pd.read_csv('big.csv', chunksize=100_000): ...`. `nrows` reads the first 100,000 rows and stops."
+    },
+    {
+      "id": "to-parquet-partition",
+      "difficulty": "medium",
+      "question": "Which call writes a Parquet dataset split into one folder per `date`?",
+      "options": [
+        "`df.to_parquet('events/', partition_cols=['date'])`",
+        "`df.to_parquet('events/', partition_by=['date'])`",
+        "`df.write_parquet('events/', partition_cols=['date'])`",
+        "`df.to_parquet('events/', groupby='date')`"
+      ],
+      "answer": 0,
+      "explanation": "`partition_cols` writes Hive-style folders such as `events/date=2024-01-01/`, which query engines like Spark, DuckDB and Athena can skip when filtering. Parquet I/O needs `pyarrow` (or `fastparquet`) installed. `write_parquet(..., partition_by=...)` is the Polars spelling."
+    },
+    {
+      "id": "to-sql-append",
+      "difficulty": "medium",
+      "question": "The table `events` already exists. Which call adds the rows of `df` to it?",
+      "options": [
+        "`df.to_sql('events', con, if_exists='append', index=False)`",
+        "`df.to_sql('events', con, if_exists='replace', index=False)`",
+        "`df.to_sql('events', con, mode='append', index=False)`",
+        "`df.to_sql('events', con, if_exists='insert', index=False)`"
+      ],
+      "answer": 0,
+      "explanation": "`if_exists` decides what happens when the table exists: `'fail'` (the default) raises, `'replace'` drops and recreates the table, losing its data **and** its schema, and `'append'` inserts the rows. pandas 3 also accepts `'delete_rows'`, which empties the table but keeps its definition. `con` can be a SQLAlchemy engine or a `sqlite3` connection."
+    },
+    {
+      "id": "read-gzip",
+      "difficulty": "easy",
+      "question": "What do you need to read a gzip-compressed `data.csv.gz` file?",
+      "options": [
+        "Nothing extra: `pd.read_csv('data.csv.gz')` detects the compression from the extension",
+        "Decompress the file first, then read the `.csv`",
+        "`pd.read_csv('data.csv.gz', compression=True)`",
+        "`pd.read_gzip('data.csv.gz')`"
+      ],
+      "answer": 0,
+      "explanation": "Readers and writers default to `compression='infer'`, which picks gzip, bz2, zip, xz or zstd from the file extension. Writing works the same way: `df.to_csv('out.csv.gz')` produces a compressed file."
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "topic": "Dates and time series",
+  "questions": [
+    {
+      "id": "to-datetime",
+      "difficulty": "easy",
+      "question": "Which expression parses the `date` text column into datetimes?",
+      "code": ["df = pd.DataFrame({'date': ['2024-01-05', '2024-02-10']})"],
+      "options": [
+        "`pd.to_datetime(df['date'])`",
+        "`df['date'].to_datetime()`",
+        "`df['date'].astype('date')`",
+        "`pd.datetime(df['date'])`"
+      ],
+      "answer": 0,
+      "explanation": "`pd.to_datetime` is a top-level function, not a Series method. Once a column holds datetimes, the `.dt` accessor gives you parts such as `.dt.year`.",
+      "check": "options"
+    },
+    {
+      "id": "dt-accessor",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.to_datetime(pd.Series(['2024-03-15', '2024-12-01']))",
+        "print(s.dt.month.tolist(), s.dt.day_name().tolist())"
+      ],
+      "options": [
+        "`[3, 12] ['Friday', 'Sunday']`",
+        "`[15, 1] ['Friday', 'Sunday']`",
+        "`[3, 12] ['Fri', 'Sun']`",
+        "`['March', 'December'] ['Friday', 'Sunday']`"
+      ],
+      "answer": 0,
+      "explanation": "`.dt` exposes datetime parts for a whole column. `.dt.month` is a number from 1 to 12 and `.dt.day` the day of the month, while `.dt.day_name()` (a method) spells out the weekday. `.dt.dayofweek` gives Monday = 0 through Sunday = 6.",
+      "check": "output"
+    },
+    {
+      "id": "to-datetime-format",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "d = pd.to_datetime('03/04/2024', format='%d/%m/%Y')",
+        "print(d.month)"
+      ],
+      "options": ["`4`", "`3`", "`2024`", "`ValueError`"],
+      "answer": 0,
+      "explanation": "`format` says exactly how to read the text: `%d/%m/%Y` is day/month/year, so this is 3 April 2024. An explicit format removes the month/day ambiguity and parses faster.",
+      "check": "output"
+    },
+    {
+      "id": "to-datetime-coerce",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['2024-01-05', 'not a date'])",
+        "print(pd.to_datetime(s, errors='coerce').isna().tolist())"
+      ],
+      "options": ["`[False, True]`", "`[False, False]`", "`[True, True]`", "`ValueError`"],
+      "answer": 0,
+      "explanation": "`errors='coerce'` turns anything it can't parse into `NaT` (\"not a time\", the datetime version of `NaN`) instead of raising. Afterwards `isna()` finds the bad rows.",
+      "check": "output"
+    },
+    {
+      "id": "date-range",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "idx = pd.date_range('2024-01-30', periods=3, freq='D')",
+        "print(idx.strftime('%m-%d').tolist())"
+      ],
+      "options": [
+        "`['01-30', '01-31', '02-01']`",
+        "`['01-30', '01-31', '01-32']`",
+        "`['01-30', '02-29', '03-30']`",
+        "`['01-30', '01-30', '01-30']`"
+      ],
+      "answer": 0,
+      "explanation": "`date_range(start, periods=n, freq=...)` generates n timestamps, here one per day, rolling over into February. `strftime` formats each one as text.",
+      "check": "output"
+    },
+    {
+      "id": "resample-month-end",
+      "difficulty": "medium",
+      "question": "In pandas 3, which call sums a daily Series per calendar month, labeled by month end?",
+      "code": ["s = pd.Series(range(60), index=pd.date_range('2024-01-01', periods=60, freq='D'))"],
+      "options": [
+        "`s.resample('ME').sum()`",
+        "`s.resample('M').sum()`",
+        "`s.resample('month').sum()`",
+        "`s.groupby('month').sum()`"
+      ],
+      "answer": 0,
+      "explanation": "Month end is `'ME'` since pandas 2.2; the old `'M'` was deprecated then and is an error in pandas 3. Other aliases: `'MS'` (month start), `'QE'`, `'YE'`, `'W'`, `'D'`, `'h'` (hour), `'min'` and `'s'`.",
+      "check": "options"
+    },
+    {
+      "id": "resample-daily-sum",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "idx = pd.date_range('2024-01-01', periods=4, freq='12h')",
+        "s = pd.Series([1, 2, 3, 4], index=idx)",
+        "print(s.resample('D').sum().tolist())"
+      ],
+      "options": ["`[3, 7]`", "`[1, 2, 3, 4]`", "`[10]`", "`[2, 4]`"],
+      "answer": 0,
+      "explanation": "The readings are 12 hours apart, two per day. `resample('D')` buckets them by calendar day and sums each bucket: 1 + 2 on Jan 1 and 3 + 4 on Jan 2. `resample` needs a DatetimeIndex, or `on=` naming a datetime column.",
+      "check": "output"
+    },
+    {
+      "id": "shift",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([10, 20, 30])",
+        "print(s.shift(1).tolist())"
+      ],
+      "options": ["`[nan, 10.0, 20.0]`", "`[20.0, 30.0, nan]`", "`[10, 20, 30]`", "`[nan, 20.0, 30.0]`"],
+      "answer": 0,
+      "explanation": "`shift(1)` moves values down one row, so each row sees the **previous** value and the first row gets `NaN`; `shift(-1)` looks ahead instead. It's the building block for lag features and changes such as `s - s.shift()`.",
+      "check": "output"
+    },
+    {
+      "id": "diff-pct-change",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([100, 110, 99])",
+        "print(s.diff().tolist(), s.pct_change().round(2).tolist())"
+      ],
+      "options": [
+        "`[nan, 10.0, -11.0] [nan, 0.1, -0.1]`",
+        "`[10, -11] [0.1, -0.1]`",
+        "`[nan, 10.0, -11.0] [nan, 10.0, -10.0]`",
+        "`[nan, 10.0, -1.0] [nan, 0.1, -0.01]`"
+      ],
+      "answer": 0,
+      "explanation": "`diff()` subtracts the previous value, and `pct_change()` divides that change by the previous value: 10 / 100 = 0.1 and -11 / 110 = -0.1. Both leave `NaN` in the first row.",
+      "check": "output"
+    },
+    {
+      "id": "rolling-mean",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 2, 3, 4])",
+        "print(s.rolling(2).mean().tolist())"
+      ],
+      "options": ["`[nan, 1.5, 2.5, 3.5]`", "`[1.5, 2.5, 3.5]`", "`[1.0, 1.5, 2.5, 3.5]`", "`[1.5, 3.5]`"],
+      "answer": 0,
+      "explanation": "A window of 2 averages each value with the one before it. The first row doesn't have a full window yet, so it's `NaN`, because `min_periods` defaults to the window size. `rolling(2, min_periods=1)` would give 1.0 there.",
+      "check": "output"
+    },
+    {
+      "id": "cummax",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([3, 1, 4, 1, 5])",
+        "print(s.cummax().tolist())"
+      ],
+      "options": ["`[3, 3, 4, 4, 5]`", "`[3, 1, 4, 1, 5]`", "`[5, 5, 5, 5, 5]`", "`[3, 4, 8, 9, 14]`"],
+      "answer": 0,
+      "explanation": "`cummax()` is the running maximum: the largest value seen so far. Its siblings are `cumsum()`, `cumprod()` and `cummin()`, and `expanding()` is the general version.",
+      "check": "output"
+    },
+    {
+      "id": "timedelta-hours",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "start = pd.Timestamp('2024-01-01 08:00')",
+        "end = pd.Timestamp('2024-01-02 10:30')",
+        "print((end - start).total_seconds() / 3600)"
+      ],
+      "options": ["`26.5`", "`2.5`", "`24.0`", "`1590.0`"],
+      "answer": 0,
+      "explanation": "Subtracting timestamps gives a `Timedelta`, here 1 day and 2:30. `total_seconds()` converts the **whole** duration to seconds, and dividing by 3600 gives hours. The `.seconds` attribute would leave out the full day.",
+      "check": "output"
+    },
+    {
+      "id": "partial-string-index",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(range(5), index=pd.date_range('2024-01-30', periods=5, freq='D'))",
+        "print(s.loc['2024-02'].tolist())"
+      ],
+      "options": ["`[2, 3, 4]`", "`[0, 1]`", "`KeyError`", "`[2]`"],
+      "answer": 0,
+      "explanation": "On a DatetimeIndex, a partial date string selects the whole period it names: `'2024-02'` matches every timestamp in February, which are Feb 1 to 3 here. `'2024'` would select the whole year.",
+      "check": "output"
+    },
+    {
+      "id": "tz-localize-vs-convert",
+      "difficulty": "hard",
+      "question": "The timestamps have no time zone but were recorded in UTC. Which call attaches UTC without changing the clock times?",
+      "code": ["s = pd.Series(pd.to_datetime(['2024-06-01 12:00', '2024-06-02 08:30']))"],
+      "options": [
+        "`s.dt.tz_localize('UTC')`",
+        "`s.dt.tz_convert('UTC')`",
+        "`s.dt.set_tz('UTC')`",
+        "`s.astype('UTC')`"
+      ],
+      "answer": 0,
+      "explanation": "`tz_localize` **declares** which zone naive timestamps are in. `tz_convert` **moves** timestamps that already have a zone into another one, so on naive data it raises `TypeError`. A common pattern is `s.dt.tz_localize('UTC').dt.tz_convert('Europe/Paris')`.",
+      "check": "options"
+    },
+    {
+      "id": "tz-convert-hour",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "ts = pd.Timestamp('2024-06-01 12:00', tz='UTC')",
+        "print(ts.tz_convert('Europe/Paris').hour)"
+      ],
+      "options": ["`14`", "`12`", "`13`", "`10`"],
+      "answer": 0,
+      "explanation": "Paris is on summer time (UTC+2) in June, so 12:00 UTC is 14:00 there. `tz_convert` keeps the same instant and changes how it reads; the time zone database handles daylight saving for you.",
+      "check": "output"
+    }
+  ]
+}

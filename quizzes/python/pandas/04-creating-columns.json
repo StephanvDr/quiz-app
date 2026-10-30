@@ -1,0 +1,207 @@
+{
+  "topic": "Creating and changing columns",
+  "questions": [
+    {
+      "id": "assign-new-column",
+      "difficulty": "easy",
+      "question": "Which expression returns a copy of `df` with a new column `c` = `a` + `b`?",
+      "code": ["df = pd.DataFrame({'a': [1, 2], 'b': [10, 20]})"],
+      "options": [
+        "`df.assign(c=df['a'] + df['b'])`",
+        "`df.assign('c', df['a'] + df['b'])`",
+        "`df.add_column(c=df['a'] + df['b'])`",
+        "`df.assign(c=a + b)`"
+      ],
+      "answer": 0,
+      "explanation": "`assign` takes keyword arguments, one per new column, and returns a new DataFrame while `df` stays unchanged. That makes it the column-adding step in method chains. Bare names like `a` aren't columns in Python code, so `a + b` raises `NameError`.",
+      "check": "options"
+    },
+    {
+      "id": "assign-lambda-order",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2]})",
+        "out = df.assign(b=lambda d: d['a'] * 10, c=lambda d: d['b'] + 1)",
+        "print(out['c'].tolist())"
+      ],
+      "options": ["`[11, 21]`", "`[2, 3]`", "`KeyError`", "`[10, 20]`"],
+      "answer": 0,
+      "explanation": "A lambda in `assign` receives the DataFrame as it is at that point, and the keyword arguments are applied in order. So `c` can use the `b` created just before it: 10 + 1 and 20 + 1.",
+      "check": "output"
+    },
+    {
+      "id": "rename-columns",
+      "difficulty": "easy",
+      "question": "Which expression renames column `a` to `alpha`?",
+      "code": ["df = pd.DataFrame({'a': [1], 'b': [2]})"],
+      "options": [
+        "`df.rename(columns={'a': 'alpha'})`",
+        "`df.rename({'a': 'alpha'})`",
+        "`df.rename(columns=['alpha'])`",
+        "`df.rename(columns={'alpha': 'a'})`"
+      ],
+      "answer": 0,
+      "explanation": "Use `columns=` with an `{old: new}` mapping. A bare dict renames **index** labels, so `df.rename({'a': 'alpha'})` quietly changes nothing here, and labels missing from the mapping are ignored rather than raising. A list isn't a mapping: it raises `TypeError`.",
+      "check": "options"
+    },
+    {
+      "id": "drop-column",
+      "difficulty": "easy",
+      "question": "Which expression drops column `b`?",
+      "code": ["df = pd.DataFrame({'a': [1, 2], 'b': [3, 4]})"],
+      "options": [
+        "`df.drop(columns='b')`",
+        "`df.drop('b')`",
+        "`df.remove('b')`",
+        "`df.drop(['b'], axis=0)`"
+      ],
+      "answer": 0,
+      "explanation": "`drop` removes rows by default (`axis=0`), so `df.drop('b')` looks for a **row** labeled `b` and raises `KeyError`. Say `columns=` (or `axis=1`) to drop columns.",
+      "check": "options"
+    },
+    {
+      "id": "np-where",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'score': [45, 80, 62]})",
+        "df['result'] = np.where(df['score'] >= 60, 'pass', 'fail')",
+        "print(df['result'].tolist())"
+      ],
+      "options": [
+        "`['fail', 'pass', 'pass']`",
+        "`['pass', 'fail', 'fail']`",
+        "`['fail', 'pass', 'fail']`",
+        "`[False, True, True]`"
+      ],
+      "answer": 0,
+      "explanation": "`np.where(condition, if_true, if_false)` picks a value per row, a vectorized if/else. 80 and 62 are both at least 60.",
+      "check": "output"
+    },
+    {
+      "id": "map-dict-missing",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['cat', 'dog', 'cow'])",
+        "print(s.map({'cat': 1, 'dog': 2}).tolist())"
+      ],
+      "options": ["`[1.0, 2.0, nan]`", "`[1, 2, 'cow']`", "`[1, 2]`", "`KeyError`"],
+      "answer": 0,
+      "explanation": "`map` with a dict looks up every value, and values missing from the dict become `NaN`, which also turns the integers into floats. Use `replace` when unmatched values should stay as they are.",
+      "check": "output"
+    },
+    {
+      "id": "replace-keeps-unmatched",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['cat', 'dog', 'cow'])",
+        "print(s.replace({'cat': 'kitten'}).tolist())"
+      ],
+      "options": [
+        "`['kitten', 'dog', 'cow']`",
+        "`['kitten', nan, nan]`",
+        "`['kitten']`",
+        "`['cat', 'dog', 'cow']`"
+      ],
+      "answer": 0,
+      "explanation": "`replace` swaps only the values you list and leaves everything else alone. Compare `map`, which turns values missing from the dict into `NaN`.",
+      "check": "output"
+    },
+    {
+      "id": "astype-float",
+      "difficulty": "easy",
+      "question": "Which expression converts column `a` to floats?",
+      "code": ["df = pd.DataFrame({'a': [1, 2]})"],
+      "options": [
+        "`df['a'].astype(float)`",
+        "`df['a'].to_type(float)`",
+        "`float(df['a'])`",
+        "`df['a'].dtype(float)`"
+      ],
+      "answer": 0,
+      "explanation": "`astype` converts a whole column and returns a new object. On a DataFrame it also takes a dict, like `df.astype({'a': 'float64'})`. `float(series)` only works for a single value, and `dtype` is an attribute, not a converter.",
+      "check": "options"
+    },
+    {
+      "id": "cut-bins",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "ages = pd.Series([5, 18, 30, 70])",
+        "groups = pd.cut(ages, bins=[0, 18, 65, 120], labels=['child', 'adult', 'senior'])",
+        "print(groups.tolist())"
+      ],
+      "options": [
+        "`['child', 'child', 'adult', 'senior']`",
+        "`['child', 'adult', 'adult', 'senior']`",
+        "`['child', 'adult', 'senior', 'senior']`",
+        "`[0, 0, 1, 2]`"
+      ],
+      "answer": 0,
+      "explanation": "`pd.cut` bins are closed on the right by default: `(0, 18]`, `(18, 65]` and `(65, 120]`. So 18 falls in the first bin. Pass `right=False` to get bins like `[0, 18)`.",
+      "check": "output"
+    },
+    {
+      "id": "apply-axis-1",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2], 'b': [10, 20]})",
+        "print(df.apply(lambda row: row['a'] + row['b'], axis=1).tolist())"
+      ],
+      "options": ["`[11, 22]`", "`[3, 30]`", "`KeyError`", "`[1, 2, 10, 20]`"],
+      "answer": 0,
+      "explanation": "With `axis=1`, `apply` calls the function once per **row**, passed as a Series, so `row['a'] + row['b']` works. With the default `axis=0` each call gets a column, and `row['a']` raises `KeyError`. For plain arithmetic, `df['a'] + df['b']` is much faster.",
+      "check": "output"
+    },
+    {
+      "id": "insert-position",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1], 'b': [2]})",
+        "df.insert(1, 'new', 0)",
+        "print(df.columns.tolist())"
+      ],
+      "options": ["`['a', 'new', 'b']`", "`['new', 'a', 'b']`", "`['a', 'b', 'new']`", "`['a', 'b']`"],
+      "answer": 0,
+      "explanation": "`insert(loc, column, value)` puts the column at **position** `loc` and changes `df` in place (it returns `None`). Assigning `df['new'] = 0` always adds the column at the end.",
+      "check": "output"
+    },
+    {
+      "id": "clip-range",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([-5, 3, 12])",
+        "print(s.clip(0, 10).tolist())"
+      ],
+      "options": ["`[0, 3, 10]`", "`[3]`", "`[-5, 3, 10]`", "`[0, 3, 12]`"],
+      "answer": 0,
+      "explanation": "`clip(lower, upper)` caps values at the bounds instead of dropping them: -5 becomes 0 and 12 becomes 10.",
+      "check": "output"
+    },
+    {
+      "id": "clean-column-names",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame(columns=[' First Name', 'AGE '])",
+        "df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')",
+        "print(df.columns.tolist())"
+      ],
+      "options": [
+        "`['first_name', 'age']`",
+        "`['_first_name', 'age_']`",
+        "`['first name', 'age']`",
+        "`['First_Name', 'AGE']`"
+      ],
+      "answer": 0,
+      "explanation": "Column labels are an Index, and an Index has the same `.str` methods as a Series. Strip, lowercase, then replace spaces is the usual way to normalize messy headers.",
+      "check": "output"
+    }
+  ]
+}

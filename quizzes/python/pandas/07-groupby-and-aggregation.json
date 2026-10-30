@@ -1,0 +1,209 @@
+{
+  "topic": "GroupBy and aggregation",
+  "questions": [
+    {
+      "id": "groupby-mean",
+      "difficulty": "easy",
+      "question": "Which expression gives the average `salary` per `dept`?",
+      "code": ["df = pd.DataFrame({'dept': ['IT', 'HR', 'IT'], 'salary': [100, 80, 120]})"],
+      "options": [
+        "`df.groupby('dept')['salary'].mean()`",
+        "`df.groupby('salary')['dept'].mean()`",
+        "`df['salary'].groupby().mean()`",
+        "`df.group_by('dept')['salary'].mean()`"
+      ],
+      "answer": 0,
+      "explanation": "Read it as split-apply-combine: group by the key column, pick the value column, then aggregate. The result is a Series indexed by `dept`. (`group_by` is the Polars spelling.)",
+      "check": "options"
+    },
+    {
+      "id": "groupby-sum-dict",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'b', 'a'], 'v': [1, 2, 3]})",
+        "print(df.groupby('k')['v'].sum().to_dict())"
+      ],
+      "options": ["`{'a': 4, 'b': 2}`", "`{'a': 1, 'b': 2}`", "`{'a': 3, 'b': 2}`", "`{'a': [1, 3], 'b': [2]}`"],
+      "answer": 0,
+      "explanation": "Rows with the same key are summed: `a` is 1 + 3 = 4 and `b` is 2. The group keys become the index of the result.",
+      "check": "output"
+    },
+    {
+      "id": "size-vs-count",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'a', 'b'], 'v': [1, None, 3]})",
+        "g = df.groupby('k')['v']",
+        "print(g.size().tolist(), g.count().tolist())"
+      ],
+      "options": ["`[2, 1] [1, 1]`", "`[2, 1] [2, 1]`", "`[1, 1] [2, 1]`", "`[3] [2]`"],
+      "answer": 0,
+      "explanation": "`size()` counts the rows in each group, missing values included. `count()` counts **non-missing** values. Group `a` has 2 rows but only one value.",
+      "check": "output"
+    },
+    {
+      "id": "as-index-false",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'b', 'a'], 'v': [1, 2, 3]})",
+        "out = df.groupby('k', as_index=False)['v'].sum()",
+        "print(out.columns.tolist())"
+      ],
+      "options": ["`['k', 'v']`", "`['v']`", "`['k']`", "`['index', 'k', 'v']`"],
+      "answer": 0,
+      "explanation": "`as_index=False` keeps the group keys as a regular column instead of the index, so the result is a flat DataFrame. It's the same as adding `.reset_index()` at the end.",
+      "check": "output"
+    },
+    {
+      "id": "named-aggregation",
+      "difficulty": "medium",
+      "question": "Which call returns one row per `k` with columns named `total` and `avg`?",
+      "code": ["df = pd.DataFrame({'k': ['a', 'b', 'a'], 'v': [1, 2, 3]})"],
+      "options": [
+        "`df.groupby('k').agg(total=('v', 'sum'), avg=('v', 'mean'))`",
+        "`df.groupby('k').agg({'total': ('v', 'sum'), 'avg': ('v', 'mean')})`",
+        "`df.groupby('k')['v'].agg(['total', 'avg'])`",
+        "`df.groupby('k').agg(total=sum('v'), avg=mean('v'))`"
+      ],
+      "answer": 0,
+      "explanation": "This is named aggregation: each keyword is an output column, set to a `(column, function)` tuple. Dict keys passed to `agg` must be **existing** columns, and a list like `['sum', 'mean']` names functions, not outputs.",
+      "check": "options"
+    },
+    {
+      "id": "agg-list-multiindex",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'a', 'b'], 'v': [1, 3, 5]})",
+        "out = df.groupby('k').agg({'v': ['min', 'max']})",
+        "print(out.columns.tolist())"
+      ],
+      "options": ["`[('v', 'min'), ('v', 'max')]`", "`['min', 'max']`", "`['v_min', 'v_max']`", "`['v']`"],
+      "answer": 0,
+      "explanation": "Several functions for one column produce **MultiIndex** columns: (column, function) pairs. Named aggregation, as in `agg(v_min=('v', 'min'))`, gives flat names instead.",
+      "check": "output"
+    },
+    {
+      "id": "transform-mean",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'a', 'b'], 'v': [1, 3, 5]})",
+        "print(df.groupby('k')['v'].transform('mean').tolist())"
+      ],
+      "options": ["`[2.0, 2.0, 5.0]`", "`[2.0, 5.0]`", "`[1, 3, 5]`", "`[4, 4, 5]`"],
+      "answer": 0,
+      "explanation": "`transform` returns one value **per original row**, aligned with `df`'s index, instead of one per group. Each row gets its group's mean, so you can store the result as a new column.",
+      "check": "output"
+    },
+    {
+      "id": "transform-share",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'a', 'b'], 'v': [1, 3, 5]})",
+        "df['share'] = df['v'] / df.groupby('k')['v'].transform('sum')",
+        "print(df['share'].tolist())"
+      ],
+      "options": ["`[0.25, 0.75, 1.0]`", "`[0.111, 0.333, 0.556]`", "`[0.5, 0.5, 1.0]`", "`[0.25, 0.75]`"],
+      "answer": 0,
+      "explanation": "`transform('sum')` puts each group's total on every row (4, 4, 5), so dividing gives each row's share of its own group: 1/4, 3/4 and 5/5.",
+      "check": "output"
+    },
+    {
+      "id": "groupby-filter",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'a', 'b'], 'v': [1, 3, 5]})",
+        "print(df.groupby('k').filter(lambda g: len(g) > 1)['v'].tolist())"
+      ],
+      "options": ["`[1, 3]`", "`[5]`", "`[4]`", "`[1, 3, 5]`"],
+      "answer": 0,
+      "explanation": "`filter` keeps or drops **whole groups**: the function receives each group's rows and returns True or False. Only group `a` has more than one row, and its original rows come back unchanged.",
+      "check": "output"
+    },
+    {
+      "id": "groupby-cumsum",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'b', 'a', 'a'], 'v': [1, 2, 3, 4]})",
+        "print(df.groupby('k')['v'].cumsum().tolist())"
+      ],
+      "options": ["`[1, 2, 4, 8]`", "`[1, 3, 6, 10]`", "`[1, 2, 3, 4]`", "`[8, 2, 8, 8]`"],
+      "answer": 0,
+      "explanation": "The running total restarts for each group while the rows keep their original order: `a` goes 1, then 1 + 3 = 4, then 4 + 4 = 8, and `b` is just 2.",
+      "check": "output"
+    },
+    {
+      "id": "value-counts-normalize",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['x', 'y', 'x', 'x'])",
+        "print(s.value_counts(normalize=True).tolist())"
+      ],
+      "options": ["`[0.75, 0.25]`", "`[3, 1]`", "`[0.25, 0.75]`", "`[75.0, 25.0]`"],
+      "answer": 0,
+      "explanation": "`value_counts()` counts each value, most frequent first. `normalize=True` turns the counts into proportions that add up to 1.",
+      "check": "output"
+    },
+    {
+      "id": "groupby-two-keys",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'year': [2023, 2023, 2024], 'q': ['Q1', 'Q2', 'Q1'], 'sales': [10, 20, 30]})",
+        "out = df.groupby(['year', 'q'])['sales'].sum()",
+        "print(out.index.nlevels, len(out))"
+      ],
+      "options": ["`2 3`", "`1 3`", "`2 2`", "`1 2`"],
+      "answer": 0,
+      "explanation": "Grouping by two columns gives a two-level **MultiIndex** of `(year, q)`, with one row per combination that occurs: (2023, Q1), (2023, Q2) and (2024, Q1). `.unstack()` would turn the `q` level into columns.",
+      "check": "output"
+    },
+    {
+      "id": "groupby-nunique",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'user': ['u1', 'u1', 'u2', 'u2'], 'page': ['home', 'home', 'home', 'cart']})",
+        "print(df.groupby('user')['page'].nunique().tolist())"
+      ],
+      "options": ["`[1, 2]`", "`[2, 2]`", "`[2, 1]`", "`[3]`"],
+      "answer": 0,
+      "explanation": "`nunique()` counts **distinct** values per group: `u1` visited only `home` (twice), while `u2` visited two different pages.",
+      "check": "output"
+    },
+    {
+      "id": "groupby-first-skips-nan",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['a', 'a', 'b'], 'v': [None, 2, 3]})",
+        "print(df.groupby('k')['v'].first().tolist())"
+      ],
+      "options": ["`[2.0, 3.0]`", "`[nan, 3.0]`", "`[nan, 2.0, 3.0]`", "`[3.0]`"],
+      "answer": 0,
+      "explanation": "`first()` returns the first **non-missing** value in each group, so group `a` skips the `NaN` and gives 2. To get the literal first row of each group, use `head(1)` or `nth(0)`.",
+      "check": "output"
+    },
+    {
+      "id": "groupby-sorts-keys",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'k': ['b', 'a', 'b'], 'v': [1, 2, 3]})",
+        "print(df.groupby('k')['v'].sum().index.tolist())"
+      ],
+      "options": ["`['a', 'b']`", "`['b', 'a']`", "`['b', 'a', 'b']`", "`[0, 1]`"],
+      "answer": 0,
+      "explanation": "`groupby` sorts the group keys by default. Pass `sort=False` to keep them in order of first appearance, which can also be a little faster.",
+      "check": "output"
+    }
+  ]
+}

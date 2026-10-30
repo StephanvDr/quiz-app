@@ -1,0 +1,190 @@
+{
+  "topic": "Missing values and duplicates",
+  "questions": [
+    {
+      "id": "nan-makes-float",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 2, None])",
+        "print(s.dtype)"
+      ],
+      "options": ["`float64`", "`int64`", "`object`", "`Int64`"],
+      "answer": 0,
+      "explanation": "`None` in numeric data becomes `NaN`, and `NaN` is a float, so the whole column becomes `float64`. To keep integers alongside missing values, use the nullable `Int64` dtype (capital I).",
+      "check": "output"
+    },
+    {
+      "id": "isna-sum",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, None, 3], 'b': [None, None, 6]})",
+        "print(df.isna().sum().tolist())"
+      ],
+      "options": ["`[1, 2]`", "`[2, 1]`", "`3`", "`[False, True, False]`"],
+      "answer": 0,
+      "explanation": "`isna()` gives a frame of True/False values, and `sum()` counts the Trues in each column, since True counts as 1. It's the standard missing-values report.",
+      "check": "output"
+    },
+    {
+      "id": "dropna-how",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, None, 3], 'b': [4, None, None]})",
+        "print(len(df.dropna()), len(df.dropna(how='all')))"
+      ],
+      "options": ["`1 2`", "`2 1`", "`1 1`", "`3 2`"],
+      "answer": 0,
+      "explanation": "By default `dropna()` drops every row with **any** missing value, which leaves only row 0. `how='all'` drops only the rows where every value is missing, which is just row 1.",
+      "check": "output"
+    },
+    {
+      "id": "dropna-thresh",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, None, 3], 'b': [4, None, None], 'c': [7, 8, 9]})",
+        "print(df.dropna(thresh=2).index.tolist())"
+      ],
+      "options": ["`[0, 2]`", "`[0]`", "`[1]`", "`[0, 1, 2]`"],
+      "answer": 0,
+      "explanation": "`thresh=n` keeps the rows that have **at least n non-missing** values. Row 0 has 3, row 1 has 1 and row 2 has 2, so rows 0 and 2 stay.",
+      "check": "output"
+    },
+    {
+      "id": "fillna-mean",
+      "difficulty": "easy",
+      "question": "Which expression fills the gaps in `a` with the column's mean?",
+      "code": ["df = pd.DataFrame({'a': [1.0, None, 3.0]})"],
+      "options": [
+        "`df['a'].fillna(df['a'].mean())`",
+        "`df['a'].fillna('mean')`",
+        "`df['a'].fillna(method='mean')`",
+        "`df['a'].fill_na(df['a'].mean())`"
+      ],
+      "answer": 0,
+      "explanation": "`fillna` takes the value to fill with, so compute the mean first. `mean()` skips `NaN`, which makes it (1 + 3) / 2 = 2.0. `fillna` has no `method='mean'`, and `'mean'` on its own is just a string, not an instruction.",
+      "check": "options"
+    },
+    {
+      "id": "ffill-pandas3",
+      "difficulty": "medium",
+      "question": "In pandas 3, which call fills each gap with the last known value above it?",
+      "code": ["df = pd.DataFrame({'price': [10.0, None, None, 12.0]})"],
+      "options": [
+        "`df.ffill()`",
+        "`df.fillna(method='ffill')`",
+        "`df.bfill()`",
+        "`df.forward_fill()`"
+      ],
+      "answer": 0,
+      "explanation": "`ffill()` (forward fill) carries the last valid value down; `bfill()` (backward fill) pulls the next valid value up. `fillna(method='ffill')` was deprecated in pandas 2.1 and removed in pandas 3.",
+      "check": "options"
+    },
+    {
+      "id": "aggregations-skip-nan",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([2, None, 4])",
+        "print(s.mean(), s.sum(), s.count())"
+      ],
+      "options": ["`3.0 6.0 2`", "`2.0 6.0 3`", "`nan nan 3`", "`3.0 6.0 3`"],
+      "answer": 0,
+      "explanation": "Aggregations skip missing values by default (`skipna=True`), so the mean is (2 + 4) / 2 and the sum is 6. `count()` counts **non-missing** values, which gives 2; `len(s)` would be 3.",
+      "check": "output"
+    },
+    {
+      "id": "nan-not-equal",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": ["print(np.nan == np.nan, pd.isna(np.nan))"],
+      "options": ["`False True`", "`True True`", "`False False`", "`True False`"],
+      "answer": 0,
+      "explanation": "`NaN` is never equal to anything, itself included. That's why you test for missing values with `isna()` or `pd.isna()`, never with `==`.",
+      "check": "output"
+    },
+    {
+      "id": "duplicated-default",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['a', 'b', 'a', 'a'])",
+        "print(s.duplicated().tolist())"
+      ],
+      "options": [
+        "`[False, False, True, True]`",
+        "`[True, False, True, True]`",
+        "`[False, False, False, True]`",
+        "`[True, False, False, False]`"
+      ],
+      "answer": 0,
+      "explanation": "`duplicated()` marks repeats **after** the first occurrence (`keep='first'`). The first `a` isn't a duplicate; the two later ones are.",
+      "check": "output"
+    },
+    {
+      "id": "duplicated-keep-false",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 2, 2, 3])",
+        "print(s.duplicated(keep=False).tolist())"
+      ],
+      "options": [
+        "`[False, True, True, False]`",
+        "`[False, False, True, False]`",
+        "`[False, True, False, False]`",
+        "`[True, False, False, True]`"
+      ],
+      "answer": 0,
+      "explanation": "`keep=False` marks **every** copy of a repeated value. That's handy for showing all the conflicting rows at once: `df[df.duplicated('id', keep=False)]`.",
+      "check": "output"
+    },
+    {
+      "id": "drop-duplicates-latest",
+      "difficulty": "medium",
+      "question": "This keeps the latest record per user. What does it print?",
+      "code": [
+        "df = pd.DataFrame({'user': ['a', 'b', 'a'], 'ts': [1, 2, 3]})",
+        "print(df.drop_duplicates(subset='user', keep='last')['ts'].tolist())"
+      ],
+      "options": ["`[2, 3]`", "`[1, 2]`", "`[3, 2]`", "`[1, 2, 3]`"],
+      "answer": 0,
+      "explanation": "`subset='user'` compares only that column, and `keep='last'` keeps the final occurrence, so user `a` keeps `ts` 3. Kept rows stay in their original order: `b` (row 1) comes before `a` (row 2). If the data isn't sorted, sort by the timestamp first.",
+      "check": "output"
+    },
+    {
+      "id": "interpolate-linear",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1.0, None, None, 4.0])",
+        "print(s.interpolate().tolist())"
+      ],
+      "options": [
+        "`[1.0, 2.0, 3.0, 4.0]`",
+        "`[1.0, 1.0, 1.0, 4.0]`",
+        "`[1.0, 2.5, 2.5, 4.0]`",
+        "`[1.0, 4.0, 4.0, 4.0]`"
+      ],
+      "answer": 0,
+      "explanation": "`interpolate()` draws a straight line between known values by default (`method='linear'`), so the two gaps between 1 and 4 become 2 and 3. `ffill()` would repeat the 1 instead.",
+      "check": "output"
+    },
+    {
+      "id": "nunique-vs-unique",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['a', 'b', None, 'a'])",
+        "print(s.nunique(), len(s.unique()))"
+      ],
+      "options": ["`2 3`", "`3 3`", "`2 2`", "`3 2`"],
+      "answer": 0,
+      "explanation": "`nunique()` skips missing values by default (`dropna=True`), so it counts only `a` and `b`. `unique()` returns every distinct value **including** the missing one: `a`, `b` and `nan`.",
+      "check": "output"
+    }
+  ]
+}

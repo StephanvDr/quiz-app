@@ -1,0 +1,208 @@
+{
+  "topic": "Dtypes, memory and performance",
+  "questions": [
+    {
+      "id": "to-numeric-coerce",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['10', '2.5', 'n/a'])",
+        "print(pd.to_numeric(s, errors='coerce').tolist())"
+      ],
+      "options": ["`[10.0, 2.5, nan]`", "`ValueError`", "`['10', '2.5', nan]`", "`[10, 2.5, 0]`"],
+      "answer": 0,
+      "explanation": "`to_numeric` parses text into numbers. With `errors='coerce'`, values it can't parse become `NaN` instead of raising, which makes it a standard first step when cleaning messy numeric columns.",
+      "check": "output"
+    },
+    {
+      "id": "nullable-int",
+      "difficulty": "medium",
+      "question": "Which call converts `s` to integers while keeping the missing value?",
+      "code": ["s = pd.Series([1.0, None])"],
+      "options": [
+        "`s.astype('Int64')`",
+        "`s.astype(int)`",
+        "`pd.to_numeric(s, downcast='integer')`",
+        "`s.fillna(None).astype(int)`"
+      ],
+      "answer": 0,
+      "explanation": "NumPy's `int64` can't hold a missing value, so `astype(int)` raises. The nullable `Int64` dtype (capital I) stores integers plus `<NA>`. `downcast='integer'` only converts when no information is lost, so with a `NaN` present it leaves the floats alone.",
+      "check": "options"
+    },
+    {
+      "id": "nullable-vs-float",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "a = pd.Series([1, None])",
+        "b = pd.Series([1, None], dtype='Int64')",
+        "print(a.dtype, b.dtype, b.isna().tolist())"
+      ],
+      "options": [
+        "`float64 Int64 [False, True]`",
+        "`int64 Int64 [False, True]`",
+        "`float64 Int64 [False, False]`",
+        "`object Int64 [False, True]`"
+      ],
+      "answer": 0,
+      "explanation": "By default the missing value turns the integers into `float64` with a `NaN`. With `dtype='Int64'` the values stay integers and the gap is `<NA>`, which `isna()` still detects.",
+      "check": "output"
+    },
+    {
+      "id": "category-codes",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['red', 'green', 'red'] * 10_000)",
+        "c = s.astype('category')",
+        "print(c.cat.categories.tolist(), c.cat.codes[:3].tolist())"
+      ],
+      "options": [
+        "`['green', 'red'] [1, 0, 1]`",
+        "`['red', 'green'] [0, 1, 0]`",
+        "`['green', 'red'] [0, 1, 0]`",
+        "`['red', 'green', 'red'] [0, 1, 2]`"
+      ],
+      "answer": 0,
+      "explanation": "A categorical stores each distinct value once (the categories, sorted here) plus a small integer code per row. 30,000 strings become 30,000 one-byte codes, which can cut memory dramatically for repetitive text.",
+      "check": "output"
+    },
+    {
+      "id": "category-when",
+      "difficulty": "easy",
+      "question": "When does converting a text column to `category` help most?",
+      "options": [
+        "When a few distinct values repeat across many rows, like country or status",
+        "When almost every value is unique, like email addresses",
+        "When the column holds long free text such as reviews",
+        "Always, since there's no downside"
+      ],
+      "answer": 0,
+      "explanation": "Categoricals pay off when values repeat: less memory, and faster `groupby` and `value_counts`. With mostly unique values you store every string anyway, **plus** the codes. Categories also behave differently: you can't assign a value that isn't already one of the categories."
+    },
+    {
+      "id": "memory-usage-deep",
+      "difficulty": "medium",
+      "question": "What does `deep=True` change in `df.memory_usage(deep=True)`?",
+      "options": [
+        "It also measures the Python objects, such as strings, that the columns point to",
+        "It adds up the memory of every copy of `df`",
+        "It reports sizes in megabytes instead of bytes",
+        "It measures the file on disk as well as the data in memory"
+      ],
+      "answer": 0,
+      "explanation": "Text is often stored as Python objects, and a shallow count only sees the 8-byte pointers to them, so text-heavy frames look far smaller than they are. `deep=True`, or `df.info(memory_usage='deep')`, measures the objects too."
+    },
+    {
+      "id": "vectorize-not-apply",
+      "difficulty": "easy",
+      "question": "All four give the same numbers. Which is the fastest, idiomatic way to compute `price` × `qty` for every row?",
+      "options": [
+        "`df['price'] * df['qty']`",
+        "`df.apply(lambda r: r['price'] * r['qty'], axis=1)`",
+        "`[r.price * r.qty for r in df.itertuples()]`",
+        "`[df.loc[i, 'price'] * df.loc[i, 'qty'] for i in df.index]`"
+      ],
+      "answer": 0,
+      "explanation": "Column arithmetic is **vectorized**: a single call runs a fast loop in compiled code. `apply(axis=1)` and Python loops handle one row at a time in Python, which is often 100 times slower or worse on large frames. Keep them for logic that can't be vectorized."
+    },
+    {
+      "id": "chained-assignment-cow",
+      "difficulty": "hard",
+      "question": "In pandas 3, what does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2, 3]})",
+        "df['a'][0] = 100",
+        "print(df['a'].tolist())"
+      ],
+      "options": ["`[1, 2, 3]`", "`[100, 2, 3]`", "`SettingWithCopyError`", "`[100, 100, 100]`"],
+      "answer": 0,
+      "explanation": "This is **chained assignment**: `df['a']` returns a new Series, and `[0] = 100` changes that Series instead of `df`. Under Copy-on-Write, the only mode in pandas 3, it never reaches `df`, and pandas warns with `ChainedAssignmentError`. In pandas 2.x it often did change `df`. Write `df.loc[0, 'a'] = 100`.",
+      "check": "output"
+    },
+    {
+      "id": "subset-is-independent",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2, 3]})",
+        "subset = df[df['a'] > 1]",
+        "subset['a'] = 0",
+        "print(df['a'].tolist())"
+      ],
+      "options": ["`[1, 2, 3]`", "`[1, 0, 0]`", "`[0, 0, 0]`", "`SettingWithCopyError`"],
+      "answer": 0,
+      "explanation": "A filtered result behaves as an independent object, so changing it never changes `df`. In pandas 3 (Copy-on-Write) that's guaranteed and there's no warning; pandas 2.x showed the infamous `SettingWithCopyWarning` here. To change `df`, assign through it: `df.loc[df['a'] > 1, 'a'] = 0`.",
+      "check": "output"
+    },
+    {
+      "id": "pipe",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "def add_tax(d, rate):",
+        "    return d.assign(total=d['price'] * (1 + rate))",
+        "",
+        "df = pd.DataFrame({'price': [100, 200]})",
+        "print(df.pipe(add_tax, rate=0.5)['total'].tolist())"
+      ],
+      "options": ["`[150.0, 300.0]`", "`[100, 200]`", "`[50.0, 100.0]`", "`TypeError`"],
+      "answer": 0,
+      "explanation": "`df.pipe(f, **kwargs)` calls `f(df, **kwargs)`. It lets your own functions slot into a method chain, as in `df.pipe(clean).pipe(add_tax, rate=0.5)`, instead of nesting the calls inside out.",
+      "check": "output"
+    },
+    {
+      "id": "select-dtypes",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1], 'b': [1.5], 'c': ['x'], 'd': [True]})",
+        "print(df.select_dtypes(include='number').columns.tolist())"
+      ],
+      "options": ["`['a', 'b']`", "`['a', 'b', 'd']`", "`['a']`", "`['c']`"],
+      "answer": 0,
+      "explanation": "`select_dtypes(include='number')` keeps the integer and float columns. Booleans don't count as numbers here, so `d` is left out. Use `exclude=` for the opposite selection.",
+      "check": "output"
+    },
+    {
+      "id": "downcast-int8",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series([1, 2, 3])",
+        "print(pd.to_numeric(s, downcast='integer').dtype)"
+      ],
+      "options": ["`int8`", "`int64`", "`int32`", "`int16`"],
+      "answer": 0,
+      "explanation": "`downcast='integer'` picks the **smallest** integer type that holds every value. 1 to 3 fits in `int8` (-128 to 127), so each value takes 1 byte instead of 8.",
+      "check": "output"
+    },
+    {
+      "id": "inplace-returns-none",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [3, 1, 2]})",
+        "result = df.sort_values('a', inplace=True)",
+        "print(result)"
+      ],
+      "options": ["`None`", "The sorted DataFrame", "The original, unsorted DataFrame", "`TypeError`"],
+      "answer": 0,
+      "explanation": "With `inplace=True` a method changes `df` itself and returns `None`, so `df = df.sort_values('a', inplace=True)` wipes out your DataFrame. Prefer the default `inplace=False` and assign the result; it reads better in chains and is usually just as fast.",
+      "check": "output"
+    },
+    {
+      "id": "str-dtype-pandas3",
+      "difficulty": "medium",
+      "question": "In pandas 3, what does this print?",
+      "code": [
+        "s = pd.Series(['a', 'b'])",
+        "print(s.dtype)"
+      ],
+      "options": ["`str`", "`object`", "`string`", "`<U1`"],
+      "answer": 0,
+      "explanation": "pandas 3 stores text in a dedicated string dtype, shown as `str` (backed by PyArrow when it's installed). pandas 2.x used the generic `object` dtype. Code that checks `dtype == object` to find text columns needs updating: use `select_dtypes(include='str')` or `pd.api.types.is_string_dtype`.",
+      "check": "output"
+    }
+  ]
+}

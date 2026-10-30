@@ -1,0 +1,242 @@
+{
+  "topic": "JSON and text for LLM pipelines",
+  "questions": [
+    {
+      "id": "json-normalize-nested",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "records = [",
+        "    {'id': 1, 'user': {'name': 'Ann', 'plan': 'pro'}},",
+        "    {'id': 2, 'user': {'name': 'Bob', 'plan': 'free'}},",
+        "]",
+        "print(pd.json_normalize(records).columns.tolist())"
+      ],
+      "options": [
+        "`['id', 'user.name', 'user.plan']`",
+        "`['id', 'user']`",
+        "`['id', 'name', 'plan']`",
+        "`['id', 'user_name', 'user_plan']`"
+      ],
+      "answer": 0,
+      "explanation": "`json_normalize` flattens nested dicts into columns whose names are joined with `.` (change that with `sep='_'`). `pd.DataFrame(records)` would keep `user` as a single column of dicts.",
+      "check": "output"
+    },
+    {
+      "id": "json-normalize-record-path",
+      "difficulty": "hard",
+      "question": "Each document has a list of chunks. What does this print?",
+      "code": [
+        "docs = [",
+        "    {'doc': 'a.pdf', 'chunks': [{'n': 0}, {'n': 1}]},",
+        "    {'doc': 'b.pdf', 'chunks': [{'n': 0}]},",
+        "]",
+        "df = pd.json_normalize(docs, record_path='chunks', meta=['doc'])",
+        "print(df.shape, df['doc'].tolist())"
+      ],
+      "options": [
+        "`(3, 2) ['a.pdf', 'a.pdf', 'b.pdf']`",
+        "`(2, 2) ['a.pdf', 'b.pdf']`",
+        "`(3, 1) ['a.pdf', 'b.pdf']`",
+        "`(2, 3) ['a.pdf', 'b.pdf']`"
+      ],
+      "answer": 0,
+      "explanation": "`record_path` names the list to unpack, giving one row per chunk, and `meta` copies parent fields onto each of those rows. That's how you turn nested API or RAG output into a flat table.",
+      "check": "output"
+    },
+    {
+      "id": "to-dict-records",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'role': ['user', 'assistant'], 'content': ['Hi', 'Hello!']})",
+        "print(df.to_dict('records'))"
+      ],
+      "options": [
+        "`[{'role': 'user', 'content': 'Hi'}, {'role': 'assistant', 'content': 'Hello!'}]`",
+        "`{'role': {0: 'user', 1: 'assistant'}, 'content': {0: 'Hi', 1: 'Hello!'}}`",
+        "`[['user', 'Hi'], ['assistant', 'Hello!']]`",
+        "`{'user': 'Hi', 'assistant': 'Hello!'}`"
+      ],
+      "answer": 0,
+      "explanation": "`orient='records'` gives a list with one dict per row, which is exactly the shape of a chat `messages` list or a JSON API payload. The default orient, `'dict'`, nests `{column: {index: value}}` instead.",
+      "check": "output"
+    },
+    {
+      "id": "to-dict-default",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'a': [1, 2]})",
+        "print(df.to_dict())"
+      ],
+      "options": ["`{'a': {0: 1, 1: 2}}`", "`[{'a': 1}, {'a': 2}]`", "`{'a': [1, 2]}`", "`{0: {'a': 1}, 1: {'a': 2}}`"],
+      "answer": 0,
+      "explanation": "The default orient is `'dict'`: `{column: {index_label: value}}`. Use `'list'` for `{'a': [1, 2]}`, `'records'` for one dict per row, or `'index'` for `{index_label: {column: value}}`.",
+      "check": "output"
+    },
+    {
+      "id": "to-jsonl",
+      "difficulty": "medium",
+      "question": "This builds a fine-tuning dataset. What does it print?",
+      "code": [
+        "df = pd.DataFrame({'prompt': ['2+2?', 'Capital of France?'], 'completion': ['4', 'Paris']})",
+        "print(df.to_json(orient='records', lines=True))"
+      ],
+      "options": [
+        "{\"prompt\":\"2+2?\",\"completion\":\"4\"}\n{\"prompt\":\"Capital of France?\",\"completion\":\"Paris\"}",
+        "`[{\"prompt\":\"2+2?\",\"completion\":\"4\"},{\"prompt\":\"Capital of France?\",\"completion\":\"Paris\"}]`",
+        "`{\"prompt\":{\"0\":\"2+2?\",\"1\":\"Capital of France?\"},\"completion\":{\"0\":\"4\",\"1\":\"Paris\"}}`",
+        "`{\"prompt\":[\"2+2?\",\"Capital of France?\"],\"completion\":[\"4\",\"Paris\"]}`"
+      ],
+      "answer": 0,
+      "explanation": "`orient='records', lines=True` writes **JSON Lines**: one JSON object per line, the usual format for fine-tuning and batch-inference files. Without `lines=True` you get a single JSON array. Pass a path, as in `to_json('train.jsonl', orient='records', lines=True)`, to write a file.",
+      "check": "output"
+    },
+    {
+      "id": "read-jsonl",
+      "difficulty": "easy",
+      "question": "`data` holds JSON Lines text, one object per line. Which call parses it?",
+      "code": [
+        "from io import StringIO",
+        "data = '{\"id\": 1, \"text\": \"hi\"}\\n{\"id\": 2, \"text\": \"yo\"}\\n'"
+      ],
+      "options": [
+        "`pd.read_json(StringIO(data), lines=True)`",
+        "`pd.read_json(StringIO(data))`",
+        "`pd.read_jsonl(StringIO(data))`",
+        "`pd.read_json(StringIO(data), orient='lines')`"
+      ],
+      "answer": 0,
+      "explanation": "`lines=True` reads JSONL. Without it pandas expects a single JSON document and fails at the second line, and there's no `read_jsonl`. For files too big for memory, add `chunksize=` and loop over the reader.",
+      "check": "options"
+    },
+    {
+      "id": "word-count",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['the quick brown fox', 'hello world'])",
+        "print(s.str.split().str.len().tolist())"
+      ],
+      "options": ["`[4, 2]`", "`[19, 11]`", "`[3, 1]`", "`[[4], [2]]`"],
+      "answer": 0,
+      "explanation": "`str.split()` with no argument splits on any whitespace, and `.str.len()` on the resulting lists counts the words. It's a cheap first estimate of text size; exact token counts need the model's tokenizer.",
+      "check": "output"
+    },
+    {
+      "id": "filter-by-length",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "docs = pd.DataFrame({'text': ['short', 'a much longer document', 'medium text']})",
+        "print(docs[docs['text'].str.len() > 10]['text'].tolist())"
+      ],
+      "options": [
+        "`['a much longer document', 'medium text']`",
+        "`['a much longer document']`",
+        "`['short']`",
+        "`[False, True, True]`"
+      ],
+      "answer": 0,
+      "explanation": "`str.len()` counts characters, spaces included: 5, 22 and 11. Filtering on it is a quick way to drop empty or oversized documents before you embed them or send them to a model.",
+      "check": "output"
+    },
+    {
+      "id": "batch-rows",
+      "difficulty": "medium",
+      "question": "This splits rows into batches for API calls. What does it print?",
+      "code": [
+        "df = pd.DataFrame({'text': list('abcdefg')})",
+        "batches = [b['text'].tolist() for _, b in df.groupby(df.index // 3)]",
+        "print(batches)"
+      ],
+      "options": [
+        "`[['a', 'b', 'c'], ['d', 'e', 'f'], ['g']]`",
+        "`[['a', 'd', 'g'], ['b', 'e'], ['c', 'f']]`",
+        "`[['a', 'b', 'c'], ['d', 'e', 'f']]`",
+        "`[['a', 'b'], ['c', 'd'], ['e', 'f'], ['g']]`"
+      ],
+      "answer": 0,
+      "explanation": "With the default `0..n-1` index, `df.index // 3` is 0, 0, 0, 1, 1, 1, 2, so grouping by it gives consecutive batches of 3, and the last batch holds whatever is left. `df.index % 3` would deal the rows out round-robin instead.",
+      "check": "output"
+    },
+    {
+      "id": "train-test-split",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "df = pd.DataFrame({'x': range(10)})",
+        "train = df.sample(frac=0.8, random_state=42)",
+        "test = df.drop(train.index)",
+        "print(len(train), len(test))"
+      ],
+      "options": ["`8 2`", "`2 8`", "`8 10`", "`10 2`"],
+      "answer": 0,
+      "explanation": "`sample(frac=0.8)` picks 80% of the rows at random, and `random_state` makes the pick repeatable. Dropping the sampled index labels leaves the other 20%. It's a quick way to split off an evaluation set when you don't need stratification.",
+      "check": "output"
+    },
+    {
+      "id": "prompt-template",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "template = 'Summarize in {n} words: {text}'",
+        "df = pd.DataFrame({'text': ['Long article...', 'Another one...'], 'n': [10, 20]})",
+        "prompts = df.apply(lambda row: template.format(**row), axis=1)",
+        "print(prompts[1])"
+      ],
+      "options": [
+        "`Summarize in 20 words: Another one...`",
+        "`Summarize in 10 words: Long article...`",
+        "`Summarize in {n} words: {text}`",
+        "`KeyError`"
+      ],
+      "answer": 0,
+      "explanation": "With `axis=1` each row arrives as a Series, and `**row` unpacks it into keyword arguments named after the columns, which fills the template's placeholders. `prompts[1]` is the prompt built from the second row.",
+      "check": "output"
+    },
+    {
+      "id": "dedupe-normalized-text",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['Hello World', 'hello world ', 'Bye'])",
+        "print(s.str.lower().str.strip().drop_duplicates().index.tolist())"
+      ],
+      "options": ["`[0, 2]`", "`[0, 1, 2]`", "`[1, 2]`", "`[2]`"],
+      "answer": 0,
+      "explanation": "After lowercasing and stripping, rows 0 and 1 hold the same text. `drop_duplicates()` keeps the first occurrence along with the original labels, so you can use the surviving index to filter the raw data. Normalizing before deduplicating catches near-copies in training data.",
+      "check": "output"
+    },
+    {
+      "id": "list-of-dicts-missing-keys",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "rows = [{'id': 1, 'label': 'spam'}, {'id': 2}]",
+        "df = pd.DataFrame(rows)",
+        "print(df['label'].tolist())"
+      ],
+      "options": ["`['spam', nan]`", "`['spam']`", "`['spam', None]`", "`KeyError`"],
+      "answer": 0,
+      "explanation": "A list of dicts becomes one row per dict, with columns from the union of all keys. Keys a record lacks become `NaN`, so inconsistent API results load without errors.",
+      "check": "output"
+    },
+    {
+      "id": "embeddings-to-matrix",
+      "difficulty": "hard",
+      "question": "Each row holds an embedding as a list. Which expression gives a 2-D NumPy array with one row per embedding?",
+      "code": ["df = pd.DataFrame({'embedding': [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]})"],
+      "options": [
+        "`np.vstack(df['embedding'].to_numpy())`",
+        "`df['embedding'].to_numpy()`",
+        "`df['embedding'].to_numpy().reshape(2, 3)`",
+        "`df['embedding'].astype(float).to_numpy()`"
+      ],
+      "answer": 0,
+      "explanation": "A column of lists is an `object` array of shape `(2,)`, where each cell holds a whole Python list. `np.vstack` stacks those lists into a real `(2, 3)` float matrix, ready for cosine similarity or a vector index. `np.array(df['embedding'].tolist())` works too.",
+      "check": "options"
+    }
+  ]
+}

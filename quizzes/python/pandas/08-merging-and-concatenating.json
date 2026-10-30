@@ -1,0 +1,210 @@
+{
+  "topic": "Merging and concatenating",
+  "questions": [
+    {
+      "id": "merge-default-inner",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "left = pd.DataFrame({'id': [1, 2, 3], 'name': ['a', 'b', 'c']})",
+        "right = pd.DataFrame({'id': [2, 3, 4], 'score': [20, 30, 40]})",
+        "print(len(pd.merge(left, right, on='id')))"
+      ],
+      "options": ["`2`", "`3`", "`4`", "`6`"],
+      "answer": 0,
+      "explanation": "`merge` does an **inner** join by default (`how='inner'`): only ids found on both sides survive, which are 2 and 3.",
+      "check": "output"
+    },
+    {
+      "id": "merge-left",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "left = pd.DataFrame({'id': [1, 2, 3]})",
+        "right = pd.DataFrame({'id': [2, 3, 4], 'score': [20, 30, 40]})",
+        "print(left.merge(right, on='id', how='left')['score'].tolist())"
+      ],
+      "options": ["`[nan, 20.0, 30.0]`", "`[20, 30]`", "`[20.0, 30.0, 40.0]`", "`[0, 20, 30]`"],
+      "answer": 0,
+      "explanation": "A left join keeps every row of `left`. Id 1 has no match, so its `score` is `NaN`, which also turns the column into floats. Id 4 exists only on the right, so it's dropped.",
+      "check": "output"
+    },
+    {
+      "id": "merge-outer-indicator",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "left = pd.DataFrame({'id': [1, 2, 3]})",
+        "right = pd.DataFrame({'id': [2, 3, 4]})",
+        "out = left.merge(right, on='id', how='outer', indicator=True)",
+        "print(out['_merge'].tolist())"
+      ],
+      "options": [
+        "`['left_only', 'both', 'both', 'right_only']`",
+        "`['both', 'both']`",
+        "`[True, True, True, True]`",
+        "`['left', 'both', 'both', 'right']`"
+      ],
+      "answer": 0,
+      "explanation": "An outer join keeps every key from both sides, and `indicator=True` adds a `_merge` column saying where each row came from. It's a quick way to reconcile two datasets: filter on `'left_only'` to find the unmatched records.",
+      "check": "output"
+    },
+    {
+      "id": "merge-left-on-right-on",
+      "difficulty": "easy",
+      "question": "The key is called `cust_id` in `orders` but `id` in `customers`. Which call joins them?",
+      "code": [
+        "orders = pd.DataFrame({'order': [10, 11], 'cust_id': [1, 2]})",
+        "customers = pd.DataFrame({'id': [1, 2], 'name': ['Ann', 'Bob']})"
+      ],
+      "options": [
+        "`orders.merge(customers, left_on='cust_id', right_on='id')`",
+        "`orders.merge(customers, on=['cust_id', 'id'])`",
+        "`orders.merge(customers, on={'cust_id': 'id'})`",
+        "`orders.join(customers, on='cust_id')`"
+      ],
+      "answer": 0,
+      "explanation": "When the key columns have different names, use `left_on=` and `right_on=`; both columns stay in the result. `on=` needs names that exist on **both** sides, and `join(..., on=...)` matches against the other frame's **index**, which here is 0 and 1.",
+      "check": "options"
+    },
+    {
+      "id": "merge-suffixes",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "a = pd.DataFrame({'id': [1], 'val': [10]})",
+        "b = pd.DataFrame({'id': [1], 'val': [99]})",
+        "print(a.merge(b, on='id').columns.tolist())"
+      ],
+      "options": [
+        "`['id', 'val_x', 'val_y']`",
+        "`['id', 'val']`",
+        "`['id', 'val', 'val']`",
+        "`['id', 'val_left', 'val_right']`"
+      ],
+      "answer": 0,
+      "explanation": "Non-key columns that exist on both sides get the suffixes `_x` (left) and `_y` (right). Choose clearer ones with `suffixes=('_old', '_new')`.",
+      "check": "output"
+    },
+    {
+      "id": "merge-row-explosion",
+      "difficulty": "medium",
+      "question": "Both sides repeat the key. How many rows does the merge return?",
+      "code": [
+        "a = pd.DataFrame({'k': [1, 1], 'x': ['a', 'b']})",
+        "b = pd.DataFrame({'k': [1, 1, 1], 'y': [7, 8, 9]})",
+        "print(len(a.merge(b, on='k')))"
+      ],
+      "options": ["`6`", "`2`", "`3`", "`5`"],
+      "answer": 0,
+      "explanation": "Every left row pairs with every matching right row, so you get 2 × 3 = 6. Unexpected duplicate keys are a classic reason row counts blow up after a join. Check for them before merging, or pass `validate=`.",
+      "check": "output"
+    },
+    {
+      "id": "merge-validate",
+      "difficulty": "hard",
+      "question": "What happens when this runs?",
+      "code": [
+        "a = pd.DataFrame({'k': [1, 1], 'x': ['a', 'b']})",
+        "b = pd.DataFrame({'k': [1, 1], 'y': [7, 8]})",
+        "a.merge(b, on='k', validate='many_to_one')"
+      ],
+      "options": ["`MergeError`", "`KeyError`", "It returns 4 rows", "It returns 2 rows"],
+      "answer": 0,
+      "explanation": "`validate='many_to_one'` asserts that the keys on the **right** are unique. They aren't, so pandas raises `MergeError` instead of quietly multiplying rows. The other options are `'one_to_one'`, `'one_to_many'` and `'many_to_many'`.",
+      "check": "output"
+    },
+    {
+      "id": "merge-dtype-mismatch",
+      "difficulty": "medium",
+      "question": "The keys look alike, but one side stores them as text. What happens?",
+      "code": [
+        "a = pd.DataFrame({'id': [1, 2], 'x': [10, 20]})",
+        "b = pd.DataFrame({'id': ['1', '2'], 'y': [30, 40]})",
+        "a.merge(b, on='id')"
+      ],
+      "options": ["`ValueError`", "`KeyError`", "It returns an empty DataFrame", "It returns 2 matched rows"],
+      "answer": 0,
+      "explanation": "pandas refuses to merge an integer key with a text key and raises `ValueError` (\"You are trying to merge on int64 and str columns\"). Convert one side first, e.g. `b['id'] = b['id'].astype(int)`. This often bites with IDs read from CSV or JSON.",
+      "check": "output"
+    },
+    {
+      "id": "concat-keeps-index",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "a = pd.DataFrame({'x': [1, 2]})",
+        "b = pd.DataFrame({'x': [3, 4]})",
+        "print(pd.concat([a, b]).index.tolist())"
+      ],
+      "options": ["`[0, 1, 0, 1]`", "`[0, 1, 2, 3]`", "`[0, 1]`", "`[1, 2, 3, 4]`"],
+      "answer": 0,
+      "explanation": "`concat` stacks the frames and keeps their original index labels, so the labels repeat. Pass `ignore_index=True` for a fresh `0..n-1` index.",
+      "check": "output"
+    },
+    {
+      "id": "concat-ignore-index",
+      "difficulty": "easy",
+      "question": "Which expression stacks `a` on top of `b` with a fresh 0 to n-1 index?",
+      "code": [
+        "a = pd.DataFrame({'x': [1, 2]})",
+        "b = pd.DataFrame({'x': [3, 4]})"
+      ],
+      "options": [
+        "`pd.concat([a, b], ignore_index=True)`",
+        "`a.append(b, ignore_index=True)`",
+        "`pd.concat(a, b, ignore_index=True)`",
+        "`pd.merge(a, b, ignore_index=True)`"
+      ],
+      "answer": 0,
+      "explanation": "`pd.concat` takes a **list** of frames. `DataFrame.append` was removed in pandas 2.0, and `merge` joins on keys rather than stacking rows.",
+      "check": "options"
+    },
+    {
+      "id": "concat-axis-1",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "a = pd.DataFrame({'x': [1, 2]})",
+        "b = pd.DataFrame({'y': [3, 4]}, index=[1, 2])",
+        "print(pd.concat([a, b], axis=1).shape)"
+      ],
+      "options": ["`(3, 2)`", "`(2, 2)`", "`(4, 2)`", "`(4, 1)`"],
+      "answer": 0,
+      "explanation": "With `axis=1` the frames sit side by side, **aligned on the index**. The labels are 0, 1 and 2, so there are 3 rows, and cells without a value become `NaN`.",
+      "check": "output"
+    },
+    {
+      "id": "join-on-index",
+      "difficulty": "medium",
+      "question": "Both frames are indexed by user id. Which expression puts their columns side by side, matching rows on that index?",
+      "code": [
+        "a = pd.DataFrame({'name': ['Ann', 'Bob']}, index=[1, 2])",
+        "b = pd.DataFrame({'plan': ['pro', 'free']}, index=[1, 2])"
+      ],
+      "options": [
+        "`a.join(b)`",
+        "`a.merge(b)`",
+        "`pd.concat([a, b])`",
+        "`a.merge(b, on='index')`"
+      ],
+      "answer": 0,
+      "explanation": "`join` matches rows on the index by default, as a left join. `merge` works on columns: with no shared column it raises `MergeError`, and there's no column called `'index'`. `concat` without `axis=1` stacks rows. `pd.merge(a, b, left_index=True, right_index=True)` would also work.",
+      "check": "options"
+    },
+    {
+      "id": "merge-cross",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "sizes = pd.DataFrame({'size': ['S', 'M']})",
+        "colors = pd.DataFrame({'color': ['red', 'blue', 'green']})",
+        "print(sizes.merge(colors, how='cross').shape)"
+      ],
+      "options": ["`(6, 2)`", "`(5, 2)`", "`(3, 2)`", "`(2, 3)`"],
+      "answer": 0,
+      "explanation": "`how='cross'` pairs every left row with every right row (a Cartesian product), so 2 × 3 = 6 rows. It's handy for building every combination of a set of parameters.",
+      "check": "output"
+    }
+  ]
+}

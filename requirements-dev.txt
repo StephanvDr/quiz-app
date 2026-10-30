@@ -1,0 +1,4 @@
+# Only `python quiz.py verify` needs these: it runs the quiz snippets.
+# The app itself and the other commands use the standard library only.
+pandas>=3.0,<4
+numpy>=2

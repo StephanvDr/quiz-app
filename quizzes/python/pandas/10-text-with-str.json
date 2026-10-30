@@ -1,0 +1,182 @@
+{
+  "topic": "Text with the .str accessor",
+  "questions": [
+    {
+      "id": "str-lower",
+      "difficulty": "easy",
+      "question": "Which expression lowercases every value in the `name` column?",
+      "code": ["df = pd.DataFrame({'name': ['Ann', 'BOB']})"],
+      "options": [
+        "`df['name'].str.lower()`",
+        "`df['name'].lower()`",
+        "`df['name'].str.lowercase()`",
+        "`lower(df['name'])`"
+      ],
+      "answer": 0,
+      "explanation": "String methods live under the `.str` accessor and run on every element. A Series has no `lower()` method of its own, and Python's string method is called `lower`, not `lowercase`.",
+      "check": "options"
+    },
+    {
+      "id": "str-contains-case",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['Apple', 'banana', 'Cherry'])",
+        "print(s[s.str.contains('a', case=False)].tolist())"
+      ],
+      "options": ["`['Apple', 'banana']`", "`['banana']`", "`['Apple']`", "`['Apple', 'banana', 'Cherry']`"],
+      "answer": 0,
+      "explanation": "`case=False` makes the match case-insensitive, so `Apple` matches through its capital A, while `Cherry` has no a at all. `contains` treats the pattern as a regular expression unless you pass `regex=False`.",
+      "check": "output"
+    },
+    {
+      "id": "str-split-expand",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['Ada Lovelace', 'Alan Turing'])",
+        "parts = s.str.split(' ', expand=True)",
+        "print(parts.shape, parts[1].tolist())"
+      ],
+      "options": [
+        "`(2, 2) ['Lovelace', 'Turing']`",
+        "`(2, 1) ['Lovelace', 'Turing']`",
+        "`(2, 2) ['Alan', 'Turing']`",
+        "`(4, 1) ['Lovelace', 'Turing']`"
+      ],
+      "answer": 0,
+      "explanation": "`expand=True` returns a DataFrame with one column per piece, labeled 0, 1, and so on, so `parts[1]` is the column of last names. Without `expand` you get a Series of lists.",
+      "check": "output"
+    },
+    {
+      "id": "str-split-get",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['a-b-c', 'd-e'])",
+        "print(s.str.split('-').str[-1].tolist())"
+      ],
+      "options": ["`['c', 'e']`", "`['a', 'd']`", "`[['a', 'b', 'c'], ['d', 'e']]`", "`['b', 'e']`"],
+      "answer": 0,
+      "explanation": "`str.split` returns lists, and `.str[i]` indexes into each element, list or string alike. So `.str[-1]` takes the last piece of each list.",
+      "check": "output"
+    },
+    {
+      "id": "str-extract",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['order-123', 'order-45', 'refund'])",
+        "print(s.str.extract(r'(\\d+)')[0].tolist())"
+      ],
+      "options": ["`['123', '45', nan]`", "`[123, 45, nan]`", "`['123', '45']`", "`['order', 'order', 'refund']`"],
+      "answer": 0,
+      "explanation": "`extract` returns a DataFrame with one column per capture group, here column 0, and rows without a match get `NaN`. The matches are still strings: convert them with `.astype(int)` or `pd.to_numeric`.",
+      "check": "output"
+    },
+    {
+      "id": "str-replace-literal",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['1.5', '2.25'])",
+        "print(s.str.replace('.', ',').tolist())"
+      ],
+      "options": ["`['1,5', '2,25']`", "`[',,,', ',,,,']`", "`['15', '225']`", "`['1.5', '2.25']`"],
+      "answer": 0,
+      "explanation": "Since pandas 2.0, `str.replace` treats the pattern as a **literal** string by default (`regex=False`), so only the dot is replaced. With `regex=True`, `.` would match every character.",
+      "check": "output"
+    },
+    {
+      "id": "str-len-nan",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['hi', None, 'hello'])",
+        "print(s.str.len().tolist())"
+      ],
+      "options": ["`[2.0, nan, 5.0]`", "`[2, 0, 5]`", "`[2, 5]`", "`TypeError`"],
+      "answer": 0,
+      "explanation": "`.str` methods pass missing values through as `NaN` instead of failing, and that `NaN` makes the result a float column.",
+      "check": "output"
+    },
+    {
+      "id": "str-strip-title",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['  ada lovelace ', 'ALAN turing'])",
+        "print(s.str.strip().str.title().tolist())"
+      ],
+      "options": [
+        "`['Ada Lovelace', 'Alan Turing']`",
+        "`['  Ada Lovelace ', 'Alan Turing']`",
+        "`['Ada lovelace', 'Alan turing']`",
+        "`['ADA LOVELACE', 'ALAN TURING']`"
+      ],
+      "answer": 0,
+      "explanation": "`.str` calls chain: `strip()` removes the surrounding spaces, then `title()` capitalizes the first letter of every word and lowercases the rest. `capitalize()` would only capitalize the first word.",
+      "check": "output"
+    },
+    {
+      "id": "str-slice",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['2024-05-01', '2023-12-31'])",
+        "print(s.str[:4].tolist())"
+      ],
+      "options": ["`['2024', '2023']`", "`['2024-', '2023-']`", "`['05-01', '12-31']`", "`['2024-05-01', '2023']`"],
+      "answer": 0,
+      "explanation": "`.str[start:stop]` slices every string the way Python slicing does, with the end left out. For real dates, parse with `pd.to_datetime` and use `.dt.year` instead.",
+      "check": "output"
+    },
+    {
+      "id": "str-concat-columns",
+      "difficulty": "medium",
+      "question": "Which expression builds full names like `'Ada Lovelace'`?",
+      "code": ["df = pd.DataFrame({'first': ['Ada', 'Alan'], 'last': ['Lovelace', 'Turing']})"],
+      "options": [
+        "`df['first'] + ' ' + df['last']`",
+        "`df['first'].str.cat(df['last'])`",
+        "`' '.join(df['first'], df['last'])`",
+        "`df['first'].str.join(df['last'])`"
+      ],
+      "answer": 0,
+      "explanation": "`+` concatenates string columns element by element, and a scalar like `' '` is applied to every row. `str.cat` works too but needs `sep=' '`; without it you get `'AdaLovelace'`. `str.join(sep)` takes a separator string and joins the pieces **inside** each value (such as a list), so it can't combine two columns.",
+      "check": "options"
+    },
+    {
+      "id": "str-extract-named",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['john@example.com', 'ana@test.org'])",
+        "out = s.str.extract(r'(?P<user>[^@]+)@(?P<domain>.+)')",
+        "print(out.columns.tolist(), out.loc[1, 'domain'])"
+      ],
+      "options": [
+        "`['user', 'domain'] test.org`",
+        "`[0, 1] test.org`",
+        "`['user', 'domain'] ana`",
+        "`['user', 'domain'] example.com`"
+      ],
+      "answer": 0,
+      "explanation": "Named groups, written `(?P<name>...)`, become the column names of the result. `loc[1, 'domain']` is row 1 (the second email) in column `domain`.",
+      "check": "output"
+    },
+    {
+      "id": "str-zfill",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "s = pd.Series(['7', '42'])",
+        "print(s.str.zfill(3).tolist())"
+      ],
+      "options": ["`['007', '042']`", "`['700', '420']`", "`['7', '42']`", "`[7, 42]`"],
+      "answer": 0,
+      "explanation": "`zfill(width)` pads on the left with zeros up to `width` characters, which is useful for fixed-width IDs and codes. `str.pad(3, fillchar='0')` does the same.",
+      "check": "output"
+    }
+  ]
+}
