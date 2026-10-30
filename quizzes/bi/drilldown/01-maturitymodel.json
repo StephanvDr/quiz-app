@@ -1,0 +1,266 @@
+{
+  "topic": "Maturitymodel",
+  "questions": [
+    {
+      "id": "mat-01",
+      "question": "Een hotelketen bewaart de omzetcijfers in losse Excel-bestanden per afdeling, die iedereen zelf bijwerkt. In welke TDWI-fase zit deze organisatie?",
+      "options": [
+        "Infant (spreadmarts)",
+        "Child (data marts)",
+        "Teenager (datawarehouse)",
+        "Adult (enterprise datawarehouse)"
+      ],
+      "answer": 0,
+      "explanation": "Excel als opslag én analyse, per persoon of afdeling, heet spreadmarts. Dat is kenmerkend voor de Infant-fase."
+    },
+    {
+      "id": "mat-02",
+      "question": "Wat is een spreadmart?",
+      "options": [
+        "Een spreadsheet die als eigen mini-data mart dient, los van centrale data",
+        "Een gedeelde data mart die via Excel wordt ontsloten",
+        "Een Excel-koppeling die live op het datawarehouse leest",
+        "Een rapport dat automatisch naar Excel wordt geëxporteerd"
+      ],
+      "answer": 0,
+      "explanation": "Spreadsheet + data mart: iemand trekt data naar een eigen bestand en analyseert daar, zonder centraal beheer of gedeelde definities."
+    },
+    {
+      "id": "mat-03",
+      "question": "Wat is de juiste volgorde van de TDWI-fasen?",
+      "options": [
+        "Prenatal → Infant → Child → Teenager → Adult → Sage",
+        "Infant → Prenatal → Child → Teenager → Sage → Adult",
+        "Prenatal → Child → Infant → Teenager → Adult → Sage",
+        "Infant → Child → Prenatal → Teenager → Adult → Sage"
+      ],
+      "answer": 0,
+      "explanation": "Het model volgt een levensloop: van ongeboren tot wijze. Zo is de volgorde makkelijk te onthouden."
+    },
+    {
+      "id": "mat-04",
+      "question": "Waar zit in het TDWI-model de 'gulf' (kloof)?",
+      "options": [
+        "Tussen Infant en Child",
+        "Tussen Child en Teenager",
+        "Tussen Teenager en Adult",
+        "Tussen Adult en Sage"
+      ],
+      "answer": 0,
+      "explanation": "De gulf is de stap van losse, persoonlijke spreadsheets naar gedeelde, beheerde data marts."
+    },
+    {
+      "id": "mat-05",
+      "question": "Waar zit in het TDWI-model de 'chasm'?",
+      "options": [
+        "Tussen Teenager en Adult",
+        "Tussen Prenatal en Infant",
+        "Tussen Infant en Child",
+        "Tussen Adult en Sage"
+      ],
+      "answer": 0,
+      "explanation": "De chasm is de stap van afdelings- en divisieoplossingen naar één enterprise-aanpak."
+    },
+    {
+      "id": "mat-06",
+      "question": "Wat kenmerkt de Prenatal-fase?",
+      "options": [
+        "Vaste standaardrapporten rechtstreeks uit de operationele systemen",
+        "Iedereen bouwt eigen analyses in Excel",
+        "Afdelingen hebben elk een eigen data mart",
+        "Eén enterprise datawarehouse voor de hele organisatie"
+      ],
+      "answer": 0,
+      "explanation": "In Prenatal is er nog geen echte BI: alleen de rapporten die de bronsystemen zelf leveren."
+    },
+    {
+      "id": "mat-07",
+      "question": "Wat ontbreekt typisch in de Infant-fase?",
+      "options": [
+        "Een single source of truth",
+        "Toegang tot brondata",
+        "Mensen die vragen stellen aan data",
+        "Rekenkracht om analyses te maken"
+      ],
+      "answer": 0,
+      "explanation": "Iedereen werkt met eigen kopieën. Twee sheets geven dan twee waarheden."
+    },
+    {
+      "id": "mat-08",
+      "question": "Wat gebeurt er in de Child-fase?",
+      "options": [
+        "Afdelingen krijgen eigen data marts en analyse wordt structureler",
+        "Data marts worden samengevoegd tot één datawarehouse",
+        "BI wordt aangeboden aan klanten en leveranciers",
+        "Alleen de bronsystemen leveren rapporten"
+      ],
+      "answer": 0,
+      "explanation": "Child = data marts per afdeling. Beter dan spreadsheets, maar nog per afdeling georganiseerd."
+    },
+    {
+      "id": "mat-09",
+      "question": "Wat is kenmerkend voor de Teenager-fase?",
+      "options": [
+        "Data marts worden samengevoegd in een datawarehouse en definities worden gestandaardiseerd",
+        "Elke afdeling bouwt een eigen data mart",
+        "Medewerkers analyseren vooral in persoonlijke spreadsheets",
+        "BI is volledig ingebed in alle bedrijfsprocessen"
+      ],
+      "answer": 0,
+      "explanation": "In de tienerfase groeit het besef dat losse marts tot tegenstrijdige cijfers leiden: consolidatie en standaardisatie beginnen."
+    },
+    {
+      "id": "mat-10",
+      "question": "Wat kenmerkt de Adult-fase?",
+      "options": [
+        "Een enterprise datawarehouse is de centrale, betrouwbare bron en BI is bedrijfskritisch",
+        "Elke afdeling beheert haar eigen data mart",
+        "Data staat vooral in spreadsheets",
+        "Er zijn alleen vaste rapporten uit het ERP"
+      ],
+      "answer": 0,
+      "explanation": "Adult = één enterprise-aanpak: de organisatie vertrouwt op en stuurt met centrale data."
+    },
+    {
+      "id": "mat-11",
+      "question": "Wat kenmerkt de Sage-fase?",
+      "options": [
+        "BI als dienst, ingebed in processen en soms gedeeld met klanten en leveranciers",
+        "Het eerste datawarehouse wordt gebouwd",
+        "Excel wordt verboden",
+        "Rapportages worden handmatig samengesteld"
+      ],
+      "answer": 0,
+      "explanation": "De wijze fase: analytics zit in de processen zelf en reikt soms tot buiten de organisatie."
+    },
+    {
+      "id": "mat-12",
+      "question": "Waar of onwaar: In het TDWI-model groeit de reikwijdte van BI van individu, via afdeling, naar de hele organisatie en daarbuiten.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 0,
+      "explanation": "Infant is persoonlijk, Child per afdeling, Teenager per divisie, Adult enterprise-breed en Sage ook richting klanten en leveranciers.",
+      "shuffle": false
+    },
+    {
+      "id": "mat-13",
+      "question": "Waar of onwaar: Een organisatie die Excel alleen gebruikt om cijfers uit een beheerd datawarehouse te bekijken, zit daardoor automatisch in de Infant-fase.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "Het probleem is Excel als opslag en bron van waarheid. Excel als front-end op centrale, beheerde data is iets anders.",
+      "shuffle": false
+    },
+    {
+      "id": "mat-14",
+      "question": "Welke reden is géén argument tegen Excel als dataopslag?",
+      "options": [
+        "Je kunt er flexibel formules in maken",
+        "Er is geen afgedwongen data-integriteit",
+        "Versiebeheer en historie ontbreken",
+        "Het schaalt slecht bij veel data en gebruikers"
+      ],
+      "answer": 0,
+      "explanation": "Flexibele formules zijn juist een sterk punt. De problemen zitten in beheer, integriteit, historie en schaal."
+    },
+    {
+      "id": "mat-15",
+      "question": "Wat is de volgorde in Gartners analytics-model (analytic ascendancy)?",
+      "options": [
+        "Descriptive → Diagnostic → Predictive → Prescriptive",
+        "Diagnostic → Descriptive → Prescriptive → Predictive",
+        "Predictive → Descriptive → Diagnostic → Prescriptive",
+        "Descriptive → Predictive → Diagnostic → Prescriptive"
+      ],
+      "answer": 0,
+      "explanation": "Wat gebeurde er? Waarom? Wat gaat er gebeuren? Wat moeten we doen? Elke stap levert meer waarde maar is moeilijker."
+    },
+    {
+      "id": "mat-16",
+      "question": "'Waarom daalde de bezettingsgraad in het derde kwartaal?' Welk type analytics is dit?",
+      "options": [
+        "Diagnostic",
+        "Descriptive",
+        "Predictive",
+        "Prescriptive"
+      ],
+      "answer": 0,
+      "explanation": "Diagnostic analytics zoekt naar oorzaken: de vraag 'waarom'."
+    },
+    {
+      "id": "mat-17",
+      "question": "'Hoeveel overnachtingen verwachten we in december?' Welk type analytics is dit?",
+      "options": [
+        "Predictive",
+        "Descriptive",
+        "Diagnostic",
+        "Prescriptive"
+      ],
+      "answer": 0,
+      "explanation": "Een voorspelling van de toekomst is predictive analytics."
+    },
+    {
+      "id": "mat-18",
+      "question": "'Welke kamerprijs moeten we morgen hanteren voor maximale opbrengst?' Welk type analytics is dit?",
+      "options": [
+        "Prescriptive",
+        "Predictive",
+        "Diagnostic",
+        "Descriptive"
+      ],
+      "answer": 0,
+      "explanation": "Prescriptive analytics adviseert een actie, niet alleen een voorspelling."
+    },
+    {
+      "id": "mat-19",
+      "question": "Wie ontwikkelde het TDWI BI Maturity Model?",
+      "options": [
+        "Wayne Eckerson",
+        "Ralph Kimball",
+        "Bill Inmon",
+        "Edgar F. Codd"
+      ],
+      "answer": 0,
+      "explanation": "Eckerson ontwikkelde het voor TDWI. Kimball en Inmon staan voor datawarehouse-architecturen, Codd voor het relationele model en de term OLAP."
+    },
+    {
+      "id": "mat-20",
+      "question": "Welke stap helpt het meest om van Infant naar Child te gaan?",
+      "options": [
+        "Data uit losse sheets centraliseren in een beheerde data mart met afgesproken definities",
+        "Iedereen een nieuwere Excel-versie geven",
+        "Rapporten vaker per e-mail verspreiden",
+        "Elke analist een eigen database geven"
+      ],
+      "answer": 0,
+      "explanation": "De gulf oversteken betekent: van persoonlijke kopieën naar gedeelde, beheerde data."
+    },
+    {
+      "id": "mat-21",
+      "question": "Waar of onwaar: Je kunt een paar maturityfasen overslaan door een duur BI-tool aan te schaffen.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "Maturity gaat over data, processen, governance en mensen. Een tool op versnipperde data levert alleen mooiere spreadmarts op.",
+      "shuffle": false
+    },
+    {
+      "id": "mat-22",
+      "question": "Excel als dataopslag wordt vaak 'fase 1' genoemd, terwijl Prenatal in het TDWI-model eerst komt. Hoe rijm je dat?",
+      "options": [
+        "Prenatal gaat vooraf aan echte BI; Infant is de eerste fase waarin mensen zelf analyseren",
+        "Prenatal en Infant zijn twee namen voor dezelfde fase",
+        "Excel hoort eigenlijk bij Prenatal",
+        "Het TDWI-model telt de fasen van achteren naar voren"
+      ],
+      "answer": 0,
+      "explanation": "In Prenatal zijn er alleen vaste rapporten uit de bronsystemen. Infant is de eerste fase waarin gebruikers zelf gaan analyseren, met spreadsheets: de peuterfase van BI."
+    }
+  ]
+}

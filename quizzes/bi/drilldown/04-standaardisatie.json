@@ -1,0 +1,208 @@
+{
+  "topic": "Standaardisatie",
+  "questions": [
+    {
+      "id": "std-01",
+      "question": "Wat bedoel je met standaardisatie in een BI-context?",
+      "options": [
+        "Zorgen dat data overal hetzelfde betekent en hetzelfde formaat heeft",
+        "Alle rapporten in dezelfde kleuren opmaken",
+        "Maar één BI-tool toestaan",
+        "Alle data in één Excel-bestand zetten"
+      ],
+      "answer": 0,
+      "explanation": "Standaardisatie gaat over definities, formaten en stamdata. Precies wat in de Excel-fase ontbreekt."
+    },
+    {
+      "id": "std-02",
+      "question": "Wat is een business glossary?",
+      "options": [
+        "Een lijst met afgesproken definities van begrippen zoals 'omzet' of 'actieve klant'",
+        "Een overzicht van alle tabellen en kolommen in de database",
+        "Een woordenlijst van SQL-functies",
+        "Een handleiding voor het BI-tool"
+      ],
+      "answer": 0,
+      "explanation": "Een glossary legt de betekenis van begrippen vast, zodat iedereen hetzelfde bedoelt."
+    },
+    {
+      "id": "std-03",
+      "question": "Twee afdelingen rapporteren elk een andere omzet voor dezelfde maand. Wat is de meest waarschijnlijke oorzaak?",
+      "options": [
+        "Ze hanteren verschillende definities, bijvoorbeeld inclusief of exclusief btw",
+        "De database rekent verkeerd",
+        "Een van beide gebruikt een snowflake schema",
+        "Ze gebruiken een ander BI-tool"
+      ],
+      "answer": 0,
+      "explanation": "Verschillende definities zijn de klassieke oorzaak van 'twee waarheden'. Standaardisatie lost dit op."
+    },
+    {
+      "id": "std-04",
+      "question": "Wat is Master Data Management (MDM)?",
+      "options": [
+        "Zorgen dat kernentiteiten zoals klant en product één betrouwbare versie hebben",
+        "Het beheer van de master-databaseserver",
+        "Het maken van back-ups van het datawarehouse",
+        "Het toewijzen van rechten aan beheerders"
+      ],
+      "answer": 0,
+      "explanation": "MDM maakt één gedeelde, opgeschoonde versie van stamdata die alle systemen gebruiken."
+    },
+    {
+      "id": "std-05",
+      "question": "Wat is een golden record?",
+      "options": [
+        "De ene, opgeschoonde en samengevoegde versie van een entiteit uit meerdere bronnen",
+        "Het record met de hoogste omzet",
+        "Het eerste record in een tabel",
+        "Een record dat nooit gewijzigd mag worden"
+      ],
+      "answer": 0,
+      "explanation": "Uit drie varianten van dezelfde klant wordt één betrouwbaar record samengesteld."
+    },
+    {
+      "id": "std-06",
+      "question": "Wat is een conformed dimension?",
+      "options": [
+        "Een dimensie die met dezelfde sleutels en betekenis door meerdere feitentabellen wordt gedeeld",
+        "Een dimensie die voldoet aan 3NF",
+        "Een dimensie zonder historie",
+        "Een dimensie die door één feitentabel wordt gebruikt"
+      ],
+      "answer": 0,
+      "explanation": "Doordat bijvoorbeeld DimDatum en DimHotel gedeeld worden, kun je cijfers uit verschillende processen naast elkaar zetten."
+    },
+    {
+      "id": "std-07",
+      "question": "Wat toont Kimballs bus matrix?",
+      "options": [
+        "Welke bedrijfsprocessen (rijen) welke conformed dimensions (kolommen) gebruiken",
+        "De netwerkverbindingen tussen servers",
+        "De laadvolgorde van ETL-jobs",
+        "De hiërarchie binnen één dimensie"
+      ],
+      "answer": 0,
+      "explanation": "De bus matrix is het bouwplan van een Kimball-datawarehouse en maakt gedeelde dimensies zichtbaar."
+    },
+    {
+      "id": "std-08",
+      "question": "Welk datumformaat gebruik je bij voorkeur voor uitwisseling en opslag?",
+      "options": [
+        "ISO 8601: JJJJ-MM-DD",
+        "DD-MM-JJJJ",
+        "MM/DD/JJJJ",
+        "Vrije tekst, zoals '3 maart'"
+      ],
+      "answer": 0,
+      "explanation": "ISO 8601 is ondubbelzinnig en sorteert correct als tekst."
+    },
+    {
+      "id": "std-09",
+      "question": "Waar vindt het gelijktrekken van formaten (datums, valuta, codes) meestal plaats?",
+      "options": [
+        "In de transformatiestap van de ETL",
+        "In het bronsysteem, door gebruikers",
+        "Apart in elk rapport",
+        "In de back-upsoftware"
+      ],
+      "answer": 0,
+      "explanation": "Door het centraal in de ETL te doen, krijgt elk rapport dezelfde, gestandaardiseerde data."
+    },
+    {
+      "id": "std-10",
+      "question": "Welke vraag hoort bij de datakwaliteitsdimensie volledigheid (completeness)?",
+      "options": [
+        "Zijn alle verplichte waarden aanwezig?",
+        "Komt elke klant maar één keer voor?",
+        "Is de data op tijd beschikbaar?",
+        "Klopt de waarde met de werkelijkheid?"
+      ],
+      "answer": 0,
+      "explanation": "Volledigheid gaat over ontbrekende waarden. De andere opties zijn uniciteit, tijdigheid en juistheid."
+    },
+    {
+      "id": "std-11",
+      "question": "Welke vraag hoort bij de datakwaliteitsdimensie uniciteit?",
+      "options": [
+        "Komt elke entiteit maar één keer voor?",
+        "Zijn alle velden ingevuld?",
+        "Is de data actueel?",
+        "Voldoet de waarde aan het afgesproken formaat?"
+      ],
+      "answer": 0,
+      "explanation": "Uniciteit betekent: geen duplicaten, bijvoorbeeld één record per klant."
+    },
+    {
+      "id": "std-12",
+      "question": "Welke vraag hoort bij de datakwaliteitsdimensie tijdigheid (timeliness)?",
+      "options": [
+        "Is de data actueel genoeg op het moment dat je hem nodig hebt?",
+        "Is elk veld ingevuld?",
+        "Bestaat elke klant maar één keer?",
+        "Komen de waarden overeen tussen systemen?"
+      ],
+      "answer": 0,
+      "explanation": "Data van vorige week kan correct zijn, maar toch te laat voor een dagelijkse beslissing."
+    },
+    {
+      "id": "std-13",
+      "question": "Wat doet een data steward?",
+      "options": [
+        "Bewaakt de kwaliteit en definities van een datadomein",
+        "Beheert de fysieke servers van het datawarehouse",
+        "Bouwt alle rapporten voor het management",
+        "Keurt facturen goed"
+      ],
+      "answer": 0,
+      "explanation": "De steward is het aanspreekpunt voor de betekenis en kwaliteit van data, vaak namens de data-eigenaar."
+    },
+    {
+      "id": "std-14",
+      "question": "Waar of onwaar: Standaardisatie is vooral een technisch probleem; afspraken met de business zijn niet nodig.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "Wat 'omzet' betekent, bepaalt de business. De techniek voert de afspraak alleen uit.",
+      "shuffle": false
+    },
+    {
+      "id": "std-15",
+      "question": "Klant 'Jansen B.V.' staat drie keer in het CRM, met verschillende spellingen. Welke aanpak past?",
+      "options": [
+        "Deduplicatie en matching tot één golden record",
+        "Alle drie de records laten staan",
+        "Het CRM vervangen door Excel",
+        "De klant verwijderen"
+      ],
+      "answer": 0,
+      "explanation": "Matching herkent dat het om dezelfde entiteit gaat; MDM legt daarna één betrouwbare versie vast."
+    },
+    {
+      "id": "std-16",
+      "question": "Waarom zijn conformed dimensions belangrijk?",
+      "options": [
+        "Cijfers uit verschillende processen, zoals boekingen en restaurantomzet, worden vergelijkbaar en combineerbaar",
+        "Ze maken de feitentabel kleiner",
+        "Ze vervangen de ETL",
+        "Ze zijn nodig voor row-level security"
+      ],
+      "answer": 0,
+      "explanation": "Met gedeelde dimensies kun je drill-across doen: twee feitentabellen combineren via dezelfde dimensie."
+    },
+    {
+      "id": "std-17",
+      "question": "Hotels rapporteren in euro's en in Amerikaanse dollars. Wat is een goede standaardisatie?",
+      "options": [
+        "Omrekenen naar één rapportagevaluta met een vastgelegde koers en datum, en de originele waarde bewaren",
+        "Alleen de euro-hotels meenemen",
+        "De bedragen zonder omrekening optellen",
+        "Elk rapport zelf laten omrekenen"
+      ],
+      "answer": 0,
+      "explanation": "Eén afgesproken methode, centraal uitgevoerd, met de originele waarde erbij voor controle."
+    }
+  ]
+}

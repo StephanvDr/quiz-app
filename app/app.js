@@ -41,7 +41,9 @@
   }
 
   function settingsFor(subject) {
-    return { ...DEFAULTS, ...saved.settings[subject.id] };
+    const settings = { ...DEFAULTS, ...saved.settings[subject.id] };
+    if (!hasLevels(subject)) settings.difficulty = 'all';
+    return settings;
   }
 
   function saveSettings(subject, settings) {
@@ -65,6 +67,11 @@
 
   function itemsOf(subject) {
     return subject.topics.flatMap((topic) => topic.questions.map((q) => ({ q, topic })));
+  }
+
+  /** Difficulty is optional; subjects without it get no difficulty filter. */
+  function hasLevels(subject) {
+    return itemsOf(subject).some(({ q }) => q.difficulty);
   }
 
   function tally(subject, items) {
@@ -247,7 +254,7 @@
     show('home', null, `<div class="view">
       <section class="group">
         <h1>Pick a subject</h1>
-        <p class="lede">Short multiple-choice rounds: read a snippet, then pick what it returns or which call does the job. Every answer comes with an explanation.</p>
+        <p class="lede">Short multiple-choice rounds with an explanation after every answer. The app remembers what you've mastered and what you missed.</p>
       </section>
       ${list || '<p class="status">No subjects yet. Add a folder with a quiz.json under quizzes/.</p>'}
     </div>`);
@@ -342,10 +349,10 @@
           <span class="label" id="count-label">Questions per round</span>
           <div class="pills">${counts}</div>
         </div>
-        <div class="group" role="radiogroup" aria-labelledby="difficulty-label">
+        ${hasLevels(subject) ? `<div class="group" role="radiogroup" aria-labelledby="difficulty-label">
           <span class="label" id="difficulty-label">Difficulty</span>
           <div class="pills">${levels}</div>
-        </div>
+        </div>` : ''}
         <div class="group" role="radiogroup" aria-labelledby="pool-label">
           <span class="label" id="pool-label">Questions to draw from</span>
           <div class="pills">${pools}</div>
@@ -423,7 +430,9 @@
         </div>`;
     }
 
-    const dots = '●'.repeat(LEVELS.indexOf(q.difficulty) + 1).padEnd(3, '○');
+    const level = q.difficulty
+      ? `<div class="q-head"><span class="chip"><span class="dots" aria-hidden="true">${'●'.repeat(LEVELS.indexOf(q.difficulty) + 1).padEnd(3, '○')}</span>${q.difficulty}</span></div>`
+      : '';
     show('quiz', subject, `<div class="view">
       <div class="quiz-top">
         <div class="quiz-meta">
@@ -435,7 +444,7 @@
         </div>
       </div>
       <article class="question" aria-labelledby="question-text">
-        <div class="q-head"><span class="chip"><span class="dots" aria-hidden="true">${dots}</span>${q.difficulty}</span></div>
+        ${level}
         <p class="prompt" id="question-text">${inline(q.question, language)}</p>
         ${q.code ? cell(q.code, language, index + 1) : ''}
         <ol class="options" aria-label="Answers">${options}</ol>

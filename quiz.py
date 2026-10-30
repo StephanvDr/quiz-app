@@ -114,7 +114,9 @@ def export_subject(subject: dict) -> dict:
 
 
 def export_question(q: dict) -> dict:
-    out = {key: q[key] for key in ("id", "difficulty", "question", "options", "answer", "explanation")}
+    out = {key: q[key] for key in ("id", "question", "options", "answer", "explanation")}
+    if "difficulty" in q:
+        out["difficulty"] = q["difficulty"]
     if "code" in q:
         out["code"] = as_text(q["code"])
     if q.get("shuffle") is False:
@@ -175,7 +177,7 @@ def question_problems(q) -> list[str]:
     problems = [f'unknown key "{key}"' for key in sorted(q.keys() - QUESTION_KEYS)]
     if not (is_text(q.get("id")) and ID_PATTERN.fullmatch(q["id"])):
         problems.append('"id" must be lowercase words joined by hyphens, like "groupby-size"')
-    if q.get("difficulty") not in DIFFICULTIES:
+    if "difficulty" in q and q["difficulty"] not in DIFFICULTIES:
         problems.append(f'"difficulty" must be one of {", ".join(DIFFICULTIES)}')
     for key in ("question", "explanation"):
         if not is_text(q.get(key)):

@@ -2,13 +2,19 @@
 
 Private app for training skills within different domains.
 
-It starts with multiple-choice syntax drills for coding subjects. Each question shows a
-snippet and asks what it prints, or which call does the job, then explains the answer
-either way.
+Every round is multiple choice, and every answer comes with an explanation. The app keeps
+track of what you've mastered and what you missed, per subject.
 
-The first subject is **pandas**: 183 questions across 14 topics, aimed at data engineering
-and LLM work. 172 of them are checked by actually running the code, so the marked answers
-are what pandas really does.
+| Subject | Language | Questions | Topics |
+| --- | --- | ---: | ---: |
+| [Pandas](#pandas) | English | 183 | 14 |
+| [BI Drill-down](#bi-drill-down) | Dutch | 144 | 7 |
+
+### Pandas
+
+Syntax drills for data engineering and LLM work, in `quizzes/python/pandas`. Each question
+shows a snippet and asks what it prints, or which call does the job. 172 of the questions
+are checked by actually running the code, so the marked answers are what pandas really does.
 
 | Topic | Questions |
 | --- | ---: |
@@ -26,6 +32,21 @@ are what pandas really does.
 | Reading and writing files | 13 |
 | Dtypes, memory and performance | 14 |
 | JSON and text for LLM pipelines | 14 |
+
+### BI Drill-down
+
+Business intelligence concepts in Dutch, in `quizzes/bi/drilldown`: multiple choice and
+true/false, with many examples set in a hotel chain.
+
+| Onderwerp | Vragen |
+| --- | ---: |
+| Maturitymodel | 22 |
+| OLTP vs OLAP | 22 |
+| Grain & feiten | 20 |
+| Standaardisatie | 17 |
+| Star & snowflake | 26 |
+| Self-service BI | 17 |
+| DWH & ETL | 20 |
 
 ## Run it
 
@@ -48,8 +69,9 @@ someone, or host it on any static host (GitHub Pages, Netlify, S3).
 
 ## Using the quiz
 
-- Pick the topics, the round size (10, 20, 30 or all), a difficulty, and which questions to
-  draw from: all of them, ones you haven't seen yet, or ones you got wrong last time.
+- Pick the topics, the round size (10, 20, 30 or all), a difficulty (for subjects that have
+  levels), and which questions to draw from: all of them, ones you haven't seen yet, or ones
+  you got wrong last time.
 - Answer options are shuffled every time. Press `1`–`6` or `A`–`F` to answer and `Enter` to
   continue. "I don't know, show me" reveals the answer and counts it as missed.
 - The results page breaks the score down by topic, lists every miss with its explanation, and
@@ -92,7 +114,7 @@ To add a subject, say SQL, create `quizzes/sql/postgres/quiz.json` plus a topic 
 | --- | --- | --- |
 | `title`, `category` | required | Subjects are grouped under their category on the home page. |
 | `badge` | optional | Short text on the subject's tile, such as the import alias `pd`. |
-| `language` | optional | Syntax highlighting: `python` or `sql`. Other values show plain code. |
+| `language` | optional | Syntax highlighting: `python` or `sql`. Other values show plain code; leave it out for subjects without code. |
 | `description`, `note` | optional | Shown on the subject page. `note` is a good place for assumptions. |
 | `prelude` | optional | Code that `verify` runs before every snippet. It isn't shown in questions. |
 
@@ -122,14 +144,14 @@ To add a subject, say SQL, create `quizzes/sql/postgres/quiz.json` plus a topic 
 | Field | | |
 | --- | --- | --- |
 | `id` | required | Lowercase words joined by hyphens, unique within the subject. Progress is saved per id, so keep it stable. |
-| `difficulty` | required | `easy`, `medium` or `hard`. |
+| `difficulty` | optional | `easy`, `medium` or `hard`. The difficulty filter only appears for subjects that use it. |
 | `question`, `explanation` | required | Text with `` `code` `` and `**bold**`. Explanations can also have paragraphs (blank lines) and fenced code blocks. |
 | `code` | optional | The snippet, as a string or a list of lines. |
 | `options` | required | 2 to 6 answers. An option containing a line break is shown as preformatted text, which suits printed DataFrames. |
 | `answer` | required | Index of the correct option. The app shuffles options, so it can always be `0`. |
 | `check` | optional | How `verify` tests the question; see below. |
 | `expect` | optional | With `"check": "options"`: a Python expression the answer must equal. |
-| `shuffle` | optional | `false` keeps the options in file order. |
+| `shuffle` | optional | `false` keeps the options in file order, e.g. `["True", "False"]` for true/false questions. |
 
 ### Checked answers
 

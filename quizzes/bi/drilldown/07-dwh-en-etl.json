@@ -1,0 +1,244 @@
+{
+  "topic": "DWH & ETL",
+  "questions": [
+    {
+      "id": "dwh-01",
+      "question": "Waar staat ETL voor?",
+      "options": [
+        "Extract, Transform, Load",
+        "Extract, Test, Launch",
+        "Evaluate, Transfer, Log",
+        "Export, Translate, Link"
+      ],
+      "answer": 0,
+      "explanation": "Data ophalen uit bronnen, omzetten naar het gewenste model en laden in het datawarehouse."
+    },
+    {
+      "id": "dwh-02",
+      "question": "Wat is het verschil tussen ETL en ELT?",
+      "options": [
+        "Bij ELT laad je eerst in het doelplatform en transformeer je daarna met de rekenkracht daarvan",
+        "ELT slaat de transformatie over",
+        "ELT is ETL in omgekeerde volgorde, voor back-ups",
+        "Er is geen verschil"
+      ],
+      "answer": 0,
+      "explanation": "ELT past bij moderne cloud-datawarehouses die zelf veel rekenkracht hebben."
+    },
+    {
+      "id": "dwh-03",
+      "question": "Wat is een staging area?",
+      "options": [
+        "Een tussenlaag waar ruwe brondata landt voordat die wordt getransformeerd",
+        "Het podium voor BI-presentaties",
+        "De productieomgeving van het datawarehouse",
+        "Een testomgeving voor rapporten"
+      ],
+      "answer": 0,
+      "explanation": "Staging ontkoppelt het ophalen van data van het verwerken ervan en ontlast de bronsystemen."
+    },
+    {
+      "id": "dwh-04",
+      "question": "Welke vier kenmerken noemt Inmon in zijn definitie van een datawarehouse?",
+      "options": [
+        "Subject-oriented, integrated, time-variant, non-volatile",
+        "Fast, scalable, secure, cheap",
+        "Normalized, transactional, real-time, volatile",
+        "Structured, unstructured, internal, external"
+      ],
+      "answer": 0,
+      "explanation": "Onderwerpgericht, geïntegreerd, tijdsafhankelijk en niet-vluchtig: een verzameling data ter ondersteuning van besluitvorming."
+    },
+    {
+      "id": "dwh-05",
+      "question": "Wat betekent non-volatile in een datawarehouse?",
+      "options": [
+        "Geladen data wordt niet meer gewijzigd of verwijderd; er wordt alleen toegevoegd",
+        "De data verdwijnt niet bij een stroomstoring",
+        "De data verandert continu",
+        "De data wordt versleuteld opgeslagen"
+      ],
+      "answer": 0,
+      "explanation": "Anders dan in OLTP blijft wat geladen is staan. Zo blijven historische analyses reproduceerbaar."
+    },
+    {
+      "id": "dwh-06",
+      "question": "Wat betekent time-variant?",
+      "options": [
+        "Data wordt met een tijdsdimensie bewaard, zodat je historie kunt analyseren",
+        "De laadtijd varieert per dag",
+        "De data is maar tijdelijk beschikbaar",
+        "Tijdzones worden genegeerd"
+      ],
+      "answer": 0,
+      "explanation": "Elk gegeven hoort bij een moment of periode, zodat je trends over tijd ziet."
+    },
+    {
+      "id": "dwh-07",
+      "question": "Wat is een data mart?",
+      "options": [
+        "Een subset van het datawarehouse, gericht op één afdeling of onderwerp",
+        "Een webshop voor datasets",
+        "Een kopie van het OLTP-systeem",
+        "Een Excel-bestand met marketingdata"
+      ],
+      "answer": 0,
+      "explanation": "Bijvoorbeeld een mart voor Finance of voor Sales, vaak als star schema."
+    },
+    {
+      "id": "dwh-08",
+      "question": "Wat kenmerkt de aanpak van Kimball?",
+      "options": [
+        "Bottom-up: dimensionele data marts, verbonden via conformed dimensions",
+        "Top-down: eerst een genormaliseerd enterprise datawarehouse",
+        "Alleen een data lake, zonder modellering",
+        "Rapporten direct op de bronsystemen"
+      ],
+      "answer": 0,
+      "explanation": "Kimball bouwt proces voor proces; de bus-architectuur met gedeelde dimensies houdt het samenhangend."
+    },
+    {
+      "id": "dwh-09",
+      "question": "Wat kenmerkt de aanpak van Inmon?",
+      "options": [
+        "Top-down: eerst een genormaliseerd (3NF) enterprise datawarehouse, daarna data marts",
+        "Bottom-up: eerst losse star schemas per proces",
+        "Geen datawarehouse, alleen self-service",
+        "Alleen real-time streaming"
+      ],
+      "answer": 0,
+      "explanation": "Inmon begint centraal en integreert eerst; afdelingsmarts worden daarvan afgeleid."
+    },
+    {
+      "id": "dwh-10",
+      "question": "Wat is een data lake?",
+      "options": [
+        "Opslag van ruwe data in elk formaat, waarbij de structuur pas bij het lezen wordt bepaald",
+        "Een datawarehouse met alleen star schemas",
+        "Een back-up van alle databases",
+        "Een gelekte dataset"
+      ],
+      "answer": 0,
+      "explanation": "Schema-on-read: flexibel en goedkoop, maar zonder discipline wordt het een 'data swamp'."
+    },
+    {
+      "id": "dwh-11",
+      "question": "Wat betekent schema-on-write?",
+      "options": [
+        "De structuur wordt vastgelegd bij het laden, zoals in een datawarehouse",
+        "De structuur wordt pas bepaald bij het lezen",
+        "Gebruikers schrijven zelf het schema",
+        "Het schema verandert bij elke schrijfactie"
+      ],
+      "answer": 0,
+      "explanation": "Een datawarehouse valideert en structureert data bij het laden; een data lake doet dat pas bij het lezen."
+    },
+    {
+      "id": "dwh-12",
+      "question": "Wat is een incrementele load?",
+      "options": [
+        "Alleen nieuwe of gewijzigde records laden sinds de vorige run",
+        "Elke nacht alles opnieuw laden",
+        "Data in kleine stukjes handmatig invoeren",
+        "Een load die steeds langzamer wordt"
+      ],
+      "answer": 0,
+      "explanation": "Incrementeel laden is sneller en ontlast de bron, maar vraagt dat je wijzigingen kunt herkennen."
+    },
+    {
+      "id": "dwh-13",
+      "question": "Wat is Change Data Capture (CDC)?",
+      "options": [
+        "Wijzigingen in de bron detecteren en doorgeven aan het datawarehouse",
+        "Vastleggen wie data mag wijzigen",
+        "Een back-upmethode",
+        "Een type dimensie"
+      ],
+      "answer": 0,
+      "explanation": "CDC maakt incrementele en bijna-real-time loads mogelijk, bijvoorbeeld via de transactielog van de bron."
+    },
+    {
+      "id": "dwh-14",
+      "question": "Wat is data lineage?",
+      "options": [
+        "Herleidbaarheid: waar een getal vandaan komt en welke transformaties het heeft doorlopen",
+        "De volgorde van kolommen in een tabel",
+        "Het aantal regels in een dataset",
+        "Een lijn in een lijngrafiek"
+      ],
+      "answer": 0,
+      "explanation": "Lineage maakt cijfers controleerbaar en helpt bij impactanalyse als een bron verandert."
+    },
+    {
+      "id": "dwh-15",
+      "question": "Wat betekent single source of truth?",
+      "options": [
+        "Eén afgesproken, betrouwbare bron per gegeven, zodat iedereen dezelfde cijfers ziet",
+        "Eén database voor alle applicaties",
+        "Eén persoon die alle cijfers controleert",
+        "Eén rapport voor de hele organisatie"
+      ],
+      "answer": 0,
+      "explanation": "Het doel van het datawarehouse en het tegenovergestelde van de spreadmart-fase."
+    },
+    {
+      "id": "dwh-16",
+      "question": "Waar of onwaar: Een datawarehouse is bedoeld om de dagelijkse transacties van het bedrijf vast te leggen.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "Dat doen de OLTP-systemen. Het datawarehouse is bedoeld voor analyse en besluitvorming.",
+      "shuffle": false
+    },
+    {
+      "id": "dwh-17",
+      "question": "Wat is een lakehouse?",
+      "options": [
+        "Een architectuur die de flexibele opslag van een data lake combineert met de structuur en het beheer van een datawarehouse",
+        "Een datawarehouse aan het water",
+        "Een data mart voor de recreatiesector",
+        "Een ander woord voor staging area"
+      ],
+      "answer": 0,
+      "explanation": "Een lakehouse probeert het beste van beide te bieden op één platform."
+    },
+    {
+      "id": "dwh-18",
+      "question": "Wat is metadata?",
+      "options": [
+        "Data over data, zoals beschrijvingen van tabellen, kolommen, herkomst en definities",
+        "De belangrijkste data van het bedrijf",
+        "Versleutelde data",
+        "Data uit sociale media"
+      ],
+      "answer": 0,
+      "explanation": "Metadata maakt data vindbaar en begrijpelijk; een business glossary is er een vorm van."
+    },
+    {
+      "id": "dwh-19",
+      "question": "In welke ETL-stap verwijder je dubbele records en trek je formaten gelijk?",
+      "options": [
+        "Transform",
+        "Extract",
+        "Load",
+        "Archive"
+      ],
+      "answer": 0,
+      "explanation": "In de transformstap gebeuren opschoning, standaardisatie en het omzetten naar het dimensionele model."
+    },
+    {
+      "id": "dwh-20",
+      "question": "Waarom bewaar je historie in het datawarehouse?",
+      "options": [
+        "Om trends en vergelijkingen over tijd te kunnen maken, wat OLTP door overschrijven niet kan",
+        "Omdat de wet dat altijd verplicht",
+        "Om de bronsystemen te vervangen",
+        "Omdat oude data sneller te bevragen is"
+      ],
+      "answer": 0,
+      "explanation": "Historie is een van de belangrijkste redenen om überhaupt een datawarehouse te bouwen."
+    }
+  ]
+}
