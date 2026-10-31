@@ -1,0 +1,246 @@
+{
+  "topic": "Transform: FactSales",
+  "questions": [
+    {
+      "id": "lu1-datekey-text",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "s = pd.DataFrame({'DateKey': ['2011-05-07 00:00:00,000']})",
+        "print(s['DateKey'].str[:10].str.replace('-', '', regex=False).astype('int32')[0])"
+      ],
+      "options": [
+        "`20110507`",
+        "`2011-05-07`",
+        "`7052011`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "`.str[:10]` houdt de eerste 10 tekens over, `'2011-05-07'`. Zonder streepjes wordt dat `'20110507'`, en `astype('int32')` maakt er een getal van. Dat is hetzelfde formaat als de `DateKey` van DimDate.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-datekey-why",
+      "difficulty": "medium",
+      "question": "Waarom maakt het notebook van de verkoopdatum een getal als 20110507?",
+      "options": [
+        "Zodat de sleutel hetzelfde formaat heeft als `DateKey` in DimDate (jjjjmmdd) en de koppeling werkt",
+        "Omdat pandas geen datums kan opslaan",
+        "Omdat een getal sneller sorteert dan een datum",
+        "Om de tijd van de dag te bewaren"
+      ],
+      "answer": 0,
+      "explanation": "DimDate gebruikt `DateInt` uit de kalender als sleutel, in de vorm jjjjmmdd. Feit en dimensie moeten dezelfde waarden hebben om op `DateKey` te kunnen koppelen. Een geheel getal is bovendien compact."
+    },
+    {
+      "id": "lu1-small-dtypes",
+      "difficulty": "easy",
+      "question": "Waarom krijgen kolommen in `fact` types als `int8`, `int16` en `int32`?",
+      "code": [
+        "'ChannelKey':       s['channelKey'].astype('int8'),",
+        "'StoreKey':         s['StoreKey'].astype('int16'),"
+      ],
+      "options": [
+        "Kleinere types besparen geheugen bij 2,3 miljoen regels",
+        "Power BI accepteert alleen deze types",
+        "Om negatieve sleutels te voorkomen",
+        "Zodat pandas de kolommen kan sorteren"
+      ],
+      "answer": 0,
+      "explanation": "Een `int8` kost 1 byte per waarde, een `int64` 8 bytes. Over 2,3 miljoen regels scheelt dat per kolom zo'n 16 MB (2,28 miljoen × 7 bytes). De hele feitentabel kost zo 306 MB."
+    },
+    {
+      "id": "lu1-iinfo",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "print(np.iinfo('int8').max, np.iinfo('int16').max)"
+      ],
+      "options": [
+        "`127 32767`",
+        "`255 65535`",
+        "`128 32768`",
+        "`8 16`"
+      ],
+      "answer": 0,
+      "explanation": "Een `int8` heeft 8 bits, met teken: van -128 tot 127. Een `int16` loopt van -32768 tot 32767. Zo zie je of een kolom in een klein type past.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-int8-safe",
+      "difficulty": "medium",
+      "question": "Waarom is `int8` veilig voor `ChannelKey` en `PromotionKey`?",
+      "options": [
+        "Er zijn 4 kanalen en 28 promoties, dus de sleutels blijven ver onder de 127",
+        "Omdat sleutels nooit groter worden dan 8",
+        "Omdat `int8` automatisch groeit als dat nodig is",
+        "Omdat het tekst is"
+      ],
+      "answer": 0,
+      "explanation": "DimChannel heeft 4 rijen en de promotietabel 28. Bij `StoreKey` (306 winkels) en `ProductKey` (1690 producten) is `int16` nodig, want die waarden passen niet in `int8`."
+    },
+    {
+      "id": "lu1-int8-overflow",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "print(pd.Series([300]).astype('int8').tolist())"
+      ],
+      "options": [
+        "`[44]`",
+        "`[300]`",
+        "`OverflowError`",
+        "`[127]`"
+      ],
+      "answer": 0,
+      "explanation": "Een getal dat niet past, loopt bij `astype` stilletjes rond: 300 − 256 = 44. Het notebook leest de verkoopdata als tekst, en bij tekst geeft pandas wél een fout (`OverflowError`). Toch is de les: kies een type dat ruim groot genoeg is.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-channelkey-lowercase",
+      "difficulty": "easy",
+      "question": "Waarom staat er `s['channelKey']`, met een kleine c?",
+      "code": [
+        "'ChannelKey':       s['channelKey'].astype('int8'),"
+      ],
+      "options": [
+        "Zo heet de kolom in Contoso_Sales.csv; in het feit wordt hij `ChannelKey`, net als in DimChannel",
+        "Kolomnamen zijn in pandas niet hoofdlettergevoelig",
+        "Het is een typfout die niets uitmaakt",
+        "Met een kleine letter wordt de kolom automatisch een sleutel"
+      ],
+      "answer": 0,
+      "explanation": "Kolomnamen zijn in pandas wél hoofdlettergevoelig: `s['ChannelKey']` zou een `KeyError` geven. Door de nieuwe DataFrame op te bouwen met `'ChannelKey': s['channelKey']` trekt het notebook de naam gelijk."
+    },
+    {
+      "id": "lu1-store-keys-chain",
+      "difficulty": "medium",
+      "question": "Hoe komen `GeographyKey` en `CountryKey` in de feitentabel?",
+      "code": [
+        "store_keys = (raw['stores'][['StoreKey', 'GeographyKey']]",
+        "    .merge(dim_geography[['GeographyKey', 'Country']], on='GeographyKey')",
+        "    .merge(dim_country[['CountryKey', 'CountryName']], left_on='Country', right_on='CountryName')",
+        "    [['StoreKey', 'GeographyKey', 'CountryKey']])",
+        "fact = fact.merge(store_keys, on='StoreKey', how='left')"
+      ],
+      "options": [
+        "Via de winkel: StoreKey → GeographyKey (stores) → landnaam (DimGeography) → CountryKey (DimCountry), daarna een merge op StoreKey",
+        "Ze staan al in Contoso_Sales.csv",
+        "Via het product: elk product hoort bij één land",
+        "Via de promotie: elke promotie geldt in één land"
+      ],
+      "answer": 0,
+      "explanation": "De verkoopdata kent alleen de winkel. De opzoektabel `store_keys` geeft elke winkel zijn geografie en land, en de laatste merge zet die twee sleutels op elke feitregel."
+    },
+    {
+      "id": "lu1-left-on-right-on",
+      "difficulty": "easy",
+      "question": "Waarom staat er in `store_keys` `left_on='Country', right_on='CountryName'`?",
+      "options": [
+        "De landnaam heet in DimGeography `Country` en in DimCountry `CountryName`",
+        "Om de linker tabel op de rechter te sorteren",
+        "Om alleen landen links op de kaart te houden",
+        "Omdat `on=` alleen met sleutelkolommen werkt"
+      ],
+      "answer": 0,
+      "explanation": "Met `on=` moet de kolom aan beide kanten dezelfde naam hebben. Heet hij anders, dan noem je beide namen met `left_on` en `right_on`."
+    },
+    {
+      "id": "lu1-keys-directly",
+      "difficulty": "hard",
+      "question": "Waarom zet het notebook `GeographyKey` en `CountryKey` direct in het feit, in plaats van ze via DimStore op te zoeken?",
+      "options": [
+        "Zodat elke dimensie direct aan het feit hangt: een echt sterschema, zonder keten via de winkel",
+        "Omdat DimStore geen sleutel heeft",
+        "Omdat pandas geen twee merges achter elkaar kan doen",
+        "Om de feitentabel kleiner te maken"
+      ],
+      "answer": 0,
+      "explanation": "Zo staat het ook in de markdown: 'zodat elke dimensie direct aan het feit hangt'. In Power BI loopt een filter op land of regio dan in één stap naar het feit, en `star()` kan elke dimensie met één merge koppelen."
+    },
+    {
+      "id": "lu1-merge-left-lookup",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "fact = pd.DataFrame({'SalesKey': [1, 2, 3], 'StoreKey': [76, 26, 76]})",
+        "store_keys = pd.DataFrame({'StoreKey': [76, 26], 'GeographyKey': [798, 867], 'CountryKey': ['USA', 'USA']})",
+        "fact = fact.merge(store_keys, on='StoreKey', how='left')",
+        "print(len(fact), fact['GeographyKey'].tolist())"
+      ],
+      "options": [
+        "`3 [798, 867, 798]`",
+        "`2 [798, 867]`",
+        "`3 [798, 798, 867]`",
+        "`5 [798, 867, 798, 798, 867]`"
+      ],
+      "answer": 0,
+      "explanation": "Elke feitregel krijgt de sleutels van zijn eigen winkel, en de volgorde van de feitregels blijft gelijk. Het aantal regels verandert niet, omdat elke `StoreKey` maar één keer in `store_keys` staat.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-unique-store-keys",
+      "difficulty": "hard",
+      "question": "Stel dat een winkel twee keer in de opzoektabel staat. Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "fact = pd.DataFrame({'SalesKey': [1, 2], 'StoreKey': [76, 26]})",
+        "store_keys = pd.DataFrame({'StoreKey': [76, 76, 26], 'CountryKey': ['USA', 'USA', 'USA']})",
+        "print(len(fact.merge(store_keys, on='StoreKey', how='left')))"
+      ],
+      "options": [
+        "`3`",
+        "`2`",
+        "`4`",
+        "`MergeError`"
+      ],
+      "answer": 0,
+      "explanation": "Een merge koppelt elke feitregel aan álle passende rijen, dus de verkoop van winkel 76 komt twee keer in het feit en de omzet wordt dubbel geteld. Daarom controleert de validatie dat het aantal rijen voor en na de ETL gelijk is.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-column-order",
+      "difficulty": "easy",
+      "question": "Waarom wordt `fact` aan het eind opnieuw opgebouwd met een lijst kolomnamen?",
+      "code": [
+        "fact = fact[['SalesKey', 'DateKey', 'ChannelKey', 'StoreKey', 'GeographyKey', 'CountryKey', 'ProductKey', 'PromotionKey', ...]]"
+      ],
+      "options": [
+        "Om de kolommen te ordenen: eerst de sleutels, dan de feiten (meetwaarden)",
+        "Om kolommen zonder data weg te gooien",
+        "Om de rijen op SalesKey te sorteren",
+        "Om een kopie te maken voor Power BI"
+      ],
+      "answer": 0,
+      "explanation": "Na de merge staan `GeographyKey` en `CountryKey` achteraan. Met de lijst komen alle sleutels vooraan, zodat de tabel leest als een feitentabel: eerst de verwijzingen naar de dimensies, dan de getallen."
+    },
+    {
+      "id": "lu1-memory-usage",
+      "difficulty": "medium",
+      "question": "Wat meet `fact.memory_usage(deep=True).sum() / 1e6`?",
+      "options": [
+        "Het geheugengebruik van de feitentabel in MB, inclusief de tekst in kolommen zoals `CountryKey`",
+        "De grootte van het CSV-bestand op schijf",
+        "Het aantal rijen in miljoenen",
+        "Hoeveel geheugen er nog vrij is"
+      ],
+      "answer": 0,
+      "explanation": "`memory_usage` geeft per kolom het aantal bytes; `.sum()` telt die op en `/ 1e6` maakt er megabytes van. `deep=True` meet ook de strings zelf, zoals de ISO3-codes. Het notebook print 306 MB."
+    },
+    {
+      "id": "lu1-fact-rows",
+      "difficulty": "easy",
+      "question": "Hoeveel regels heeft FactSales na de Transform-stap?",
+      "options": [
+        "2.282.482, evenveel als Contoso_Sales.csv",
+        "1.096, één per dag",
+        "306, één per winkel",
+        "2.282.482 × 7, één per dimensie"
+      ],
+      "answer": 0,
+      "explanation": "De grain is één rij per verkoopregel, net als in de bron. De merge met `store_keys` voegt alleen kolommen toe en geen rijen, en de validatie bevestigt dat het aantal gelijk is gebleven."
+    }
+  ]
+}

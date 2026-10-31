@@ -9,6 +9,7 @@ track of what you've mastered and what you missed, per subject.
 | --- | --- | ---: | ---: |
 | [Pandas](#pandas) | English | 183 | 14 |
 | [BI Drill-down](#bi-drill-down) | Dutch | 144 | 7 |
+| [Contoso LU1 deel 2](#contoso-lu1-deel-2) | Dutch | 169 | 11 |
 
 ### Pandas
 
@@ -47,6 +48,28 @@ true/false, with many examples set in a hotel chain.
 | Star & snowflake | 26 |
 | Self-service BI | 17 |
 | DWH & ETL | 20 |
+
+### Contoso LU1 deel 2
+
+The logic and syntax of the Contoso notebook (LU1 Data Engineering, part 2) in Dutch, in
+`quizzes/bi/contoso-lu1`: the ETL that builds the star schema in pandas, the validation, the
+ten user-story charts and the conclusions. Questions quote the notebook's code; where a
+snippet needs the real Contoso data, it runs on a small example instead. 63 of the questions
+are checked by running the code, on pandas 2.2 as well as 3.0.
+
+| Onderwerp | Vragen |
+| --- | ---: |
+| Instellingen en hulpfuncties | 14 |
+| Extract: data laden | 17 |
+| Data verkennen | 12 |
+| Transform: datum, kanaal, geografie en winkel | 17 |
+| Transform: product, promotie en land | 19 |
+| Transform: FactSales | 15 |
+| Validatie | 11 |
+| star(), US01 en US02 | 15 |
+| US03, US04 en US05 | 15 |
+| Store Manager: US06 t/m US10 | 20 |
+| Conclusies | 14 |
 
 ## Run it
 

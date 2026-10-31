@@ -1,0 +1,187 @@
+{
+  "topic": "Conclusies",
+  "questions": [
+    {
+      "id": "lu1-c-us01-trend",
+      "difficulty": "easy",
+      "question": "Hoe ontwikkelt de omzet van Contoso zich van 2011 tot 2013 (US01)?",
+      "options": [
+        "Van $3.144 mln in 2011 via $2.642 mln naar $2.554 mln in 2013: 19% minder",
+        "Van $2.554 mln naar $3.144 mln: 19% groei",
+        "Gelijk, rond $2.780 mln per jaar",
+        "Van $8,34 mld naar $4,79 mld"
+      ],
+      "answer": 0,
+      "explanation": "De titel van US01 noemt de daling, en de kaart 'Growth % 2013 vs 2011' toont −19%. $8,34 mld is de omzet over alle drie de jaren en $4,79 mld de brutomarge."
+    },
+    {
+      "id": "lu1-c-us01-cause",
+      "difficulty": "medium",
+      "question": "Komt de omzetdaling uit US01 door een lagere marge?",
+      "options": [
+        "Nee: de marge blijft rond 57,4% en er worden zelfs meer stuks verkocht; per stuk komt er minder binnen ($265 in 2011, $185 in 2013)",
+        "Ja: de marge daalt van 65% naar 55%",
+        "Ja: er worden veel minder stuks verkocht",
+        "Nee: de daling komt door de wisselkoers"
+      ],
+      "answer": 0,
+      "explanation": "De stuks gaan van 11,9 mln (2011) naar 13,8 mln (2013), terwijl de omzet per stuk daalt. Per maand ligt de marge tussen 55,6% en 58,3%; november 2013 is met 55,6% het laagst, iets om in de gaten te houden."
+    },
+    {
+      "id": "lu1-c-us01-months",
+      "difficulty": "easy",
+      "question": "Welke maanden zijn volgens US01 elk jaar het zwakst?",
+      "options": [
+        "Januari, februari en maart",
+        "Juli en augustus",
+        "November en december",
+        "Er is geen patroon"
+      ],
+      "answer": 0,
+      "explanation": "Uit de conclusie: 'Januari, februari en maart zijn elk jaar de slechtste maanden.'"
+    },
+    {
+      "id": "lu1-c-us02",
+      "difficulty": "easy",
+      "question": "Welk verkoopkanaal groeit als enige (US02)?",
+      "options": [
+        "Online: +17% in 2013 ten opzichte van 2011",
+        "Store: +30%",
+        "Catalog: +23%",
+        "Reseller: +5%"
+      ],
+      "answer": 0,
+      "explanation": "Online groeit +10,4% en +6,3% per jaar. Winkels krimpen 30%, catalogus 23% en resellers 5% (2013 t.o.v. 2011). Het advies: meer investeren in online en kritisch kijken naar het aantal winkels."
+    },
+    {
+      "id": "lu1-c-us03-share",
+      "difficulty": "easy",
+      "question": "Hoe groot is het aandeel van de VS in de omzet (US03)?",
+      "options": [
+        "57%; samen met China en Duitsland 78%",
+        "78%; samen met China en Duitsland 95%",
+        "12,8%, na China",
+        "33%, gelijk aan Europa"
+      ],
+      "answer": 0,
+      "explanation": "De VS zijn veruit de grootste markt (57%), gevolgd door China (12,8%) en Duitsland (7,9%). De top 3 is samen 78% van de omzet."
+    },
+    {
+      "id": "lu1-c-us03-per-store",
+      "difficulty": "medium",
+      "question": "In welke verkoopregio stijgt de omzet per fysieke winkel per jaar (US03)?",
+      "options": [
+        "Alleen in Azië: van $5,92 mln naar $8,77 mln",
+        "Alleen in Europa: van $3,64 mln naar $6,81 mln",
+        "In alle regio's",
+        "In geen enkele regio"
+      ],
+      "answer": 0,
+      "explanation": "Over alle regio's daalt de omzet per winkel van $6,62 mln (2011) naar $4,62 mln (2013). Europa ($6,81 mln naar $3,64 mln) en Noord-Amerika ($6,70 mln naar $4,09 mln) dalen; alleen Azië stijgt."
+    },
+    {
+      "id": "lu1-c-us04",
+      "difficulty": "medium",
+      "question": "Welke landen ziet het notebook als kansrijk voor uitbreiding (US04)?",
+      "options": [
+        "Italië, Japan, Nederland en Zweden",
+        "Malta en Bhutan",
+        "De VS en Duitsland",
+        "China en India"
+      ],
+      "answer": 0,
+      "explanation": "Deze rijke landen (BBP $36.000 tot $60.000 per inwoner) leveren maar $0,30 tot $0,52 omzet per inwoner per jaar op, onder de mediaan van $0,61 en ver onder de VS ($5,04) en Duitsland ($2,75)."
+    },
+    {
+      "id": "lu1-c-us04-malta",
+      "difficulty": "medium",
+      "question": "Malta en Bhutan scoren hoog op omzet per inwoner. Waarom zegt dat volgens het notebook weinig?",
+      "options": [
+        "Er staan één of twee winkels op een kleine bevolking",
+        "Hun BBP-cijfers ontbreken",
+        "Ze vallen buiten de verkoopregio's",
+        "Hun omzet is in een andere valuta"
+      ],
+      "answer": 0,
+      "explanation": "Bij een kleine bevolking geeft één winkel al een hoge omzet per inwoner. Dat zegt weinig over succes in de markt."
+    },
+    {
+      "id": "lu1-c-us05",
+      "difficulty": "medium",
+      "question": "Wat is de conclusie van US05 over de productcategorieën?",
+      "options": [
+        "Computers (38%) en camera's (31%) leveren samen 69% van de omzet; de marges verschillen weinig (54,6% tot 60,8%), dus omzet weegt zwaarder voor het assortiment",
+        "Music, Movies and Audio Books levert de meeste omzet",
+        "De marges verschillen sterk, dus het assortiment moet op marge worden gestuurd",
+        "Alle 8 categorieën verkopen ongeveer evenveel"
+      ],
+      "answer": 0,
+      "explanation": "De laagste marge heeft TV and Video (54,6%), de hoogste Music, Movies and Audio Books (60,8%). Games and Toys en Home Appliances staan in de data, maar hebben geen producten."
+    },
+    {
+      "id": "lu1-c-us06",
+      "difficulty": "medium",
+      "question": "Hoe ontwikkelt de omzet van Contoso Baumholder Store zich (US06)?",
+      "options": [
+        "Bijna gehalveerd van $7,29 mln (2011) naar $3,92 mln (2012), daarna ongeveer gelijk: $3,94 mln in 2013 (+0,5%)",
+        "Gestaag gegroeid met 10% per jaar",
+        "Van $15,15 mln naar $7,29 mln",
+        "Gelijk gebleven op $5 mln per jaar"
+      ],
+      "answer": 0,
+      "explanation": "Per maand zijn er grote verschillen: februari 2013 zit 33,1% onder februari 2012, juni 27,0% erboven. $15,15 mln is de omzet van het filiaal over alle drie de jaren."
+    },
+    {
+      "id": "lu1-c-us07",
+      "difficulty": "easy",
+      "question": "Welke subcategorie verkoopt het best in Baumholder (US07)?",
+      "options": [
+        "Camcorders (17%)",
+        "Laptops (38%)",
+        "Projectors & Screens (31%)",
+        "Televisions (13%)"
+      ],
+      "answer": 0,
+      "explanation": "Daarna volgen Projectors & Screens (13%) en Laptops (13%). De top 10 van de 22 verkochte subcategorieën levert samen 84% van de omzet."
+    },
+    {
+      "id": "lu1-c-us08",
+      "difficulty": "medium",
+      "question": "Wat laat US08 zien over de retouren van Baumholder?",
+      "options": [
+        "In alle 6 categorieën ligt het retour % boven het Contoso-gemiddelde; het grootst bij TV and Video (1,64% tegen 1,20%) en Audio",
+        "Baumholder heeft minder retouren dan gemiddeld",
+        "Alleen Computers zit boven het gemiddelde",
+        "Het retour % is overal precies gemiddeld"
+      ],
+      "answer": 0,
+      "explanation": "TV and Video ligt 0,44 procentpunt hoger en Audio 0,41 procentpunt. Het advies is om bij die twee categorieën eerst uit te zoeken waar het aan ligt, bijvoorbeeld aan het advies aan de klant of aan de kwaliteit."
+    },
+    {
+      "id": "lu1-c-us09",
+      "difficulty": "medium",
+      "question": "Welke promotie levert in Baumholder per dag meer op dan een dag zonder korting (US09)?",
+      "options": [
+        "Alleen de European Spring Promotion: $16.801 tegen $14.990 per dag (+12,1%)",
+        "Alle promoties",
+        "De Holiday-promotie: +23,6%",
+        "Back-to-School: +9,9%"
+      ],
+      "answer": 0,
+      "explanation": "Back-to-School levert per dag 9,9% minder op en Holiday zelfs 23,6% minder. Holiday geeft ook de meeste korting (5,1%) en heeft de laagste marge (55,9% tegen 58,0% zonder korting). Let wel op het seizoenseffect."
+    },
+    {
+      "id": "lu1-c-us10",
+      "difficulty": "easy",
+      "question": "Op welke plaats staat Baumholder qua omzet per m² in Duitsland (US10)?",
+      "options": [
+        "Plaats 4 van de 11 Duitse winkels, met $10,10K per m² per jaar",
+        "Plaats 1, voor Ramstein",
+        "Plaats 11 van de 11",
+        "Plaats 4 van de 306 winkels wereldwijd"
+      ],
+      "answer": 0,
+      "explanation": "De eerste negen winkels liggen dicht bij elkaar ($9,90K tot $10,53K), met Ramstein bovenaan. Düsseldorf ($6,13K) en Berlin ($2,36K) blijven achter, maar die begonnen later met verkopen, dus de vergelijking is voor hen niet helemaal eerlijk."
+    }
+  ]
+}

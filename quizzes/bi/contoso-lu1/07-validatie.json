@@ -1,0 +1,174 @@
+{
+  "topic": "Validatie",
+  "questions": [
+    {
+      "id": "lu1-validation-purpose",
+      "difficulty": "easy",
+      "question": "Wat laat de validatiestap zien?",
+      "options": [
+        "Dat de ETL niets kwijtraakt: evenveel rijen, geen feitregels zonder dimensie en dezelfde totale omzet als de bron",
+        "Dat de grafieken dezelfde kleuren hebben als in Power BI",
+        "Dat de World Bank-data actueel is",
+        "Dat het notebook snel genoeg draait"
+      ],
+      "answer": 0,
+      "explanation": "De markdown van sectie 4 zegt het zo: het aantal rijen is voor en na gelijk, elke sleutel in het feit bestaat in de dimensie, en de totale omzet is voor en na hetzelfde. Daarnaast controleert hij dat elke dimensiesleutel uniek is."
+    },
+    {
+      "id": "lu1-checks-comprehension",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "relationships = [(pd.DataFrame({'DateKey': [1, 2]}), 'DateKey', 'DimDate'),",
+        "                 (pd.DataFrame({'ChannelKey': [1, 1]}), 'ChannelKey', 'DimChannel')]",
+        "checks = [{'check': f'{name}: key unique', 'ok': dim[key].is_unique} for dim, key, name in relationships]",
+        "print([c['ok'] for c in checks])"
+      ],
+      "options": [
+        "`[True, False]`",
+        "`[True, True]`",
+        "`[False, False]`",
+        "`['DimDate', 'DimChannel']`"
+      ],
+      "answer": 0,
+      "explanation": "De list comprehension pakt elke tuple uit tot `dim`, `key` en `name` en maakt per dimensie een dict met de naam van de controle en het resultaat. `is_unique` is False bij de tweede, want `ChannelKey` 1 komt twee keer voor.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-orphans",
+      "difficulty": "medium",
+      "question": "Wat controleert `fact[key].isin(dim[key]).all()`?",
+      "options": [
+        "Dat elke sleutel in het feit ook in de dimensie voorkomt: er zijn geen weesregels (orphans)",
+        "Dat elke dimensierij verkoop heeft",
+        "Dat de sleutels in het feit uniek zijn",
+        "Dat feit en dimensie evenveel rijen hebben"
+      ],
+      "answer": 0,
+      "explanation": "`isin` geeft per feitregel True als de sleutel in de dimensie staat; `.all()` is alleen True als dat voor álle regels geldt. Een weesregel zou in Power BI bij '(Blank)' terechtkomen en bij een join uit de analyse vallen."
+    },
+    {
+      "id": "lu1-isin-direction",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "fact = pd.DataFrame({'ProductKey': [1, 2, 2]})          # voorbeeld",
+        "dim = pd.DataFrame({'ProductKey': [1, 2, 3]})",
+        "print(fact['ProductKey'].isin(dim['ProductKey']).all(), dim['ProductKey'].isin(fact['ProductKey']).all())"
+      ],
+      "options": [
+        "`True False`",
+        "`True True`",
+        "`False True`",
+        "`False False`"
+      ],
+      "answer": 0,
+      "explanation": "De richting doet ertoe. Elke sleutel in het feit moet in de dimensie staan (True). Andersom hoeft niet: product 3 heeft geen verkoop, en dat mag. Daarom controleert het notebook alleen van feit naar dimensie.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-seventeen-checks",
+      "difficulty": "medium",
+      "question": "Het notebook print 'All 17 checks passed'. Hoe kom je aan 17?",
+      "options": [
+        "7 keer 'key unique', 7 keer '0 orphans', plus product → subcategorie, het aantal rijen en de totale omzet",
+        "Eén controle per kolom van de feitentabel",
+        "8 relaties × 2 controles, plus de totale omzet",
+        "Eén controle per tabel in `raw`"
+      ],
+      "answer": 0,
+      "explanation": "De twee list comprehensions maken elk 7 controles, één per relatie in `relationships`. Daarna voegt `checks +=` er nog drie aan toe: 7 + 7 + 3 = 17."
+    },
+    {
+      "id": "lu1-eighth-relationship",
+      "difficulty": "hard",
+      "question": "Het commentaar spreekt van 8 relaties, maar `relationships` heeft 7 tuples. Waar is de achtste?",
+      "code": [
+        "relationships = [  # (dimension, key, name) - 8 relationships of the star schema"
+      ],
+      "options": [
+        "DimProduct → DimProductSubcategory; die wordt apart gecontroleerd, omdat hij niet aan het feit hangt maar aan het product",
+        "FactSales → FactSales",
+        "DimDate telt twee keer mee",
+        "Er is geen achtste; het commentaar is fout"
+      ],
+      "answer": 0,
+      "explanation": "Zeven dimensies hangen direct aan het feit (7 relaties); de achtste loopt van DimProduct naar de subdimensie. Die controle staat apart: `dim_product['SubcategoryKey'].isin(dim_subcategory['SubcategoryKey']).all()`."
+    },
+    {
+      "id": "lu1-assert",
+      "difficulty": "medium",
+      "question": "Eén controle faalt. Wat gebeurt er?",
+      "code": [
+        "# voorbeeld",
+        "result = pd.DataFrame({'check': ['DimDate: key unique', 'Rows source = rows fact'], 'ok': [True, False]})",
+        "assert result['ok'].all(), 'A check fails - see the table'"
+      ],
+      "options": [
+        "`AssertionError`",
+        "Er wordt alleen een waarschuwing geprint en het notebook gaat door",
+        "`False`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "`assert voorwaarde, melding` stopt het notebook met een `AssertionError` als de voorwaarde False is. Zo worden de grafieken nooit gemaakt op data die de validatie niet doorstaat.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-isclose-total",
+      "difficulty": "medium",
+      "question": "Waarom vergelijkt de omzetcontrole de totalen met `np.isclose` en niet met `==`?",
+      "code": [
+        "'ok': np.isclose(to_number(raw['sales']['SalesAmount']).sum(), fact['SalesAmount'].sum())"
+      ],
+      "options": [
+        "Sommen van kommagetallen kunnen in de laatste decimalen verschillen door afronding",
+        "Omdat `==` niet werkt op getallen boven een miljard",
+        "Omdat de totalen in verschillende valuta zijn",
+        "Omdat `np.isclose` sneller is"
+      ],
+      "answer": 0,
+      "explanation": "Kommagetallen zijn niet exact, en de volgorde van optellen kan het resultaat in de laatste decimalen veranderen. `np.isclose` accepteert zo'n minimaal verschil, maar geen echt verschil zoals een verdwenen verkoopregel."
+    },
+    {
+      "id": "lu1-total-sales",
+      "difficulty": "easy",
+      "question": "Wat is de totale omzet volgens de validatie?",
+      "options": [
+        "$8.341.224.365",
+        "$2.554.000.000",
+        "$4.790.000.000",
+        "$306.000.000"
+      ],
+      "answer": 0,
+      "explanation": "'All 17 checks passed. Total sales: $8.341.224.365'. Dat is de omzet over 2011–2013; in US01 wordt dat `$8,34bn`. $2,55 mld is alleen 2013 en $4,79 mld is de brutomarge."
+    },
+    {
+      "id": "lu1-rows-equal",
+      "difficulty": "medium",
+      "question": "Wat zou het betekenen als `len(raw['sales']) == len(fact)` False was?",
+      "options": [
+        "Dat een merge rijen heeft verdubbeld of weggegooid, bijvoorbeeld door een dubbele sleutel in een opzoektabel",
+        "Dat de verkoopdata dubbele rijen bevat",
+        "Dat de feitentabel te veel kolommen heeft",
+        "Dat de datums verkeerd zijn omgezet"
+      ],
+      "answer": 0,
+      "explanation": "De Transform-stap zet waarden om en voegt kolommen toe; het aantal regels hoort gelijk te blijven. Alleen een merge kan rijen toevoegen (bij een dubbele sleutel) of laten verdwijnen (bij een inner join zonder match)."
+    },
+    {
+      "id": "lu1-unique-keys-why",
+      "difficulty": "hard",
+      "question": "Waarom controleert de validatie ook dat elke dimensiesleutel uniek is?",
+      "options": [
+        "Een dubbele sleutel zou bij een merge feitregels verdubbelen, en maakt in Power BI de relatie veel-op-veel",
+        "Omdat pandas geen dubbele waarden in een kolom toestaat",
+        "Omdat unieke sleutels sneller sorteren",
+        "Om lege sleutels te vinden"
+      ],
+      "answer": 0,
+      "explanation": "In een sterschema is de relatie van feit naar dimensie veel-op-één. Dat werkt alleen als elke sleutel precies één keer in de dimensie staat. `star()` koppelt de dimensies met een merge, dus een dubbele sleutel zou ook de omzet in de grafieken verdubbelen."
+    }
+  ]
+}

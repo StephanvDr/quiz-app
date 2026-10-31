@@ -1,0 +1,206 @@
+{
+  "topic": "Data verkennen",
+  "questions": [
+    {
+      "id": "lu1-profile-output",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "def profile(name, df):",
+        "    return {'table': name, 'rows': len(df), 'columns': df.shape[1],",
+        "            'empty cells': int(df.isna().sum().sum()), 'duplicate rows': int(df.duplicated().sum()),",
+        "            'columns with empty cells': ', '.join(df.columns[df.isna().any()])}",
+        "",
+        "# voorbeeld",
+        "df = pd.DataFrame({'a': [1, None, 1], 'b': ['x', None, 'x'], 'c': [5, 6, 5]})",
+        "print(profile('demo', df))"
+      ],
+      "options": [
+        "`{'table': 'demo', 'rows': 3, 'columns': 3, 'empty cells': 2, 'duplicate rows': 1, 'columns with empty cells': 'a, b'}`",
+        "`{'table': 'demo', 'rows': 3, 'columns': 3, 'empty cells': 2, 'duplicate rows': 2, 'columns with empty cells': 'a, b'}`",
+        "`{'table': 'demo', 'rows': 3, 'columns': 3, 'empty cells': 1, 'duplicate rows': 1, 'columns with empty cells': 'a'}`",
+        "`{'table': 'demo', 'rows': 3, 'columns': 3, 'empty cells': 2, 'duplicate rows': 0, 'columns with empty cells': 'a, b'}`"
+      ],
+      "answer": 0,
+      "explanation": "Er zijn 2 lege cellen (één in `a`, één in `b`). Rij 2 is gelijk aan rij 0, en `duplicated()` markeert alleen de herhaling, dus 1 dubbele rij. `df.columns[df.isna().any()]` geeft de kolommen met minstens één lege cel.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-isna-sum-sum",
+      "difficulty": "medium",
+      "question": "Waarom staat er twee keer `.sum()` in `df.isna().sum().sum()`?",
+      "options": [
+        "De eerste telt de lege cellen per kolom, de tweede telt die kolomtotalen op tot één getal",
+        "De tweede `.sum()` telt de dubbele rijen",
+        "De eerste telt per rij, de tweede per kolom, en het resultaat is het gemiddelde",
+        "Dat is dubbelop; één `.sum()` geeft hetzelfde"
+      ],
+      "answer": 0,
+      "explanation": "`isna()` geeft een tabel met True/False. `.sum()` telt per kolom de Trues (True telt als 1) en geeft een Series. Een tweede `.sum()` telt die Series op tot het totaal voor de tabel."
+    },
+    {
+      "id": "lu1-isna-any-columns",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "df = pd.DataFrame({'Year': [2011, 2012], 'CloseReason': [None, 'Moved'],",
+        "                   'EmployeeCount': [19, None]})",
+        "print(', '.join(df.columns[df.isna().any()]))"
+      ],
+      "options": [
+        "`CloseReason, EmployeeCount`",
+        "`Year, CloseReason, EmployeeCount`",
+        "`CloseReason`",
+        "`2`"
+      ],
+      "answer": 0,
+      "explanation": "`df.isna().any()` geeft per kolom True als er minstens één lege cel in staat. Met die booleans selecteer je de kolomnamen, en `', '.join(...)` maakt er één tekst van. In het echte profiel staat dit bij de tabel stores.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-dot1-columns",
+      "difficulty": "medium",
+      "question": "De kalender en de promotietabel hebben kolommen als `Year.1`. Wat print deze code?",
+      "code": [
+        "from io import StringIO",
+        "# voorbeeld: twee kolommen met dezelfde naam",
+        "csv = 'Year,Year\\n2011,2013\\n'",
+        "print(pd.read_csv(StringIO(csv)).columns.tolist())"
+      ],
+      "options": [
+        "`['Year', 'Year.1']`",
+        "`['Year', 'Year']`",
+        "`['Year']`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "Kolomnamen moeten uniek zijn, dus `read_csv` zet `.1` achter de tweede kolom met dezelfde naam. In de kalender is `Year.1` een dubbele kolom die weg kan; in de promotietabel is de tweede set (`Year.1`, `Month.1`, `Day.1`) juist de startdatum.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-countries-34",
+      "difficulty": "easy",
+      "question": "De verkenning print `Geography : {'City': 517, 'State/Province': 120, 'Country/Region': 34, 'Continent': 3}`. In hoeveel landen zit Contoso volgens de geografietabel?",
+      "options": [
+        "`34`",
+        "`674`",
+        "`517`",
+        "`3`"
+      ],
+      "answer": 0,
+      "explanation": "Elke rij heeft een `GeographyType`. De 34 rijen van het type `Country/Region` zijn de landen; 674 is het totaal aantal rijen. Dit zijn ook de 34 landen in DimCountry."
+    },
+    {
+      "id": "lu1-double-space-count",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "names = pd.Series(['Contoso  Bellevue Store', 'Contoso Cambridge Store',",
+        "                   'Contoso  Cedar Park  Store'])",
+        "print(names.str.contains('  ').sum())"
+      ],
+      "options": [
+        "`2`",
+        "`3`",
+        "`1`",
+        "`[True, False, True]`"
+      ],
+      "answer": 0,
+      "explanation": "`str.contains('  ')` geeft True als een naam twee spaties achter elkaar bevat. `.sum()` telt de Trues: het aantal namen, niet het aantal dubbele spaties. In de echte data waren het 10 winkelnamen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-sales-rule",
+      "difficulty": "medium",
+      "question": "Wat controleert deze code?",
+      "code": [
+        "number = lambda col: pd.to_numeric(s[col].str.replace(',', '.', regex=False))",
+        "ok = np.isclose(number('SalesAmount'), number('UnitPrice') * number('SalesQuantity') - number('DiscountAmount'), atol=0.01)"
+      ],
+      "options": [
+        "Of SalesAmount op elke regel gelijk is aan UnitPrice × SalesQuantity − DiscountAmount, op 1 cent na",
+        "Of de kortingen kloppen met de promotietabel",
+        "Of er lege bedragen in de verkoopdata staan",
+        "Of de omzet per jaar stijgt"
+      ],
+      "answer": 0,
+      "explanation": "De `lambda` zet een tekstkolom met decimale komma's om naar getallen. `np.isclose` vergelijkt per regel, met een marge van 0,01. De regel klopte voor 100% van de rijen, dus de omzet kun je vertrouwen."
+    },
+    {
+      "id": "lu1-mean-of-bools",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "ok = np.array([True, True, True, False])          # voorbeeld",
+        "print(f'{ok.mean():.1%}')"
+      ],
+      "options": [
+        "`75.0%`",
+        "`0.75%`",
+        "`3`",
+        "`75,0%`"
+      ],
+      "answer": 0,
+      "explanation": "Het gemiddelde van booleans is het aandeel Trues (True = 1, False = 0). `:.1%` vermenigvuldigt met 100 en zet er een procentteken achter, met 1 decimaal. Dit is Pythons eigen notatie met een punt; `fmt` gebruikt het notebook alleen voor de grafieken en kaarten.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-isclose",
+      "difficulty": "medium",
+      "question": "Wat print deze code? Het is de reden dat de controles `np.isclose` gebruiken.",
+      "code": [
+        "print(0.1 * 3 == 0.3, np.isclose(0.1 * 3, 0.3))"
+      ],
+      "options": [
+        "`False True`",
+        "`True True`",
+        "`False False`",
+        "`True False`"
+      ],
+      "answer": 0,
+      "explanation": "Kommagetallen worden binair opgeslagen en zijn daardoor niet altijd exact: `0.1 * 3` is `0.30000000000000004`. `np.isclose` vergelijkt met een kleine marge en ziet de getallen als gelijk.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-repr-text",
+      "difficulty": "easy",
+      "question": "Waarom print de verkenning `repr(s['DateKey'].iloc[0])` en niet gewoon de waarde?",
+      "options": [
+        "`repr` zet er aanhalingstekens omheen ('2011-05-07 00:00:00,000'), zodat je ziet dat het tekst is",
+        "`repr` zet de tekst om naar een datum",
+        "`repr` toont alle rijen in plaats van één",
+        "`repr` rondt de waarde af"
+      ],
+      "answer": 0,
+      "explanation": "Met `print` zie je `2011-05-07 00:00:00,000` en niet of het tekst of een datum is. De aanhalingstekens van `repr` maken duidelijk dat de datum en de bedragen tekst zijn, wat de Transform-stap moet oplossen."
+    },
+    {
+      "id": "lu1-findings",
+      "difficulty": "medium",
+      "question": "Welke bijzonderheden vond de verkenning, die de Transform-stap moet oplossen?",
+      "options": [
+        "Bedragen en datums als tekst met een decimale komma, dubbele kolomnamen en dubbele spaties in winkelnamen",
+        "Dubbele rijen in de verkoopdata",
+        "Lege bedragen in de verkoopdata",
+        "Verkoopregels zonder winkel"
+      ],
+      "answer": 0,
+      "explanation": "Het profiel liet zien dat de verkoopdata geen lege cellen en geen dubbele rijen heeft. De problemen zitten in het formaat: tekst met komma's (`'321,44'`, `'$143,26'`), de kolommen `.1`, en tien winkelnamen met een dubbele spatie."
+    },
+    {
+      "id": "lu1-stores-empty-cells",
+      "difficulty": "hard",
+      "question": "De tabel stores heeft 295 lege cellen, in `CloseReason` en `EmployeeCount`. Wat is de verklaring?",
+      "options": [
+        "De 294 open winkels hebben geen sluitreden, en bij één winkel ontbreekt het aantal medewerkers",
+        "Bij 295 winkels ontbreken alle gegevens",
+        "De gesloten winkels hebben geen medewerkers meer",
+        "De online winkels hebben geen sluitreden en geen medewerkers"
+      ],
+      "answer": 0,
+      "explanation": "Er zijn 294 winkels met status On en 12 met Off. Alleen gesloten winkels hebben een sluitreden, dus 294 lege `CloseReason`-cellen, plus 1 lege `EmployeeCount`. In DimStore wordt een lege sluitreden `N/A` en blijft het lege aantal medewerkers leeg (`Int64`)."
+    }
+  ]
+}

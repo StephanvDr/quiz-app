@@ -741,7 +741,9 @@ h2 {
   .prompt { font-size: var(--step-1); }
   .cell { grid-template-columns: minmax(0, 1fr); gap: 0.3rem; }
   .cell-prompt { padding-top: 0; }
-  .option { gap: 0.7rem; padding: 0.7rem 0.8rem; }
+  .option { grid-template-columns: auto minmax(0, 1fr); gap: 0.35rem 0.7rem; padding: 0.7rem 0.8rem; }
+  .option .verdict { grid-column: 2; padding-top: 0; }
+  .option .verdict:empty { display: none; }
   .answer-line { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; }
 }
 
