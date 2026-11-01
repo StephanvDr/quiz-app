@@ -90,6 +90,80 @@ python quiz.py build
 `dist/index.html` holds the app and every question. Open it straight from disk, send it to
 someone, or host it on any static host (GitHub Pages, Netlify, S3).
 
+## Desktop app
+
+On Windows, install Code Quiz with `CodeQuiz-Setup-1.0.0.exe`. Get it from the repository's
+[Releases](../../releases) page, from the artifacts of a run of the "Windows installer"
+workflow on the Actions tab, or [build it yourself](#building-the-installer).
+
+- It installs for your user only (no administrator rights) into
+  `%LOCALAPPDATA%\Programs\Code Quiz`, with a Start menu shortcut, an optional desktop
+  shortcut, and its own copy of Python. A Python you already have is left alone.
+- The installer isn't code-signed, so SmartScreen may say "Windows protected your PC". Click
+  **More info**, then **Run anyway**.
+- Code Quiz opens in its own Edge (or Chrome) app window. It quietly stops 15 minutes after
+  you close that window.
+- Your progress is saved in that window, separately from the progress of `python quiz.py` in
+  a normal browser tab.
+- Modules you add and your settings are kept in `%APPDATA%\CodeQuiz`. Updates keep them, and
+  when you uninstall (Settings > Apps > Code Quiz) you're asked whether to delete them.
+
+On macOS and Linux, run the same desktop app with `python3 quiz.py app`. It keeps its data in
+`~/Library/Application Support/CodeQuiz` or `~/.local/share/code-quiz`.
+
+### Modules
+
+Every subject is a module. The desktop app's **Modules** page (the last tile on the home
+page, "Add or update subjects") shows where each one comes from and adds new ones:
+
+- **Built in:** the subjects in `quizzes/` when the installer was built.
+- **From a file:** a `.quiz` module file. Drop it anywhere on the window, choose it on the
+  Modules page, double-click it (Windows), or copy it into the modules folder. Make one with
+  `python quiz.py pack python-pandas`, which writes `dist/modules/python-pandas.quiz`;
+  without a subject id it packs every subject.
+- **From GitHub:** see below.
+
+A module with the same id as a built-in subject replaces it. Remove the module and the
+built-in version comes back.
+
+### GitHub library
+
+The Modules page also reads the `quizzes/` folder of a GitHub repository, by default
+`StephanvDr/quiz-app` on `main`, and lists every subject in it as **Install**, **Update** or
+**Up to date**. So the workflow for new questions is: add them to the repository, push, then
+click **Save and check** on the Modules page and update the subject.
+
+The repository and branch can be changed there. A private repository needs a token:
+
+1. On GitHub, open Settings > Developer settings > Personal access tokens > Fine-grained
+   tokens, and generate a new token.
+2. Under Repository access, choose **Only select repositories** and pick the repository.
+3. Under Permissions > Repository permissions, set **Contents** to **Read-only**.
+4. Paste the token in the Access token field on the Modules page and click **Save and check**.
+
+The token is saved in `settings.json` in the data folder, is only sent to `api.github.com`,
+and is never shown again. Without a token, GitHub allows 60 checks an hour per network.
+
+### Module file format
+
+A module file is one subject in a single JSON file: the `quiz.json` as `subject`, and each
+topic file as an entry of `topics`, with its file name in `file` (that sets the order).
+
+```json
+{
+  "format": "code-quiz-module",
+  "version": 1,
+  "id": "sql-basics",
+  "subject": { "title": "SQL basics", "category": "SQL", "language": "sql" },
+  "topics": [
+    { "file": "01-select", "topic": "SELECT", "questions": [] }
+  ]
+}
+```
+
+The app checks a module like `python quiz.py validate` checks the quiz folders, and says what
+is wrong when it can't add one.
+
 ## Using the quiz
 
 - Pick the topics, the round size (10, 20, 30 or all), a difficulty (for subjects that have
@@ -197,9 +271,38 @@ and file or database I/O) are validated for structure only, so review them by ha
 | `python quiz.py build [--out DIR]` | Write the single-file app to `dist/index.html`. |
 | `python quiz.py validate` | Check every quiz file's structure: required fields, unique ids, valid answer indexes. |
 | `python quiz.py verify [SUBJECT]` | Run the checked questions. Needs `pip install -r requirements-dev.txt`. |
+| `python quiz.py app [--import FILE]` | Run the desktop app, adding a module file first if given. |
+| `python quiz.py quit` | Stop a running desktop app. |
+| `python quiz.py pack [SUBJECT ...] [--out DIR]` | Write subjects as `.quiz` module files to `dist/modules/`. |
+| `python installer/build.py` | Build the Windows installer; see below. |
 | `python -m unittest discover -s tests` | Tests for `quiz.py`. |
 
-GitHub Actions runs all of these on every push (`.github/workflows/ci.yml`).
+GitHub Actions runs the checks on every push (`.github/workflows/ci.yml`).
+
+## Building the installer
+
+```bash
+python installer/build.py
+```
+
+This writes `dist/CodeQuiz-Setup-<version>.exe` and works on Windows, Linux or macOS with
+[NSIS](https://nsis.sourceforge.io) installed (`apt install nsis` or `brew install makensis`).
+It downloads Python 3.13 for Windows once (the official `python` package on NuGet, checked
+against a pinned SHA-512), trims what the app doesn't use, and packs it with the app and the
+subjects in `quizzes/`. The installer script is `installer/codequiz.nsi`.
+
+To publish a release, raise `VERSION` in `quiz.py`, then push a matching tag:
+
+```bash
+git tag v1.0.1
+```
+
+```bash
+git push origin v1.0.1
+```
+
+The "Windows installer" workflow (`.github/workflows/installer.yml`) builds the installer and
+attaches it to a GitHub release for that tag.
 
 ## pandas versions
 
@@ -211,8 +314,9 @@ run `python quiz.py verify` to see which answers changed.
 ## Layout
 
 ```
-quiz.py              serve, build, validate and verify (standard library only)
-app/                 the web app: index.html, styles.css, app.js (no dependencies)
+quiz.py              serve, build, validate, verify, pack and the desktop app (standard library only)
+app/                 the web app: index.html, styles.css, app.js, icon.svg (no dependencies)
 quizzes/             the questions
-tests/test_quiz.py   unit tests for quiz.py
+installer/           build.py, the NSIS script, the icon and the setup wizard image
+tests/               unit tests for quiz.py and the desktop app
 ```

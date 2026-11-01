@@ -6,7 +6,9 @@ Each subject is a folder under quizzes/ holding a quiz.json (title, category,
 self-contained HTML file and checks the quiz files.
 
     python quiz.py                  serve the app on http://localhost:8000
+    python quiz.py app              run the desktop app (modules, GitHub library)
     python quiz.py build            write dist/index.html (one self-contained file)
+    python quiz.py pack             write each subject as a .quiz module file
     python quiz.py validate         check the structure of every quiz file
     python quiz.py verify           run the Python snippets and check the answers
 
@@ -17,20 +19,48 @@ libraries the snippets import (pip install -r requirements-dev.txt).
 from __future__ import annotations
 
 import argparse
+import base64
 import contextlib
+import hashlib
 import io
 import json
+import os
 import re
+import shutil
+import subprocess
 import sys
+import threading
+import time
+import urllib.error
+import urllib.request
 import warnings
 import webbrowser
+from http.client import HTTPException
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import quote, urlsplit
 
+VERSION = "1.0.0"
 ROOT = Path(__file__).resolve().parent
 APP_DIR = ROOT / "app"
 QUIZ_DIR = ROOT / "quizzes"
 META_FILE = "quiz.json"
+
+# A module is one subject in a single file, for sharing and for the desktop app.
+MODULE_FORMAT = "code-quiz-module"
+MODULE_EXT = ".quiz"
+
+# The desktop app's GitHub library: subjects in the quizzes/ folder of this repository.
+DEFAULT_LIBRARY = {"repo": "StephanvDr/quiz-app", "branch": "main"}
+GITHUB_API = os.environ.get("CODEQUIZ_GITHUB_API", "https://api.github.com")
+GITHUB_RAW = os.environ.get("CODEQUIZ_GITHUB_RAW", "https://raw.githubusercontent.com")
+REPO_PATTERN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
+BRANCH_PATTERN = re.compile(r"[A-Za-z0-9_.][A-Za-z0-9_./-]*")
+
+# The desktop app always tries the same port: the browser keeps progress per address.
+APP_PORT = 47280
+IDLE_SECONDS = 900  # the app window pings every 30 s; stop 15 minutes after it was closed
+MAX_UPLOAD = 20_000_000
 
 SUBJECT_KEYS = {"title", "category", "description", "language", "badge", "note", "prelude"}
 QUESTION_KEYS = {
@@ -57,7 +87,10 @@ def read_json(path: Path):
 
 
 def rel(path: Path) -> str:
-    return path.relative_to(ROOT).as_posix()
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:  # an added module outside the repository
+        return str(path)
 
 
 def as_text(value) -> str:
@@ -79,17 +112,38 @@ def load_subjects() -> list[dict]:
             "path": meta_path,
             "meta": read_json(meta_path),
             "topics": topics,
+            "source": {"kind": "built-in"},
         })
     return subjects
 
 
-def payload() -> dict:
-    """Everything the app needs, as one JSON-ready dict."""
+def payload(home: Path | None = None) -> dict:
+    """Everything the app needs, as one JSON-ready dict.
+
+    With `home` (the desktop app's data folder), modules added there are
+    included too; they replace a built-in subject with the same id.
+    """
     subjects = load_subjects()
     errors = validate(subjects)
     if errors:
         raise QuizError("\n".join(errors))
-    return {"subjects": [export_subject(s) for s in subjects]}
+    data = {}
+    if home is not None:
+        added, problems = load_modules(home / "modules")
+        by_id = {s["id"]: s for s in subjects}
+        for subject in added:
+            if subject["id"] in by_id:
+                subject["source"]["replaces"] = "built-in"
+            by_id[subject["id"]] = subject
+        subjects = list(by_id.values())
+        data["problems"] = problems
+        data["desktop"] = {
+            "version": VERSION,
+            "modulesDir": str(home / "modules"),
+            "library": public_library(load_settings(home)),
+        }
+    subjects.sort(key=lambda s: (s["meta"]["category"].lower(), s["meta"]["title"].lower()))
+    return {"subjects": [export_subject(s) for s in subjects], **data}
 
 
 def export_subject(subject: dict) -> dict:
@@ -102,6 +156,7 @@ def export_subject(subject: dict) -> dict:
         "language": meta.get("language", ""),
         "badge": meta.get("badge", ""),
         "note": meta.get("note", ""),
+        "source": subject.get("source", {"kind": "built-in"}),
         "topics": [
             {
                 "id": topic["id"],
@@ -374,29 +429,426 @@ def run_prelude(prelude: str) -> None:
         )
 
 
+# ---------------------------------------------------------------- modules
+
+
+def pack_subject(subject: dict, source: dict | None = None) -> dict:
+    """One subject as a module: the quiz.json plus every topic file, in one dict."""
+    module = {
+        "format": MODULE_FORMAT,
+        "version": 1,
+        "id": subject["id"],
+        "subject": subject["meta"],
+        "topics": [{"file": topic["id"], **topic["data"]} for topic in subject["topics"]],
+    }
+    if source:
+        module["source"] = source
+    return module
+
+
+def module_problems(data) -> list[str]:
+    """Problems with a module's outer structure; `validate` checks the questions."""
+    if not isinstance(data, dict) or data.get("format") != MODULE_FORMAT:
+        return [f'this is not a Code Quiz module (it needs "format": "{MODULE_FORMAT}")']
+    problems = []
+    if data.get("version") != 1:
+        problems.append('unsupported "version": this app reads version 1 modules')
+    if not (is_text(data.get("id")) and ID_PATTERN.fullmatch(data["id"])):
+        problems.append('"id" must be lowercase words joined by hyphens, like "python-pandas"')
+    if not isinstance(data.get("subject"), dict):
+        problems.append('"subject" (the contents of quiz.json) is missing')
+    topics = data.get("topics")
+    if not isinstance(topics, list) or not topics:
+        problems.append('"topics" must be a non-empty list')
+    elif not all(isinstance(t, dict) and is_text(t.get("file")) and ID_PATTERN.fullmatch(t["file"]) for t in topics):
+        problems.append('every topic needs a "file" name made of lowercase words and hyphens, like "01-basics"')
+    return problems
+
+
+def module_to_subject(data: dict, path: Path) -> dict:
+    return {
+        "id": data["id"],
+        "path": path,
+        "meta": data["subject"],
+        "topics": [
+            {"id": t["file"], "path": path, "data": {k: v for k, v in t.items() if k != "file"}}
+            for t in data["topics"]
+        ],
+        "source": dict(data["source"]) if isinstance(data.get("source"), dict) else {"kind": "file"},
+    }
+
+
+def checked_module(data, label: Path) -> dict:
+    """The subject in a module, or QuizError listing everything that is wrong with it."""
+    errors = module_problems(data)
+    if not errors:
+        subject = module_to_subject(data, label)
+        errors = validate([subject])
+    if errors:
+        raise QuizError("\n".join(errors))
+    return subject
+
+
+def load_modules(modules_dir: Path) -> tuple[list[dict], list[dict]]:
+    """Valid modules in the folder, plus a problem report for every file that isn't."""
+    subjects, problems, seen = [], [], {}
+    for path in sorted(modules_dir.glob(f"*{MODULE_EXT}")):
+        try:
+            subject = checked_module(json.loads(path.read_text(encoding="utf-8-sig")), path)
+        except (QuizError, OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
+            problems.append({"file": path.name, "errors": str(e).splitlines()})
+            continue
+        if subject["id"] in seen:
+            problems.append({"file": path.name, "errors": [f'the id "{subject["id"]}" is also used by {seen[subject["id"]]}']})
+            continue
+        seen[subject["id"]] = path.name
+        subjects.append(subject)
+    return subjects, problems
+
+
+def install_module(data, modules_dir: Path, label: str = "module") -> dict:
+    """Check a module and save it as <id>.quiz, replacing an older copy."""
+    subject = checked_module(data, Path(label))
+    modules_dir.mkdir(parents=True, exist_ok=True)
+    target = modules_dir / f"{subject['id']}{MODULE_EXT}"
+    temporary = target.with_suffix(".tmp")
+    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    temporary.replace(target)
+    questions = sum(len(t["data"]["questions"]) for t in subject["topics"])
+    return {"id": subject["id"], "title": subject["meta"]["title"], "questions": questions}
+
+
+def remove_module(subject_id: str, modules_dir: Path) -> None:
+    path = modules_dir / f"{subject_id}{MODULE_EXT}"
+    if not ID_PATTERN.fullmatch(subject_id) or not path.is_file():
+        raise QuizError(f"{subject_id} is not an added module")
+    path.unlink()
+
+
+def git_blob_sha(content: bytes) -> str:
+    """The id git gives a file's contents (with LF line endings, as GitHub stores them)."""
+    content = content.replace(b"\r\n", b"\n")
+    return hashlib.sha1(b"blob %d\0" % len(content) + content).hexdigest()
+
+
+def revision(files: list[tuple[str, str]]) -> str:
+    """A short fingerprint of a subject's files, from (repository path, blob sha) pairs."""
+    text = "\n".join(f"{path} {sha}" for path, sha in sorted(files))
+    return hashlib.sha1(text.encode()).hexdigest()[:12]
+
+
+def local_revision(subject: dict) -> str | None:
+    """The revision of a built-in subject, comparable with what the library reports."""
+    paths = [subject["path"], *(t["path"] for t in subject["topics"])]
+    try:
+        return revision([(rel(p), git_blob_sha(p.read_bytes())) for p in paths])
+    except OSError:
+        return None
+
+
+# ---------------------------------------------------------------- desktop data
+
+
+def data_dir() -> Path:
+    """Where the desktop app keeps added modules, settings and its log."""
+    if os.environ.get("CODEQUIZ_HOME"):
+        return Path(os.environ["CODEQUIZ_HOME"])
+    if sys.platform == "win32":
+        return Path(os.environ.get("APPDATA") or Path.home()) / "CodeQuiz"
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "CodeQuiz"
+    return Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share") / "code-quiz"
+
+
+def load_settings(home: Path) -> dict:
+    try:
+        saved = json.loads((home / "settings.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        saved = {}
+    library = saved.get("library") if isinstance(saved.get("library"), dict) else {}
+    return {"library": {**DEFAULT_LIBRARY, "token": "", **library}}
+
+
+def save_settings(home: Path, settings: dict) -> None:
+    home.mkdir(parents=True, exist_ok=True)
+    path = home / "settings.json"
+    path.write_text(json.dumps(settings, indent=2), encoding="utf-8")
+    with contextlib.suppress(OSError):
+        path.chmod(0o600)  # it can hold a GitHub token
+
+
+def public_library(settings: dict) -> dict:
+    """Library settings for the page: never the token itself."""
+    library = settings["library"]
+    return {"repo": library["repo"], "branch": library["branch"], "hasToken": bool(library["token"])}
+
+
+# ---------------------------------------------------------------- GitHub library
+
+
+class Library:
+    """Subjects in the quizzes/ folder of a GitHub repository.
+
+    One call to the trees API lists the files. Contents come from the blobs API
+    when there is a token (needed for private repositories), and otherwise
+    from raw.githubusercontent.com, which doesn't count against the API's
+    hourly limit for requests without a token.
+    """
+
+    def __init__(self, repo: str, branch: str, token: str = ""):
+        self.repo, self.branch, self.token = repo, branch, token
+
+    def get(self, url: str) -> bytes:
+        headers = {"User-Agent": f"code-quiz/{VERSION}", "Accept": "application/vnd.github+json"}
+        if self.token and url.startswith(GITHUB_API):
+            headers["Authorization"] = f"Bearer {self.token}"
+            headers["X-GitHub-Api-Version"] = "2022-11-28"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as response:
+                return response.read()
+        except urllib.error.HTTPError as e:
+            raise QuizError(self.explain(e)) from None
+        except (urllib.error.URLError, OSError) as e:
+            raise QuizError(f"Couldn't reach GitHub ({getattr(e, 'reason', e)}). Check your internet connection.") from None
+
+    def explain(self, e: urllib.error.HTTPError) -> str:
+        if e.code == 401:
+            return "GitHub didn't accept the token. It may have expired: create a new one and save it here."
+        if e.code in (403, 429) and e.headers.get("X-RateLimit-Remaining") == "0":
+            return "GitHub's hourly limit for requests without a token is used up. Try again later, or save a token."
+        if e.code in (403, 404):
+            hint = "Check the name and the branch." if self.token else "If the repository is private, save a token with read access to its contents."
+            return f"GitHub couldn't find {self.repo} on branch {self.branch}. {hint}"
+        return f"GitHub answered {e.code} {e.reason}."
+
+    def subjects(self) -> list[dict]:
+        url = f"{GITHUB_API}/repos/{self.repo}/git/trees/{quote(self.branch, safe='')}?recursive=1"
+        tree = json.loads(self.get(url))
+        blobs = {e["path"]: e["sha"] for e in tree.get("tree", []) if e.get("type") == "blob"}
+        found = []
+        for path in sorted(blobs):
+            parts = path.split("/")
+            if len(parts) < 3 or parts[0] != "quizzes" or parts[-1] != META_FILE:
+                continue
+            folder = path.rsplit("/", 1)[0]
+            topics = sorted(
+                p for p in blobs
+                if p.rsplit("/", 1)[0] == folder and p.endswith(".json") and p != path
+            )
+            files = [path, *topics]
+            found.append({
+                "id": "-".join(parts[1:-1]),
+                "files": [(p, blobs[p]) for p in files],
+                "revision": revision([(p, blobs[p]) for p in files]),
+            })
+        return found
+
+    def read(self, path: str, sha: str):
+        if self.token:
+            blob = json.loads(self.get(f"{GITHUB_API}/repos/{self.repo}/git/blobs/{sha}"))
+            content = base64.b64decode(blob["content"])
+        else:
+            content = self.get(f"{GITHUB_RAW}/{self.repo}/refs/heads/{quote(self.branch)}/{quote(path)}")
+        try:
+            return json.loads(content.decode("utf-8-sig"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as e:
+            raise QuizError(f"{path} in {self.repo} is not valid JSON ({e})") from None
+
+    def catalog(self) -> list[dict]:
+        entries = []
+        for found in self.subjects():
+            meta = self.read(*found["files"][0])
+            meta = meta if isinstance(meta, dict) else {}
+            entries.append({
+                "id": found["id"],
+                "title": str(meta.get("title") or found["id"]),
+                "category": str(meta.get("category") or ""),
+                "description": str(meta.get("description") or ""),
+                "badge": str(meta.get("badge") or ""),
+                "topics": len(found["files"]) - 1,
+                "revision": found["revision"],
+            })
+        return entries
+
+    def module(self, subject_id: str) -> dict:
+        found = next((s for s in self.subjects() if s["id"] == subject_id), None)
+        if found is None:
+            raise QuizError(f"{subject_id} is not in {self.repo} on branch {self.branch}.")
+        (meta_path, meta_sha), *topic_files = found["files"]
+        topics = []
+        for path, sha in topic_files:
+            data = self.read(path, sha)
+            if not isinstance(data, dict):
+                raise QuizError(f"{path} in {self.repo} is not a topic file")
+            topics.append({"file": Path(path).stem, **data})
+        return {
+            "format": MODULE_FORMAT,
+            "version": 1,
+            "id": found["id"],
+            "subject": self.read(meta_path, meta_sha),
+            "topics": topics,
+            "source": {"kind": "github", "repo": self.repo, "branch": self.branch, "revision": found["revision"]},
+        }
+
+
 # ---------------------------------------------------------------- serve & build
 
 
 class AppHandler(SimpleHTTPRequestHandler):
-    """Serves app/ plus quizzes.json, rebuilt from the quiz files on every request."""
+    """Serves app/ plus quizzes.json, rebuilt from the quiz files on every request.
+
+    Under the desktop app (a DesktopServer) it also answers the /api/ routes
+    that add, remove and download modules. Those only accept requests for
+    127.0.0.1 (no DNS rebinding), and changes need the X-Code-Quiz header,
+    which other websites can't send.
+    """
+
+    # Fixed types for the app's files: on Windows, mimetypes reads the
+    # registry, which can map .js to text/plain.
+    extensions_map = {
+        ".html": "text/html; charset=utf-8",
+        ".css": "text/css; charset=utf-8",
+        ".js": "text/javascript; charset=utf-8",
+        ".svg": "image/svg+xml",
+        ".json": "application/json",
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
+    @property
+    def home(self) -> Path | None:
+        return getattr(self.server, "home", None)
+
     def do_GET(self):
-        if self.path.split("?", 1)[0] != "/quizzes.json":
-            return super().do_GET()
+        self.touch()
+        path = urlsplit(self.path).path
+        if self.home and not self.from_this_app():
+            return self.reply(403, {"error": "Requests must come from Code Quiz itself."})
+        if path == "/quizzes.json":
+            return self.send_payload()
+        if self.home and path.startswith("/api/"):
+            return self.api("GET", path)
+        return super().do_GET()
+
+    def do_POST(self):
+        self.change("POST")
+
+    def do_DELETE(self):
+        self.change("DELETE")
+
+    def change(self, method: str) -> None:
+        self.touch()
+        path = urlsplit(self.path).path
+        if not (self.home and path.startswith("/api/")):
+            return self.reply(404, {"error": "Not found."})
+        if not self.from_this_app() or self.headers.get("X-Code-Quiz") != "1":
+            return self.reply(403, {"error": "Requests must come from Code Quiz itself."})
+        return self.api(method, path)
+
+    def from_this_app(self) -> bool:
+        port = self.server.server_address[1]
+        return self.headers.get("Host") in (f"127.0.0.1:{port}", f"localhost:{port}")
+
+    def touch(self) -> None:
+        if hasattr(self.server, "last_seen"):
+            self.server.last_seen = time.monotonic()
+
+    def send_payload(self) -> None:
         try:
-            body = json.dumps(payload(), ensure_ascii=False).encode("utf-8")
+            body = json.dumps(payload(self.home), ensure_ascii=False).encode("utf-8")
             status, content_type = 200, "application/json"
         except QuizError as e:
             body = str(e).encode("utf-8")
             status, content_type = 500, "text/plain"
+        self.send_body(status, content_type, body)
+
+    def reply(self, status: int, data: dict) -> None:
+        self.send_body(status, "application/json", json.dumps(data, ensure_ascii=False).encode("utf-8"))
+
+    def send_body(self, status: int, content_type: str, body: bytes) -> None:
         self.send_response(status)
         self.send_header("Content-Type", f"{content_type}; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def read_body(self):
+        length = int(self.headers.get("Content-Length") or 0)
+        if length > MAX_UPLOAD:
+            raise QuizError("That file is too large to be a quiz module.")
+        try:
+            return json.loads(self.rfile.read(length).decode("utf-8-sig"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise QuizError("That file is not JSON, so it can't be a quiz module.") from None
+
+    def api(self, method: str, path: str) -> None:
+        modules = self.home / "modules"
+        try:
+            if (method, path) == ("GET", "/api/ping"):
+                return self.reply(200, {"app": "code-quiz", "version": VERSION})
+            if (method, path) == ("POST", "/api/modules"):
+                return self.reply(200, install_module(self.read_body(), modules, "uploaded file"))
+            if method == "DELETE" and path.startswith("/api/modules/"):
+                remove_module(path.rsplit("/", 1)[1], modules)
+                return self.reply(200, {"ok": True})
+            if (method, path) == ("GET", "/api/library"):
+                return self.reply(200, self.library_listing())
+            if (method, path) == ("POST", "/api/library/install"):
+                body = self.read_body()
+                subject_id = str(body.get("id") if isinstance(body, dict) else "")
+                if not ID_PATTERN.fullmatch(subject_id):
+                    raise QuizError("Pick a subject from the library.")
+                module = self.library().module(subject_id)
+                return self.reply(200, install_module(module, modules, f"{subject_id} from GitHub"))
+            if (method, path) == ("POST", "/api/settings"):
+                return self.reply(200, self.update_settings(self.read_body()))
+            if (method, path) == ("POST", "/api/open-folder"):
+                modules.mkdir(parents=True, exist_ok=True)
+                open_folder(modules)
+                return self.reply(200, {"ok": True})
+            if (method, path) == ("POST", "/api/quit"):
+                self.reply(200, {"ok": True})
+                threading.Thread(target=self.server.shutdown, daemon=True).start()
+                return None
+        except QuizError as e:
+            return self.reply(400, {"error": str(e)})
+        return self.reply(404, {"error": "Not found."})
+
+    def library(self) -> Library:
+        library = load_settings(self.home)["library"]
+        return Library(library["repo"], library["branch"], library["token"])
+
+    def library_listing(self) -> dict:
+        library = self.library()
+        entries = library.catalog()
+        installed = {s["id"]: ("built-in", local_revision(s)) for s in load_subjects()}
+        for subject in load_modules(self.home / "modules")[0]:
+            installed[subject["id"]] = (subject["source"].get("kind"), subject["source"].get("revision"))
+        for entry in entries:
+            kind, rev = installed.get(entry["id"], (None, None))
+            entry["installedAs"] = kind
+            entry["state"] = "new" if kind is None else "current" if rev == entry["revision"] else "update"
+        return {"repo": library.repo, "branch": library.branch, "subjects": entries}
+
+    def update_settings(self, body) -> dict:
+        if not isinstance(body, dict):
+            raise QuizError("Settings must be a JSON object.")
+        settings = load_settings(self.home)
+        library = settings["library"]
+        repo = str(body.get("repo", library["repo"])).strip()
+        branch = str(body.get("branch", library["branch"])).strip()
+        if not REPO_PATTERN.fullmatch(repo):
+            raise QuizError('Write the repository as owner/name, like "StephanvDr/quiz-app".')
+        if not BRANCH_PATTERN.fullmatch(branch):
+            raise QuizError(f'"{branch}" is not a valid branch name.')
+        library.update(repo=repo, branch=branch)
+        if body.get("clearToken"):
+            library["token"] = ""
+        elif str(body.get("token") or "").strip():
+            library["token"] = str(body["token"]).strip()
+        save_settings(self.home, settings)
+        return {"library": public_library(settings)}
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
@@ -404,6 +856,29 @@ class AppHandler(SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         pass
+
+
+class DesktopServer(ThreadingHTTPServer):
+    """The desktop app's server: knows its data folder and when it was last used."""
+
+    daemon_threads = True
+
+    def __init__(self, address: tuple[str, int], home: Path):
+        super().__init__(address, AppHandler)
+        self.home = home
+        self.last_seen = time.monotonic()
+
+
+def open_folder(path: Path) -> None:
+    try:
+        if sys.platform == "win32":
+            os.startfile(path)  # noqa: S606 - opens Explorer on our own folder
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", str(path)])
+        else:
+            subprocess.Popen(["xdg-open", str(path)])
+    except OSError as e:
+        raise QuizError(f"Couldn't open {path}: {e}") from None
 
 
 def serve(port: int, open_browser: bool) -> int:
@@ -429,13 +904,170 @@ def serve(port: int, open_browser: bool) -> int:
     return 0
 
 
+def run_app(port: int, imports: list[Path], window: bool, idle: int) -> int:
+    """The desktop app: one server per user, shown in its own browser window."""
+    home = data_dir()
+    (home / "modules").mkdir(parents=True, exist_ok=True)
+    log_to_file(home)
+    running = find_instance(port)
+    if running:
+        for path in imports:
+            print(send_module(running, path))
+        if window:
+            show_window(running + ("#modules" if imports else ""))
+        return 0
+    server = None
+    for candidate in range(port, port + 10):
+        try:
+            server = DesktopServer(("127.0.0.1", candidate), home)
+            break
+        except OSError:
+            continue
+    if server is None:
+        print(f"Ports {port} to {port + 9} are all in use; start with --port to pick another.")
+        return 1
+    url = f"http://127.0.0.1:{server.server_address[1]}/"
+    for path in imports:
+        try:
+            added = install_module(json.loads(path.read_text(encoding="utf-8-sig")), home / "modules", path.name)
+            print(f"Added {added['title']} from {path}")
+        except (QuizError, OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
+            print(f"Could not add {path}: {e}")
+    print(f"Code Quiz {VERSION} at {url}  (modules: {home / 'modules'})")
+    if window:
+        show_window(url + ("#modules" if imports else ""))
+    if idle:
+        threading.Thread(target=stop_when_idle, args=(server, idle), daemon=True).start()
+    with server:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print()
+    return 0
+
+
+def log_to_file(home: Path) -> None:
+    """pythonw.exe has no console, so keep messages and errors in a log file."""
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    path = home / "code-quiz.log"
+    with contextlib.suppress(OSError):
+        if path.stat().st_size > 1_000_000:
+            path.unlink()
+    log = open(path, "a", encoding="utf-8", buffering=1)  # noqa: SIM115 - lives as long as the app
+    sys.stdout = sys.stderr = log
+    print(f"--- {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+
+def is_running(url: str) -> bool:
+    try:
+        with urllib.request.urlopen(url + "api/ping", timeout=1) as response:
+            return json.loads(response.read()).get("app") == "code-quiz"
+    except (OSError, ValueError, HTTPException):  # HTTPException: it stopped mid-reply
+        return False
+
+
+def find_instance(port: int) -> str | None:
+    """The address of a Code Quiz app that is already running, if any."""
+    for candidate in range(port, port + 10):
+        url = f"http://127.0.0.1:{candidate}/"
+        if is_running(url):
+            return url
+    return None
+
+
+def call_instance(url: str, path: str, body: bytes = b"") -> dict:
+    request = urllib.request.Request(
+        url + path, data=body, method="POST",
+        headers={"X-Code-Quiz": "1", "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.loads(response.read())
+    except urllib.error.HTTPError as e:
+        return json.loads(e.read() or b"{}")
+
+
+def send_module(url: str, path: Path) -> str:
+    try:
+        result = call_instance(url, "api/modules", path.read_bytes())
+    except (OSError, ValueError, HTTPException) as e:
+        return f"Could not add {path}: {e}"
+    return f"Added {result['title']} from {path}" if "title" in result else f"Could not add {path}: {result.get('error')}"
+
+
+def quit_app(port: int) -> int:
+    running = find_instance(port)
+    if not running:
+        print("Code Quiz is not running.")
+        return 0
+    with contextlib.suppress(OSError, ValueError, HTTPException):
+        call_instance(running, "api/quit")
+    deadline = time.monotonic() + 10  # the installer waits on this before replacing files
+    while is_running(running) and time.monotonic() < deadline:
+        time.sleep(0.2)
+    print(f"Stopped Code Quiz at {running}")
+    return 0
+
+
+def stop_when_idle(server: DesktopServer, idle: int) -> None:
+    while True:
+        time.sleep(min(5, idle))
+        if time.monotonic() - server.last_seen > idle:
+            server.shutdown()
+            return
+
+
+def show_window(url: str) -> None:
+    """Open the app in its own window (Edge or Chrome app mode), or else a browser tab."""
+    for browser in browser_candidates():
+        if browser and Path(browser).is_file():
+            try:
+                subprocess.Popen([browser, f"--app={url}", "--window-size=1180,860"])
+                return
+            except OSError:
+                continue
+    webbrowser.open(url)
+
+
+def browser_candidates() -> list[str | None]:
+    if sys.platform == "win32":
+        folders = [os.environ.get(name) for name in ("ProgramFiles(x86)", "ProgramFiles", "LOCALAPPDATA")]
+        programs = [r"Microsoft\Edge\Application\msedge.exe", r"Google\Chrome\Application\chrome.exe"]
+        return [str(Path(folder) / program) for program in programs for folder in folders if folder]
+    if sys.platform == "darwin":
+        return [f"/Applications/{name}.app/Contents/MacOS/{name}" for name in ("Microsoft Edge", "Google Chrome", "Chromium")]
+    return [shutil.which(name) for name in ("microsoft-edge", "google-chrome", "chromium", "chromium-browser")]
+
+
+def pack(subject_ids: list[str], out_dir: Path) -> list[Path]:
+    subjects = load_subjects()
+    errors = validate(subjects)
+    if errors:
+        raise QuizError("\n".join(errors))
+    unknown = set(subject_ids) - {s["id"] for s in subjects}
+    if unknown:
+        raise QuizError(f"No subject called {', '.join(sorted(unknown))}; see `python quiz.py validate` for the ids")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written = []
+    for subject in subjects:
+        if subject_ids and subject["id"] not in subject_ids:
+            continue
+        path = out_dir / f"{subject['id']}{MODULE_EXT}"
+        path.write_text(json.dumps(pack_subject(subject), ensure_ascii=False, indent=1), encoding="utf-8")
+        written.append(path)
+    return written
+
+
 def build(out_dir: Path) -> Path:
     data = json.dumps(payload(), ensure_ascii=False, separators=(",", ":"))
     data = data.replace("<", "\\u003c")  # keeps "</script>" in a question from closing the tag
     html = (APP_DIR / "index.html").read_text(encoding="utf-8")
     css = (APP_DIR / "styles.css").read_text(encoding="utf-8")
     js = (APP_DIR / "app.js").read_text(encoding="utf-8")
+    icon = base64.b64encode((APP_DIR / "icon.svg").read_bytes()).decode("ascii")
     inlined = {
+        'href="icon.svg"': f'href="data:image/svg+xml;base64,{icon}"',
         '<link rel="stylesheet" href="styles.css">': f"<style>\n{css}</style>",
         '<script src="app.js"></script>': (
             f'<script id="quiz-data" type="application/json">{data}</script>\n<script>\n{js}</script>'
@@ -469,8 +1101,20 @@ def main(argv: list[str] | None = None) -> int:
     serve_cmd = commands.add_parser("serve", help="serve the app locally (the default)")
     serve_cmd.add_argument("--port", type=int, default=8000)
     serve_cmd.add_argument("--no-open", action="store_true", help="don't open a browser")
+    app_cmd = commands.add_parser("app", help="run the desktop app: added modules, GitHub library, own window")
+    app_cmd.add_argument("--port", type=int, default=APP_PORT)
+    app_cmd.add_argument("--no-window", action="store_true", help="don't open a window")
+    app_cmd.add_argument("--idle", type=int, default=IDLE_SECONDS,
+                         help=f"stop after this many seconds without the window (default {IDLE_SECONDS}; 0 = never)")
+    app_cmd.add_argument("--import", dest="imports", type=Path, action="append", default=[],
+                         metavar="FILE", help="add a .quiz module file (used when you open a .quiz file)")
+    quit_cmd = commands.add_parser("quit", help="stop a running desktop app")
+    quit_cmd.add_argument("--port", type=int, default=APP_PORT)
     build_cmd = commands.add_parser("build", help="write one self-contained HTML file")
     build_cmd.add_argument("--out", type=Path, default=ROOT / "dist", help="output folder (default: dist)")
+    pack_cmd = commands.add_parser("pack", help="write subjects as .quiz module files")
+    pack_cmd.add_argument("subjects", nargs="*", help="subject ids (default: all)")
+    pack_cmd.add_argument("--out", type=Path, default=ROOT / "dist" / "modules", help="output folder (default: dist/modules)")
     commands.add_parser("validate", help="check the structure of every quiz file")
     verify_cmd = commands.add_parser("verify", help="run Python snippets and check the answers")
     verify_cmd.add_argument("subject", nargs="?", help="only this subject, e.g. python-pandas")
@@ -479,9 +1123,17 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command in (None, "serve"):
             return serve(getattr(args, "port", 8000), not getattr(args, "no_open", False))
+        if args.command == "app":
+            return run_app(args.port, args.imports, not args.no_window, max(args.idle, 0))
+        if args.command == "quit":
+            return quit_app(args.port)
         if args.command == "build":
             out = build(args.out)
             print(f"Wrote {out} ({out.stat().st_size // 1024} KB). Open it in a browser or host it anywhere.")
+            return 0
+        if args.command == "pack":
+            for path in pack(args.subjects, args.out):
+                print(f"Wrote {path}")
             return 0
         subjects = load_subjects()
         errors = validate(subjects)
