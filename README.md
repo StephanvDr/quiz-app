@@ -10,6 +10,20 @@ The first subject is **pandas**: 183 questions across 14 topics, aimed at data e
 and LLM work. 172 of them are checked by actually running the code, so the marked answers
 are what pandas really does.
 
+The second subject is **ML pitfalls** (category Machine Learning): 104 questions across 7
+topics on supervised-learning terminology and common mistakes, based on the DAT lesson of
+19-11-2026 (ML-valkuilen). 25 of them are scikit-learn snippets checked by running the code.
+
+| Topic | Questions |
+| --- | ---: |
+| Workflow and basics | 14 |
+| Algorithms | 14 |
+| Pitfalls 1: data quality and preprocessing | 16 |
+| Pitfalls 2: model choice and training | 15 |
+| Pitfalls 3a: classification metrics | 15 |
+| Pitfalls 3b: regression metrics and validation | 17 |
+| Pitfalls 4: implementation in practice | 13 |
+
 | Topic | Questions |
 | --- | ---: |
 | Series and DataFrames | 13 |

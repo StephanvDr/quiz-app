@@ -1,0 +1,241 @@
+{
+  "topic": "Pitfalls 1: data quality and preprocessing",
+  "questions": [
+    {
+      "id": "imbalanced-data",
+      "difficulty": "easy",
+      "question": "What is **imbalanced data** (ongebalanceerde data)?",
+      "options": [
+        "One class is far more common than the other, e.g. 95 % \"no\" and 5 % \"yes\"",
+        "The features are on very different scales",
+        "The training set is larger than the test set",
+        "Some rows have missing values"
+      ],
+      "answer": 0,
+      "explanation": "With imbalanced data, a model can predict the majority class for everything and still score a high accuracy, while it never finds the rare class (bad recall)."
+    },
+    {
+      "id": "imbalanced-accuracy-recall",
+      "difficulty": "medium",
+      "question": "A model predicts \"no\" for everyone in a dataset with 5 % \"yes\". What does this print?",
+      "code": [
+        "from sklearn.metrics import accuracy_score, recall_score",
+        "y_true = np.array([0] * 95 + [1] * 5)",
+        "y_pred = np.zeros(100, dtype=int)",
+        "print(accuracy_score(y_true, y_pred), recall_score(y_true, y_pred))"
+      ],
+      "options": [
+        "`0.95 0.0`",
+        "`0.05 0.0`",
+        "`0.95 0.95`",
+        "`0.95 1.0`"
+      ],
+      "answer": 0,
+      "explanation": "95 of 100 predictions are right, so accuracy is 0.95. But the model finds none of the 5 real positives, so recall is 0 / 5 = 0.0. This is the classic imbalanced-data pitfall: accuracy looks great while the model is useless.",
+      "check": "output"
+    },
+    {
+      "id": "too-little-data",
+      "difficulty": "easy",
+      "question": "What is the main risk of **too little data** (te kleine dataset)?",
+      "options": [
+        "Overfitting: the model learns irrelevant patterns and the estimates are unstable",
+        "Underfitting, because the model has too many features",
+        "Training takes too long",
+        "The model becomes a black box"
+      ],
+      "answer": 0,
+      "explanation": "With few examples the model can easily latch on to coincidences, and every metric moves a lot when one row changes. Regression especially needs enough examples for stable estimates."
+    },
+    {
+      "id": "three-test-rows",
+      "difficulty": "medium",
+      "question": "Case 0's test set has only 3 rows. Which accuracy values are even possible?",
+      "options": [
+        "0, 0.33, 0.67 or 1.0",
+        "Any value between 0 and 1",
+        "Only 0 or 1",
+        "0.2, 0.4, 0.6, 0.8 or 1.0"
+      ],
+      "answer": 0,
+      "explanation": "Accuracy is correct / total, and with 3 rows you can only get 0, 1, 2 or 3 right. A single row changes the score by 33 percentage points, which is the \"too little data\" pitfall in action."
+    },
+    {
+      "id": "data-leakage",
+      "difficulty": "easy",
+      "question": "What is **data leakage** (dataleakage)?",
+      "options": [
+        "Information from the test set or the future ends up in training",
+        "Rows silently disappear while loading the data",
+        "Personal data is shared outside the organisation",
+        "The model uses too much memory"
+      ],
+      "answer": 0,
+      "explanation": "Leakage gives the model information it won't have in production, such as a feature derived from the target or statistics computed on the full dataset. The result: unrealistically high scores during development, and failure in production."
+    },
+    {
+      "id": "leakage-target-feature",
+      "difficulty": "medium",
+      "question": "You predict whether a customer will cancel their subscription. Which feature is a case of **data leakage**?",
+      "options": [
+        "`cancellation_reason`, which is only filled in after a customer cancels",
+        "`months_as_customer`",
+        "`number_of_support_calls_last_year`",
+        "`monthly_price`"
+      ],
+      "answer": 0,
+      "explanation": "`cancellation_reason` is derived from the target: it only exists for customers who already cancelled. The model will score almost perfectly in testing and fail in production, where the reason isn't known yet."
+    },
+    {
+      "id": "scale-then-split",
+      "difficulty": "medium",
+      "question": "You scale all data with `StandardScaler` and then split into train and test. What pitfall is this, and what's the fix?",
+      "options": [
+        "Data leakage; split first, fit the scaler on the training data only, then transform the test data with it",
+        "Underfitting; use a more complex model",
+        "Imbalanced data; use `stratify=y` in the split",
+        "Nothing is wrong; scaling doesn't use the target, so it can't leak"
+      ],
+      "answer": 0,
+      "explanation": "The scaler's mean and standard deviation now include the test rows, so the test set has influenced training. Even though the target isn't used, the test set is no longer unseen. A scikit-learn `Pipeline` makes the right order automatic."
+    },
+    {
+      "id": "scaler-fit-on-train",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.preprocessing import StandardScaler",
+        "X_train = np.array([[0.0], [10.0]])",
+        "X_test = np.array([[20.0]])",
+        "scaler = StandardScaler().fit(X_train)",
+        "print(float(scaler.transform(X_test)[0, 0]))"
+      ],
+      "options": [
+        "`3.0`",
+        "`0.0`",
+        "`1.0`",
+        "`2.0`"
+      ],
+      "answer": 0,
+      "explanation": "The scaler learns mean 5 and standard deviation 5 from the training data only. The test value becomes (20 − 5) / 5 = 3.0. Test values may fall outside the training range; that is fine and expected.",
+      "check": "output"
+    },
+    {
+      "id": "minmax-scaler",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.preprocessing import MinMaxScaler",
+        "X = np.array([[1.0], [3.0], [5.0]])",
+        "print(MinMaxScaler().fit_transform(X).ravel().tolist())"
+      ],
+      "options": [
+        "`[0.0, 0.5, 1.0]`",
+        "`[-1.0, 0.0, 1.0]`",
+        "`[0.2, 0.6, 1.0]`",
+        "`[1.0, 3.0, 5.0]`"
+      ],
+      "answer": 0,
+      "explanation": "`MinMaxScaler` rescales to the range 0-1: (x − min) / (max − min). The minimum 1 becomes 0, the maximum 5 becomes 1, and 3 lands halfway. `StandardScaler` would give mean 0 and standard deviation 1 instead.",
+      "check": "output"
+    },
+    {
+      "id": "standard-vs-minmax",
+      "difficulty": "easy",
+      "question": "What does `StandardScaler` do to a feature?",
+      "options": [
+        "Rescales it to mean 0 and standard deviation 1",
+        "Rescales it to the range 0 to 1",
+        "Turns each category into its own 0/1 column",
+        "Removes outliers"
+      ],
+      "answer": 0,
+      "explanation": "`StandardScaler` subtracts the mean and divides by the standard deviation. `MinMaxScaler` is the one that maps to 0-1. Both are normalisation (normaliseren/schalen) and both must be fitted on the training data only."
+    },
+    {
+      "id": "one-hot-why",
+      "difficulty": "easy",
+      "question": "Why use **one-hot encoding** for a `colour` column instead of mapping red=1, blue=2, green=3?",
+      "options": [
+        "Numbers imply an order and distance (\"red < blue\") that doesn't exist",
+        "One-hot encoding uses less memory",
+        "Models can't read numbers above 1",
+        "Mapping to numbers causes data leakage"
+      ],
+      "answer": 0,
+      "explanation": "With red=1, blue=2, green=3, a linear model or k-NN treats green as \"more\" than red and blue as halfway between them. One-hot encoding makes a separate 0/1 column per category, so no false order is implied."
+    },
+    {
+      "id": "one-hot-output",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.preprocessing import OneHotEncoder",
+        "colours = np.array([['red'], ['blue'], ['red']])",
+        "enc = OneHotEncoder(sparse_output=False)",
+        "print(enc.fit_transform(colours).tolist())"
+      ],
+      "options": [
+        "`[[0.0, 1.0], [1.0, 0.0], [0.0, 1.0]]`",
+        "`[[1.0, 0.0], [0.0, 1.0], [1.0, 0.0]]`",
+        "`[[1.0], [2.0], [1.0]]`",
+        "`[[0.0], [1.0], [0.0]]`"
+      ],
+      "answer": 0,
+      "explanation": "The encoder sorts the categories, so the columns are `blue`, `red`. Each red row becomes `[0, 1]` and the blue row `[1, 0]`.",
+      "check": "output"
+    },
+    {
+      "id": "pipeline-purpose",
+      "difficulty": "medium",
+      "question": "Why is a scikit-learn **Pipeline** called the standard defence against leakage?",
+      "options": [
+        "It chains preprocessing and the model, so the preprocessing is learned from the training data only, also inside cross-validation",
+        "It encrypts the training data",
+        "It removes features that correlate with the target",
+        "It automatically balances the classes"
+      ],
+      "answer": 0,
+      "explanation": "With `make_pipeline(StandardScaler(), LogisticRegression())`, calling `fit()` fits the scaler and the model on the training data only, and `predict()` reuses that fitted scaler. In `cross_val_score`, the scaler is refitted on each training fold, so the validation fold never leaks in."
+    },
+    {
+      "id": "pipeline-code",
+      "difficulty": "hard",
+      "question": "Which code scales and trains **without** leakage?",
+      "options": [
+        "X_train, X_test, y_train, y_test = train_test_split(X, y)\nmodel = make_pipeline(StandardScaler(), KNeighborsClassifier())\nmodel.fit(X_train, y_train)\nmodel.score(X_test, y_test)",
+        "X = StandardScaler().fit_transform(X)\nX_train, X_test, y_train, y_test = train_test_split(X, y)\nKNeighborsClassifier().fit(X_train, y_train).score(X_test, y_test)",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y)\nX_test = StandardScaler().fit_transform(X_test)\nKNeighborsClassifier().fit(X_train, y_train).score(X_test, y_test)",
+        "scaler = StandardScaler().fit(np.vstack([X_train, X_test]))\nmodel = KNeighborsClassifier().fit(scaler.transform(X_train), y_train)"
+      ],
+      "answer": 0,
+      "explanation": "The pipeline splits first and fits the scaler only on `X_train`. The second and fourth options fit the scaler on test rows too (leakage). The third scales the test set with its own statistics and leaves the training set unscaled, so train and test no longer match."
+    },
+    {
+      "id": "non-representative",
+      "difficulty": "easy",
+      "question": "A model trained on patients from one Amsterdam hospital performs poorly in a rural clinic. Which pitfall is this most likely?",
+      "options": [
+        "A non-representative dataset",
+        "Data leakage",
+        "Underfitting",
+        "Wrong feature scale"
+      ],
+      "answer": 0,
+      "explanation": "When the training data differs from the real-world data the model will see (niet-representatieve dataset), the model generalises badly outside its training context, even if the test score looked good."
+    },
+    {
+      "id": "feature-engineering",
+      "difficulty": "easy",
+      "question": "According to the lesson, what often matters **more** than which algorithm you choose?",
+      "options": [
+        "Feature engineering: creating, transforming and selecting good features",
+        "The value of `random_state`",
+        "Using the newest version of scikit-learn",
+        "The size of the test set"
+      ],
+      "answer": 0,
+      "explanation": "Good features (encoding, scaling, combining, selecting) often help more than swapping algorithms. Poor feature engineering, such as illogical encodings or unscaled features, distorts the model's weights, especially in regression."
+    }
+  ]
+}

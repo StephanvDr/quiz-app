@@ -1,0 +1,236 @@
+{
+  "topic": "Pitfalls 3b: regression metrics and validation",
+  "questions": [
+    {
+      "id": "mae-value",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.metrics import mean_absolute_error",
+        "y_true = [3, 5, 7]",
+        "y_pred = [2, 5, 9]",
+        "print(mean_absolute_error(y_true, y_pred))"
+      ],
+      "options": ["`1.0`", "`1.67`", "`3.0`", "`0.0`"],
+      "answer": 0,
+      "explanation": "The absolute errors are 1, 0 and 2, and their average is 3 / 3 = 1.0. MAE is in the target's own units: lower is better and 0 is perfect.",
+      "check": "output"
+    },
+    {
+      "id": "rmse-value",
+      "difficulty": "medium",
+      "question": "Same predictions as for MAE (errors 1, 0 and 2). What does this print?",
+      "code": [
+        "from sklearn.metrics import root_mean_squared_error",
+        "y_true = [3, 5, 7]",
+        "y_pred = [2, 5, 9]",
+        "print(round(root_mean_squared_error(y_true, y_pred), 2))"
+      ],
+      "options": ["`1.29`", "`1.0`", "`1.67`", "`2.24`"],
+      "answer": 0,
+      "explanation": "RMSE = √(mean of squared errors) = √((1 + 0 + 4) / 3) = √1.67 ≈ 1.29. It is higher than the MAE of 1.0 because squaring makes the error of 2 count extra.",
+      "check": "output"
+    },
+    {
+      "id": "rmse-vs-mae",
+      "difficulty": "medium",
+      "question": "What does RMSE tell you that MAE doesn't?",
+      "options": [
+        "It punishes large errors harder, so a gap between RMSE and MAE points to a few big misses",
+        "It is in different units than the target",
+        "It can be negative when the model is bad",
+        "It is the share of the variance the model explains"
+      ],
+      "answer": 0,
+      "explanation": "Both are in the target's units, but RMSE squares errors before averaging, so large errors weigh more. If RMSE is much higher than MAE, a few predictions are far off."
+    },
+    {
+      "id": "r2-meaning",
+      "difficulty": "easy",
+      "question": "What does **R²** (coefficient of determination) measure?",
+      "options": [
+        "The share of the variance in y the model explains: 1 is perfect, 0 is no better than predicting the mean",
+        "The average absolute error in the target's units",
+        "The fraction of predictions that are exactly right",
+        "The correlation between two features"
+      ],
+      "answer": 0,
+      "explanation": "R² compares the model's squared errors with those of always predicting the mean. 1 means perfect, 0 means no better than the mean, and on test data it can even go negative."
+    },
+    {
+      "id": "r2-mean-prediction",
+      "difficulty": "medium",
+      "question": "The model always predicts the mean of `y_true`. What does this print?",
+      "code": [
+        "from sklearn.metrics import r2_score",
+        "print(r2_score([1, 2, 3], [2, 2, 2]))"
+      ],
+      "options": ["`0.0`", "`1.0`", "`0.67`", "`-1.0`"],
+      "answer": 0,
+      "explanation": "Predicting the mean for every row is exactly the baseline R² compares against, so R² = 1 − (SS_res / SS_tot) = 1 − 1 = 0.",
+      "check": "output"
+    },
+    {
+      "id": "r2-negative",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.metrics import r2_score",
+        "print(r2_score([1, 2, 3], [3, 2, 1]))"
+      ],
+      "options": ["`-3.0`", "`0.0`", "`-1.0`", "`1.0`"],
+      "answer": 0,
+      "explanation": "SS_res = 4 + 0 + 4 = 8 and SS_tot (around the mean 2) = 1 + 0 + 1 = 2, so R² = 1 − 8 / 2 = −3.0. R² goes negative when a model is worse than simply predicting the mean, which can happen on test data.",
+      "check": "output"
+    },
+    {
+      "id": "high-r2-pitfall",
+      "difficulty": "medium",
+      "question": "A house-price model has R² = 0.92 on the test set. What is the pitfall in reporting only that?",
+      "options": [
+        "A high R² can still hide large errors in euros; also check MAE or RMSE",
+        "R² above 0.9 always means overfitting",
+        "R² can only be computed on the training set",
+        "There is no pitfall; R² is the complete picture"
+      ],
+      "answer": 0,
+      "explanation": "R² is relative to the spread of the target. When prices vary a lot, a model can explain 92 % of the variance and still be off by tens of thousands of euros on a typical house. MAE and RMSE show the error in the target's own units."
+    },
+    {
+      "id": "mae-over-r2",
+      "difficulty": "medium",
+      "question": "When is MAE more useful than R²?",
+      "options": [
+        "When you need to say how far off predictions are in real units, like \"on average 0.4 grade points\"",
+        "When you want a number between 0 and 1",
+        "When the target is a category",
+        "When you want to compare models on datasets with different targets"
+      ],
+      "answer": 0,
+      "explanation": "MAE is the average error in the target's own units, which is easy to explain to a stakeholder. R² is a relative, unitless score."
+    },
+    {
+      "id": "residual",
+      "difficulty": "easy",
+      "question": "What is a **residual** (residu)?",
+      "options": [
+        "y − ŷ for one observation: the actual value minus the prediction",
+        "The part of the data left over after the train/test split",
+        "A feature that the model doesn't use",
+        "The intercept of the regression line"
+      ],
+      "answer": 0,
+      "explanation": "A residual is the prediction error for one row. MAE, RMSE and error analysis are all built on residuals."
+    },
+    {
+      "id": "error-analysis",
+      "difficulty": "easy",
+      "question": "What is **error analysis** (foutanalyse)?",
+      "options": [
+        "Looking at which predictions are wrong and why, to reveal bias and systematic errors",
+        "Computing a single metric such as accuracy",
+        "Removing all rows the model gets wrong",
+        "Fixing bugs in the training code"
+      ],
+      "answer": 0,
+      "explanation": "One metric hides where the model fails. Looking at which rows are wrong (for example, all students with few exercises, or all expensive houses) shows systematic errors you can fix with better data or features."
+    },
+    {
+      "id": "test-on-training-data",
+      "difficulty": "easy",
+      "question": "Why is scoring a model on its own training data unreliable?",
+      "options": [
+        "The model has already seen the answers, so the score overestimates performance on new data",
+        "scikit-learn raises an error when you do it",
+        "Training data is always too small",
+        "The metrics are computed differently on training data"
+      ],
+      "answer": 0,
+      "explanation": "Evaluate on data the model never saw. A model that memorised its training data can score 100 % there and still fail on new data."
+    },
+    {
+      "id": "cross-validation",
+      "difficulty": "medium",
+      "question": "How does **k-fold cross-validation** work?",
+      "options": [
+        "Split the data into k folds; train on k − 1, test on the remaining one, rotate so each fold is tested once, and average",
+        "Train k different algorithms and pick the best one",
+        "Repeat the same train/test split k times with the same `random_state`",
+        "Train on the test set and test on the training set, k times"
+      ],
+      "answer": 0,
+      "explanation": "Every row is used for testing exactly once, and you get k scores instead of one. The average is more reliable than a single split, especially for small datasets."
+    },
+    {
+      "id": "cross-val-score-count",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.linear_model import LogisticRegression",
+        "from sklearn.model_selection import cross_val_score",
+        "X = np.arange(20).reshape(-1, 1)",
+        "y = np.array([0] * 10 + [1] * 10)",
+        "scores = cross_val_score(LogisticRegression(), X, y, cv=5)",
+        "print(len(scores))"
+      ],
+      "options": ["`5`", "`1`", "`4`", "`20`"],
+      "answer": 0,
+      "explanation": "`cv=5` gives 5 folds, so you get one score per fold. Report `scores.mean()` and look at `scores.std()` to see how much the score varies between folds.",
+      "check": "output"
+    },
+    {
+      "id": "kfold-sizes",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.model_selection import KFold",
+        "X = np.arange(12).reshape(-1, 1)",
+        "kf = KFold(n_splits=4)",
+        "print([len(test) for train, test in kf.split(X)])"
+      ],
+      "options": ["`[3, 3, 3, 3]`", "`[9, 9, 9, 9]`", "`[4, 4, 4]`", "`[4, 4, 4, 4]`"],
+      "answer": 0,
+      "explanation": "12 rows in 4 folds gives 3 test rows per fold; the other 9 are used for training each time.",
+      "check": "output"
+    },
+    {
+      "id": "stratified",
+      "difficulty": "medium",
+      "question": "Why use **stratified** k-fold for imbalanced classification data?",
+      "options": [
+        "It keeps the class ratios the same in every fold",
+        "It makes every fold the same size",
+        "It removes the majority class",
+        "It sorts the data before splitting"
+      ],
+      "answer": 0,
+      "explanation": "With 5 % positives, a random fold could end up with no positives at all. Stratification keeps the class ratio in every fold. For classifiers, `cross_val_score` uses stratified folds by default; for a single split, pass `stratify=y` to `train_test_split`."
+    },
+    {
+      "id": "loss-vs-metric",
+      "difficulty": "hard",
+      "question": "What is the difference between a **loss function** and an **evaluation metric**?",
+      "options": [
+        "The loss is what the algorithm minimises while training; the metric is what you report to judge the model, and the two can differ",
+        "They are two names for the same number",
+        "The loss is computed on the test set and the metric on the training set",
+        "The loss is for regression and the metric for classification"
+      ],
+      "answer": 0,
+      "explanation": "Logistic Regression minimises log-loss, but you might report recall. Linear Regression minimises squared error, but you might report MAE. If the loss doesn't match what you actually care about, you optimise the wrong thing."
+    },
+    {
+      "id": "uncertainty",
+      "difficulty": "medium",
+      "question": "The slides list \"forgetting to report **uncertainty** (onzekerheid)\" as a pitfall. What does reporting it look like?",
+      "options": [
+        "Giving probabilities or prediction intervals, like \"grade 6.8, likely between 6.1 and 7.5\"",
+        "Saying the model might be wrong in general terms",
+        "Rounding predictions to whole numbers",
+        "Reporting only the best fold from cross-validation"
+      ],
+      "answer": 0,
+      "explanation": "A bare prediction suggests more certainty than the model has. Probabilities (`predict_proba`) and prediction intervals tell the user how sure the model is, so they can decide how much to trust it."
+    }
+  ]
+}
