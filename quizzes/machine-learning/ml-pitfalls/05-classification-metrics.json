@@ -1,0 +1,218 @@
+{
+  "topic": "Pitfalls 3a: classification metrics",
+  "questions": [
+    {
+      "id": "accuracy-two-of-three",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.metrics import accuracy_score",
+        "print(round(accuracy_score([0, 1, 1], [0, 1, 0]), 2))"
+      ],
+      "options": ["`0.67`", "`0.33`", "`1.0`", "`0.5`"],
+      "answer": 0,
+      "explanation": "Accuracy is correct predictions / total. Two of the three predictions match, so 2 / 3 ≈ 0.67.",
+      "check": "output"
+    },
+    {
+      "id": "confusion-matrix-layout",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.metrics import confusion_matrix",
+        "y_true = [0, 0, 1, 1, 1]",
+        "y_pred = [0, 1, 1, 0, 1]",
+        "print(confusion_matrix(y_true, y_pred).tolist())"
+      ],
+      "options": [
+        "`[[1, 1], [1, 2]]`",
+        "`[[2, 1], [1, 1]]`",
+        "`[[1, 1], [2, 1]]`",
+        "`[[3, 2], [0, 0]]`"
+      ],
+      "answer": 0,
+      "explanation": "Rows are the actual class, columns the predicted class: `[[TN, FP], [FN, TP]]`. Actual 0: one predicted 0 (TN) and one predicted 1 (FP). Actual 1: one predicted 0 (FN) and two predicted 1 (TP).",
+      "check": "output"
+    },
+    {
+      "id": "false-positive",
+      "difficulty": "easy",
+      "question": "A spam filter marks an important e-mail from your manager as spam. What kind of error is this?",
+      "options": [
+        "A false positive (type I error, a false alarm)",
+        "A false negative (type II error, a missed case)",
+        "A true positive",
+        "A true negative"
+      ],
+      "answer": 0,
+      "explanation": "\"Spam\" is the positive class. The model predicted positive while the e-mail was actually negative: a false positive, also called a type I error or false alarm."
+    },
+    {
+      "id": "false-negative",
+      "difficulty": "easy",
+      "question": "A disease test says a sick patient is healthy. What kind of error is this?",
+      "options": [
+        "A false negative (type II error, a missed case)",
+        "A false positive (type I error, a false alarm)",
+        "A true negative",
+        "A true positive"
+      ],
+      "answer": 0,
+      "explanation": "The patient is actually positive, but the model predicted negative: a false negative, also called a type II error. In medicine this is often the costliest mistake."
+    },
+    {
+      "id": "precision-recall-values",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.metrics import precision_score, recall_score",
+        "y_true = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]",
+        "y_pred = [1, 1, 0, 0, 1, 0, 0, 0, 0, 0]",
+        "p = precision_score(y_true, y_pred)",
+        "r = recall_score(y_true, y_pred)",
+        "print(round(p, 2), round(r, 2))"
+      ],
+      "options": ["`0.67 0.5`", "`0.5 0.67`", "`0.7 0.7`", "`0.67 0.83`"],
+      "answer": 0,
+      "explanation": "TP = 2, FP = 1, FN = 2. Precision = TP / (TP + FP) = 2 / 3 ≈ 0.67: of everything flagged, how much was right. Recall = TP / (TP + FN) = 2 / 4 = 0.5: of all real positives, how many were found.",
+      "check": "output"
+    },
+    {
+      "id": "specificity-from-matrix",
+      "difficulty": "hard",
+      "question": "scikit-learn has no `specificity_score`. What does this print?",
+      "code": [
+        "from sklearn.metrics import confusion_matrix",
+        "y_true = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]",
+        "y_pred = [1, 1, 0, 0, 1, 0, 0, 0, 0, 0]",
+        "tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()",
+        "print(round(tn / (tn + fp), 2))"
+      ],
+      "options": ["`0.83`", "`0.5`", "`0.67`", "`0.17`"],
+      "answer": 0,
+      "explanation": "Specificity = TN / (TN + FP) = 5 / 6 ≈ 0.83: recall for the negative class. `.ravel()` on a 2×2 confusion matrix gives the four counts in the order TN, FP, FN, TP.",
+      "check": "output"
+    },
+    {
+      "id": "f1-value",
+      "difficulty": "medium",
+      "question": "Precision is 2/3 and recall is 0.5. What does this print?",
+      "code": [
+        "from sklearn.metrics import f1_score",
+        "y_true = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]",
+        "y_pred = [1, 1, 0, 0, 1, 0, 0, 0, 0, 0]",
+        "print(round(f1_score(y_true, y_pred), 2))"
+      ],
+      "options": ["`0.57`", "`0.58`", "`0.7`", "`0.33`"],
+      "answer": 0,
+      "explanation": "F1 = 2 · precision · recall / (precision + recall) = 2 · 0.667 · 0.5 / 1.167 ≈ 0.57. It is the harmonic mean, which sits below the plain average (0.58) and punishes a weak score on either side.",
+      "check": "output"
+    },
+    {
+      "id": "when-precision",
+      "difficulty": "medium",
+      "question": "For which model is **precision** the most important metric?",
+      "options": [
+        "A spam filter, where a real e-mail in the spam folder is costly",
+        "A cancer screening test, where a missed tumour is costly",
+        "A fraud detector, where missed fraud is costly",
+        "A model on perfectly balanced data, where all errors cost the same"
+      ],
+      "answer": 0,
+      "explanation": "Precision answers \"of everything I flagged, how much was right?\", so it matters when false alarms are costly. Screening and fraud are about finding every real case, which is recall."
+    },
+    {
+      "id": "when-recall",
+      "difficulty": "easy",
+      "question": "When is **recall** (sensitivity) the metric to watch?",
+      "options": [
+        "When missing a real positive is costly, as with fraud or disease",
+        "When false alarms are costly",
+        "When the classes are perfectly balanced",
+        "When you are predicting a continuous number"
+      ],
+      "answer": 0,
+      "explanation": "Recall = TP / (TP + FN): of all real positives, how many did you find? It is the metric for problems where a missed case (false negative) hurts most."
+    },
+    {
+      "id": "f1-imbalanced",
+      "difficulty": "medium",
+      "question": "A fraud model scores 99 % accuracy on data with 1 % fraud. Why is that meaningless, and what should you report?",
+      "options": [
+        "Predicting \"no fraud\" for everyone also scores 99 %; report precision, recall and F1 for the fraud class",
+        "99 % is excellent; accuracy is the best metric for fraud",
+        "The model must be overfitting; report the training accuracy too",
+        "Accuracy is only meaningless for regression; report R²"
+      ],
+      "answer": 0,
+      "explanation": "On imbalanced data the majority class alone gives a high accuracy. Precision, recall and F1 for the rare class (and the confusion matrix) show whether the model actually catches fraud."
+    },
+    {
+      "id": "threshold-raise",
+      "difficulty": "medium",
+      "question": "You raise the classification threshold (drempel) from 0.5 to 0.8. What usually happens?",
+      "options": [
+        "Precision goes up, recall goes down",
+        "Precision goes down, recall goes up",
+        "Both go up",
+        "Nothing; the threshold doesn't affect the metrics"
+      ],
+      "answer": 0,
+      "explanation": "A higher threshold means the model only predicts 1 when it is very sure. Fewer false alarms raise precision, but more real positives are missed, so recall falls."
+    },
+    {
+      "id": "custom-threshold",
+      "difficulty": "easy",
+      "question": "`proba` holds the predicted probabilities of class 1. What does this print?",
+      "code": [
+        "proba = np.array([0.30, 0.55, 0.70, 0.90])",
+        "print((proba >= 0.6).astype(int).tolist())"
+      ],
+      "options": ["`[0, 0, 1, 1]`", "`[0, 1, 1, 1]`", "`[1, 1, 0, 0]`", "`[0, 0, 0, 1]`"],
+      "answer": 0,
+      "explanation": "With a threshold of 0.6, only 0.70 and 0.90 become class 1. With the default 0.5, 0.55 would also have been 1. This is how you apply a custom threshold to `predict_proba()` output.",
+      "check": "output"
+    },
+    {
+      "id": "roc-curve",
+      "difficulty": "medium",
+      "question": "What does a **ROC curve** plot?",
+      "options": [
+        "The true positive rate (recall) against the false positive rate, for all thresholds",
+        "Precision against recall, for the default threshold only",
+        "Training accuracy against test accuracy",
+        "The predicted value against the actual value"
+      ],
+      "answer": 0,
+      "explanation": "The ROC curve shows the trade-off between catching positives (TPR) and raising false alarms (FPR) as you move the threshold from 1 down to 0."
+    },
+    {
+      "id": "auc-meaning",
+      "difficulty": "easy",
+      "question": "A classifier has ROC-AUC 0.5. What does that mean?",
+      "options": [
+        "It is no better than random guessing",
+        "It is right half the time on the test set",
+        "It is perfect",
+        "Its threshold is set to 0.5"
+      ],
+      "answer": 0,
+      "explanation": "AUC is the area under the ROC curve: 0.5 is random guessing and 1.0 is perfect. Because it covers all thresholds, it is a threshold-independent way to compare classifiers."
+    },
+    {
+      "id": "auc-value",
+      "difficulty": "hard",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.metrics import roc_auc_score",
+        "y_true = [0, 0, 1, 1]",
+        "scores = [0.1, 0.4, 0.35, 0.8]",
+        "print(roc_auc_score(y_true, scores))"
+      ],
+      "options": ["`0.75`", "`0.5`", "`1.0`", "`0.25`"],
+      "answer": 0,
+      "explanation": "AUC is the chance that a random positive gets a higher score than a random negative. Of the 4 positive-negative pairs, 3 are ordered correctly; only 0.35 (positive) < 0.4 (negative) is wrong. 3 / 4 = 0.75.",
+      "check": "output"
+    }
+  ]
+}

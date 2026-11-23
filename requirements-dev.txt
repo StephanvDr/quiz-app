@@ -2,3 +2,4 @@
 # The app itself and the other commands use the standard library only.
 pandas>=3.0,<4
 numpy>=2
+scikit-learn>=1.6

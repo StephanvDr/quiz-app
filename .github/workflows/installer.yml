@@ -17,8 +17,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Install NSIS
@@ -33,7 +33,7 @@ jobs:
           fi
       - name: Build the installer
         run: python installer/build.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: CodeQuiz-Setup
           path: dist/CodeQuiz-Setup-*.exe

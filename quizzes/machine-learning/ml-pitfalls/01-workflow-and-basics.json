@@ -1,0 +1,183 @@
+{
+  "topic": "Workflow and basics",
+  "questions": [
+    {
+      "id": "supervised-learning",
+      "difficulty": "easy",
+      "question": "What makes a learning problem **supervised** (gesuperviseerd leren)?",
+      "options": [
+        "Every training example comes with the correct answer (a label)",
+        "A person watches the model while it trains",
+        "The algorithm finds groups in the data without any labels",
+        "The model keeps learning from production data after deployment"
+      ],
+      "answer": 0,
+      "explanation": "Supervised learning learns from examples where the correct answer (the label `y`) is known. Everything in this lesson, both Case 0 and the linear-regression notebook, is supervised. Finding groups without labels is *unsupervised* learning (clustering)."
+    },
+    {
+      "id": "case0-target",
+      "difficulty": "easy",
+      "question": "Case 0 predicts whether a student passes, from study hours and number of practice exercises. What is `y`?",
+      "options": [
+        "Pass or fail: 0 = gezakt, 1 = geslaagd",
+        "Study hours",
+        "Number of practice exercises",
+        "Study hours and practice exercises together"
+      ],
+      "answer": 0,
+      "explanation": "`y` is the **target** (label): the value you want to predict. Study hours and practice exercises are the **features** `X`, the inputs used to make the prediction."
+    },
+    {
+      "id": "classification-or-regression-price",
+      "difficulty": "easy",
+      "question": "You predict the selling price of a house in euros. What kind of problem is this?",
+      "options": ["Regression", "Classification", "Clustering", "Reinforcement learning"],
+      "answer": 0,
+      "explanation": "**Regression** predicts a continuous number (price, temperature, grade). **Classification** predicts a category, such as pass/fail or spam/not spam."
+    },
+    {
+      "id": "classification-or-regression-spam",
+      "difficulty": "easy",
+      "question": "Which of these is a **classification** problem?",
+      "options": [
+        "Deciding whether an e-mail is spam or not spam",
+        "Predicting tomorrow's temperature",
+        "Predicting a student's exam grade on a 1-10 scale",
+        "Estimating the number of hotel bookings next month"
+      ],
+      "answer": 0,
+      "explanation": "Classification predicts a class (category). Spam/not spam has two classes. The other three predict a number, so they are regression problems."
+    },
+    {
+      "id": "workflow-order",
+      "difficulty": "medium",
+      "question": "Which order matches the ML workflow from the Case 0 slides?",
+      "options": [
+        "Split into train/test → `fit()` on train → `predict()` on test → compare `y_test` with `y_pred` → model acceptance → production",
+        "`fit()` on all data → split into train/test → `predict()` on test → model acceptance → production",
+        "Split into train/test → `fit()` on test → `predict()` on train → model acceptance → production",
+        "`fit()` on all data → `predict()` on production data → compute metrics → split into train/test"
+      ],
+      "answer": 0,
+      "explanation": "Identify `X` and `y`, split, train on `X_train`/`y_train`, predict on `X_test`, compare `y_test` with `y_pred` to compute metrics, decide on model acceptance, and only then apply the model to production data. Training before splitting lets the model see the test data."
+    },
+    {
+      "id": "split-sizes",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.model_selection import train_test_split",
+        "X = np.arange(20).reshape(10, 2)",
+        "y = np.array([0, 1] * 5)",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)",
+        "print(len(X_train), len(X_test))"
+      ],
+      "options": ["`8 2`", "`2 8`", "`10 2`", "`5 5`"],
+      "answer": 0,
+      "explanation": "`test_size=0.2` puts 20 % of the 10 rows (2 rows) in the test set and the other 8 in the training set. Note the return order: `X_train, X_test, y_train, y_test`.",
+      "check": "output"
+    },
+    {
+      "id": "random-state",
+      "difficulty": "easy",
+      "question": "What does `random_state=42` do in `train_test_split(X, y, test_size=0.2, random_state=42)`?",
+      "options": [
+        "It makes the split reproducible: the same rows land in the test set every run",
+        "It puts 42 rows in the test set",
+        "It shuffles the data 42 times for a better split",
+        "It keeps the class ratios the same in train and test"
+      ],
+      "answer": 0,
+      "explanation": "`random_state` seeds the random shuffle, so every run produces the same split. The number itself has no meaning; 42 is just a convention. Keeping class ratios equal is what `stratify=y` does."
+    },
+    {
+      "id": "fit-does-what",
+      "difficulty": "easy",
+      "question": "What does `model.fit(X_train, y_train)` do?",
+      "options": [
+        "Learns the model's parameters from the training data",
+        "Returns the predicted classes for `X_train`",
+        "Computes the accuracy on the training data",
+        "Chooses the best hyperparameters automatically"
+      ],
+      "answer": 0,
+      "explanation": "`fit()` is the training step (trainen): it learns the pattern between the features and the target, such as the coefficients and intercept. `predict()` returns predictions, and hyperparameters are chosen by you (or by a search like `GridSearchCV`)."
+    },
+    {
+      "id": "predict-proba-shape",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.linear_model import LogisticRegression",
+        "X = np.array([[1, 5], [2, 8], [3, 10], [6, 20], [8, 25], [9, 30]])",
+        "y = np.array([0, 0, 0, 1, 1, 1])",
+        "model = LogisticRegression().fit(X, y)",
+        "print(model.predict_proba([[4, 12], [5, 18], [7, 22]]).shape)"
+      ],
+      "options": ["`(3, 2)`", "`(3,)`", "`(2, 3)`", "`(3, 1)`"],
+      "answer": 0,
+      "explanation": "`predict_proba()` returns one row per sample and one column per class: here 3 rows and 2 classes (0 and 1). Each row sums to 1. `predict()` would return shape `(3,)`.",
+      "check": "output"
+    },
+    {
+      "id": "predict-proba-to-class",
+      "difficulty": "easy",
+      "question": "In Case 0, a student with 5 hours and 18 exercises gets `predict_proba` = `[0.40, 0.60]` (P(fail), P(pass)). What does `predict()` return with the default threshold?",
+      "options": ["`1` (pass)", "`0` (fail)", "`0.60`", "`[0.40, 0.60]`"],
+      "answer": 0,
+      "explanation": "With the default threshold of 0.5, the class with probability above 0.5 is predicted. P(pass) = 0.60 > 0.5, so `predict()` returns `1`."
+    },
+    {
+      "id": "why-test-set",
+      "difficulty": "easy",
+      "question": "Why do you hold back a test set (testdata) at all?",
+      "options": [
+        "To estimate how the model will perform on new production data it has never seen",
+        "To give the model more examples to learn from",
+        "To tune the model's parameters during `fit()`",
+        "Because scikit-learn refuses to train on all the data"
+      ],
+      "answer": 0,
+      "explanation": "The test set stands in for production data: real, new data the model sees after deployment. Scoring on data the model trained on says little about how it will do on new data. That is why you never train on the test set."
+    },
+    {
+      "id": "model-acceptance",
+      "difficulty": "easy",
+      "question": "At the **model acceptance** step the metrics turn out not to be good enough. What should you do?",
+      "options": [
+        "Go back to the data, the features or the model choice, and iterate",
+        "Deploy anyway and fix it in production",
+        "Add the test set to the training data and retrain until the score is good",
+        "Lower the reported metric's precision so the numbers look better"
+      ],
+      "answer": 0,
+      "explanation": "Model acceptance is the decision whether the metrics are good enough to deploy. If not, you iterate: better data, better features or a different model. Training on the test set would make its score meaningless."
+    },
+    {
+      "id": "split-is-a-boundary",
+      "difficulty": "medium",
+      "question": "The train/test split is a hard boundary. Which step **violates** it?",
+      "options": [
+        "Fitting a `StandardScaler` on the full dataset, then splitting",
+        "Fitting a `StandardScaler` on `X_train` and using it to transform `X_test`",
+        "Calling `predict()` on `X_test`",
+        "Computing accuracy from `y_test` and `y_pred`"
+      ],
+      "answer": 0,
+      "explanation": "A scaler fitted on all the data has learned the mean and standard deviation of the test rows too, so information from the test set leaks into training. Split **first**, then fit preprocessing on the training data only."
+    },
+    {
+      "id": "estimator-term",
+      "difficulty": "easy",
+      "question": "In scikit-learn, what is a **model** or **estimator**?",
+      "options": [
+        "The algorithm together with the parameters it learned",
+        "Only the training data",
+        "The metric you use to judge the predictions",
+        "The list of features"
+      ],
+      "answer": 0,
+      "explanation": "A model (estimator) is the algorithm plus its learned parameters. `LogisticRegression()` is the algorithm; after `fit()` it also holds the learned `coef_` and `intercept_`."
+    }
+  ]
+}

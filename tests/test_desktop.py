@@ -189,7 +189,7 @@ class ModulesTest(unittest.TestCase):
 class LibraryTest(GitHubCase):
     def test_catalog_lists_every_subject_folder(self):
         catalog = {e["id"]: e for e in quiz.Library("me/quizzes", "main").catalog()}
-        self.assertEqual(sorted(catalog), ["bi-contoso-lu1", "bi-drilldown", "python-pandas"])
+        self.assertEqual(sorted(catalog), sorted(s["id"] for s in quiz.load_subjects()))
         self.assertEqual(catalog["python-pandas"]["title"], "Pandas")
         self.assertEqual(catalog["python-pandas"]["topics"], 14)
         built_in = {s["id"]: quiz.local_revision(s) for s in quiz.load_subjects()}
@@ -289,8 +289,9 @@ class DesktopServerTest(GitHubCase):
         self.files["quizzes/sql/basics/01-select.json"] = json.dumps({"topic": "SELECT", "questions": [{
             "id": "select-star", "question": "What does `SELECT *` return?", "options": ["Every column", "Nothing"],
             "answer": 0, "explanation": "The star means all columns."}]}).encode()
-        self.assertEqual(states(), {"bi-contoso-lu1": "current", "bi-drilldown": "current",
-                                    "python-pandas": "update", "sql-basics": "new"})
+        expected = {s["id"]: "current" for s in quiz.load_subjects()}
+        expected.update({"python-pandas": "update", "sql-basics": "new"})
+        self.assertEqual(states(), expected)
 
         for subject_id in ("python-pandas", "sql-basics"):
             status, result = self.call("POST", "api/library/install", {"id": subject_id})
