@@ -49,6 +49,19 @@ class QuestionProblemsTest(unittest.TestCase):
         self.assertTrue(any('"difficulty"' in p for p in problems))
         self.assertTrue(any('"answer"' in p for p in problems))
 
+    def test_difficulty_is_optional(self):
+        q = question()
+        del q["difficulty"]
+        self.assertEqual(quiz.question_problems(q), [])
+        self.assertNotIn("difficulty", quiz.export_question(q))
+
+    def test_export_keeps_only_what_the_app_uses(self):
+        out = quiz.export_question(question(shuffle=False))
+        self.assertEqual(out["code"], "print(1 + 1)")
+        self.assertEqual(out["difficulty"], "easy")
+        self.assertIs(out["shuffle"], False)
+        self.assertNotIn("check", out)
+
     def test_duplicate_options(self):
         self.assertIn("options must all be different", quiz.question_problems(question(options=["`2`", "`2`"])))
 

@@ -1,0 +1,207 @@
+{
+  "topic": "Self-service BI",
+  "questions": [
+    {
+      "id": "ssbi-01",
+      "question": "Wat is self-service BI?",
+      "options": [
+        "Eindgebruikers maken zelf rapporten en analyses op beheerde data, zonder voor elke vraag IT nodig te hebben",
+        "IT bouwt alle rapporten op verzoek van de business",
+        "Gebruikers beheren hun eigen databases",
+        "BI-software die zichzelf installeert"
+      ],
+      "answer": 0,
+      "explanation": "De business bouwt zelf de inzichten; IT levert de betrouwbare data."
+    },
+    {
+      "id": "ssbi-02",
+      "question": "Wat is de belangrijkste voorwaarde voor geslaagde self-service BI?",
+      "options": [
+        "Een betrouwbaar, gestandaardiseerd datamodel als bron",
+        "Zo veel mogelijk BI-licenties",
+        "Snelle laptops voor alle gebruikers",
+        "Een verbod op Excel"
+      ],
+      "answer": 0,
+      "explanation": "Zonder goede, gedeelde data bouwt iedereen snel mooie rapporten op verkeerde of tegenstrijdige cijfers."
+    },
+    {
+      "id": "ssbi-03",
+      "question": "Wat gebeurt er bij self-service BI zonder governance?",
+      "options": [
+        "Terugval naar de Excel-fase: eigen definities, kopieën en tegenstrijdige cijfers",
+        "De datakwaliteit verbetert vanzelf",
+        "IT krijgt meer werk, maar de kwaliteit stijgt",
+        "Er verandert niets"
+      ],
+      "answer": 0,
+      "explanation": "Vrijheid zonder afspraken maakt van een BI-tool een spreadmart-machine."
+    },
+    {
+      "id": "ssbi-04",
+      "question": "Wat is een belangrijk voordeel van self-service BI?",
+      "options": [
+        "Sneller antwoord op vragen en minder IT-bottleneck",
+        "Geen datawarehouse meer nodig",
+        "Geen training nodig",
+        "Altijd consistente cijfers, ook zonder afspraken"
+      ],
+      "answer": 0,
+      "explanation": "De business kent haar eigen vragen het best en hoeft niet in de IT-wachtrij."
+    },
+    {
+      "id": "ssbi-05",
+      "question": "Wat doet row-level security (RLS)?",
+      "options": [
+        "Gebruikers zien alleen de rijen waar ze recht op hebben, bijvoorbeeld alleen hun eigen hotel",
+        "Rijen versleutelen op schijf",
+        "Dubbele rijen verwijderen",
+        "Het aantal rijen per rapport beperken"
+      ],
+      "answer": 0,
+      "explanation": "Met RLS kan één model veilig gedeeld worden: elke manager ziet alleen zijn eigen vestiging."
+    },
+    {
+      "id": "ssbi-06",
+      "question": "Wat is een gecertificeerde dataset?",
+      "options": [
+        "Een door de eigenaar goedgekeurde dataset die als betrouwbare bron geldt",
+        "Een dataset met een ISO-certificaat",
+        "Een dataset die je niet mag gebruiken",
+        "Een versleutelde dataset"
+      ],
+      "answer": 0,
+      "explanation": "Certificering laat gebruikers zien: bouw je rapport op déze bron."
+    },
+    {
+      "id": "ssbi-07",
+      "question": "Wat is managed self-service BI?",
+      "options": [
+        "Het BI-team levert en beheert de datamodellen; de business bouwt er zelf rapporten op",
+        "IT bouwt alle rapporten",
+        "Elke gebruiker beheert zijn eigen data",
+        "Een externe partij beheert alle BI"
+      ],
+      "answer": 0,
+      "explanation": "De gangbare middenweg: centrale controle over de data, vrijheid in de rapportage."
+    },
+    {
+      "id": "ssbi-08",
+      "question": "Wat is data literacy?",
+      "options": [
+        "Het vermogen om data te lezen, te interpreteren en er kritisch mee te werken",
+        "Kennis van programmeertalen",
+        "Het lezen van documentatie over databases",
+        "Snel kunnen typen in Excel"
+      ],
+      "answer": 0,
+      "explanation": "Zonder data literacy trekken gebruikers verkeerde conclusies uit correcte data."
+    },
+    {
+      "id": "ssbi-09",
+      "question": "Wat doet een BI Center of Excellence (CoE)?",
+      "options": [
+        "Standaarden, training en best practices voor BI in de organisatie bewaken",
+        "Alle servers beheren",
+        "De boekhouding controleren",
+        "Alle rapporten zelf maken"
+      ],
+      "answer": 0,
+      "explanation": "Een CoE helpt self-service op te schalen zonder dat de kwaliteit wegzakt."
+    },
+    {
+      "id": "ssbi-10",
+      "question": "Waar of onwaar: Bij self-service BI is IT niet meer nodig.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "IT en het BI-team leveren de data, modellen, beveiliging en governance waar self-service op draait.",
+      "shuffle": false
+    },
+    {
+      "id": "ssbi-11",
+      "question": "Waar of onwaar: Volwassen self-service BI hoort bij de hogere maturityfasen.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 0,
+      "explanation": "Self-service werkt pas goed als er een betrouwbare, gestandaardiseerde basis ligt, zoals in Adult of Sage.",
+      "shuffle": false
+    },
+    {
+      "id": "ssbi-12",
+      "question": "Wat is het verschil tussen self-service BI en de Excel-fase?",
+      "options": [
+        "Dezelfde vrijheid, maar op centrale, gestandaardiseerde data in plaats van eigen kopieën",
+        "Er is geen verschil",
+        "Self-service BI gebruikt alleen grafieken",
+        "In de Excel-fase is de data beter beheerd"
+      ],
+      "answer": 0,
+      "explanation": "Dit is een sterk antwoord in een verdediging: het verschil zit in de bron, niet in de tool."
+    },
+    {
+      "id": "ssbi-13",
+      "question": "Welk rijtje bevat self-service BI-tools?",
+      "options": [
+        "Power BI, Tableau en Qlik Sense",
+        "SQL Server, Oracle en MySQL",
+        "Jira, Confluence en Trello",
+        "Docker, Kubernetes en Ansible"
+      ],
+      "answer": 0,
+      "explanation": "De andere rijtjes zijn databases, projecttools en infrastructuurtools."
+    },
+    {
+      "id": "ssbi-14",
+      "question": "Wat is report sprawl?",
+      "options": [
+        "Wildgroei aan overlappende rapporten, waardoor niemand meer weet welke klopt",
+        "Een rapport met te veel pagina's",
+        "Rapporten die langzaam laden",
+        "Het automatisch verspreiden van rapporten"
+      ],
+      "answer": 0,
+      "explanation": "Een typisch gevolg van self-service zonder governance."
+    },
+    {
+      "id": "ssbi-15",
+      "question": "Wat is een semantisch model?",
+      "options": [
+        "Een businessvriendelijke laag met tabellen, relaties, measures en definities bovenop de data",
+        "Een model dat taal analyseert",
+        "Een netwerkdiagram",
+        "Het fysieke ontwerp van de database"
+      ],
+      "answer": 0,
+      "explanation": "Gebruikers werken met 'Omzet' en 'Hotel' in plaats van met technische tabellen en joins."
+    },
+    {
+      "id": "ssbi-16",
+      "question": "In welke taal schrijf je measures in een Power BI-model?",
+      "options": [
+        "DAX",
+        "Power Query (M)",
+        "Python",
+        "YAML"
+      ],
+      "answer": 0,
+      "explanation": "DAX is voor berekeningen in het model; Power Query (M) is voor het ophalen en transformeren van data."
+    },
+    {
+      "id": "ssbi-17",
+      "question": "Wie bepaalt de definitie van een KPI als 'omzet'?",
+      "options": [
+        "De business, als data-eigenaar, vastgelegd via governance",
+        "De ontwikkelaar van het rapport",
+        "Iedere gebruiker voor zichzelf",
+        "Het BI-tool, automatisch"
+      ],
+      "answer": 0,
+      "explanation": "Definities horen bij de business; het BI-team legt ze centraal vast in het model."
+    }
+  ]
+}

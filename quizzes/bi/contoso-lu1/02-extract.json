@@ -1,0 +1,295 @@
+{
+  "topic": "Extract: data laden",
+  "questions": [
+    {
+      "id": "lu1-colab-try",
+      "difficulty": "easy",
+      "question": "Wat gebeurt er als je het notebook buiten Google Colab draait?",
+      "code": [
+        "try:",
+        "    from google.colab import drive",
+        "    drive.mount('/content/drive')",
+        "    DATA_DIR = '/content/drive/MyDrive/Contoso'",
+        "except ModuleNotFoundError:",
+        "    DATA_DIR = os.environ.get('CONTOSO_DIR', '.')"
+      ],
+      "options": [
+        "De import mislukt met `ModuleNotFoundError`; `DATA_DIR` wordt dan de map uit `CONTOSO_DIR`, of anders de huidige map",
+        "Het notebook stopt met een foutmelding",
+        "Google Drive wordt toch gekoppeld, via de browser",
+        "`DATA_DIR` blijft leeg en elk bestand wordt overgeslagen"
+      ],
+      "answer": 0,
+      "explanation": "Het pakket `google.colab` bestaat alleen in Colab. Door de fout op te vangen werkt hetzelfde notebook ook lokaal: daar zet je de datamap in de omgevingsvariabele `CONTOSO_DIR`, of je start het notebook in de map met de CSV-bestanden."
+    },
+    {
+      "id": "lu1-environ-get",
+      "difficulty": "easy",
+      "question": "Wat print deze code als de omgevingsvariabele `CONTOSO_DIR` niet bestaat?",
+      "code": [
+        "# voorbeeld: de variabele bestaat niet",
+        "os.environ.pop('CONTOSO_DIR', None)",
+        "print(os.environ.get('CONTOSO_DIR', '.'))"
+      ],
+      "options": [
+        "`.`",
+        "`None`",
+        "`KeyError`",
+        "`CONTOSO_DIR`"
+      ],
+      "answer": 0,
+      "explanation": "`.get(naam, standaard)` geeft de standaardwaarde terug als de naam ontbreekt: `'.'`, de huidige map. `os.environ['CONTOSO_DIR']` zou in dat geval een `KeyError` geven.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-makedirs",
+      "difficulty": "easy",
+      "question": "Wat doet `os.makedirs(OUTPUT_DIR, exist_ok=True)`?",
+      "options": [
+        "Maakt de map `grafieken` aan (met eventuele bovenliggende mappen) en geeft geen fout als hij al bestaat",
+        "Verwijdert de map als die al bestaat en maakt hem opnieuw",
+        "Maakt de map alleen aan als er nog geen grafieken zijn",
+        "Geeft een fout als de map al bestaat"
+      ],
+      "answer": 0,
+      "explanation": "Zonder `exist_ok=True` geeft `makedirs` een `FileExistsError` als de map er al is, bijvoorbeeld bij de tweede keer draaien. Bestaande grafieken blijven staan; `savefig` overschrijft ze."
+    },
+    {
+      "id": "lu1-utf8-sig",
+      "difficulty": "medium",
+      "question": "Wat doet `encoding='utf-8-sig'` in `read_contoso`?",
+      "code": [
+        "def read_contoso(file, **kwargs):",
+        "    return pd.read_csv(os.path.join(DATA_DIR, file), encoding='utf-8-sig', **kwargs)"
+      ],
+      "options": [
+        "Het leest het bestand als UTF-8 en slaat een BOM (een onzichtbaar teken) aan het begin over",
+        "Het zet de decimale komma om naar een punt",
+        "Het controleert of het bestand digitaal ondertekend is",
+        "Het leest alleen de eerste regel met de kolomnamen"
+      ],
+      "answer": 0,
+      "explanation": "Sommige programma's, zoals Excel, zetten een BOM vooraan een CSV-bestand. `utf-8-sig` haalt die altijd weg, zodat hij niet aan de eerste kolomnaam blijft plakken. `read_csv` slaat een BOM bij gewone UTF-8 meestal ook zelf al over; met `utf-8-sig` staat het expliciet in de code, en het werkt ook met andere tools zoals `open()`."
+    },
+    {
+      "id": "lu1-kwargs",
+      "difficulty": "medium",
+      "question": "Wat maakt `**kwargs` in `read_contoso` mogelijk?",
+      "code": [
+        "def read_contoso(file, **kwargs):",
+        "    return pd.read_csv(os.path.join(DATA_DIR, file), encoding='utf-8-sig', **kwargs)",
+        "",
+        "raw['sales'] = read_contoso('Contoso_Sales.csv', dtype=str)"
+      ],
+      "options": [
+        "Extra opties, zoals `dtype=str` bij de verkoopdata, doorgeven aan `pd.read_csv`",
+        "Meerdere bestanden tegelijk inlezen",
+        "Het bestand comprimeren",
+        "Alleen de sleutelkolommen inlezen"
+      ],
+      "answer": 0,
+      "explanation": "`**kwargs` verzamelt alle keyword-argumenten die niet bij naam in de functie staan, en `**kwargs` in de aanroep van `read_csv` geeft ze weer door. Zo hoeft `read_contoso` niet elke optie van `read_csv` zelf te kennen."
+    },
+    {
+      "id": "lu1-kwargs-output",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "def show_options(file, **kwargs):     # voorbeeld",
+        "    return kwargs",
+        "",
+        "print(show_options('Contoso_Sales.csv', dtype=str, sep=';'))"
+      ],
+      "options": [
+        "`{'dtype': <class 'str'>, 'sep': ';'}`",
+        "`('Contoso_Sales.csv', <class 'str'>, ';')`",
+        "`{'file': 'Contoso_Sales.csv'}`",
+        "`['dtype', 'sep']`"
+      ],
+      "answer": 0,
+      "explanation": "`**kwargs` is een gewone dict met de keyword-argumenten. `file` staat er niet in, want dat argument heeft een eigen naam in de functie.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-sales-as-text",
+      "difficulty": "medium",
+      "question": "Waarom leest het notebook `Contoso_Sales.csv` met `dtype=str`?",
+      "options": [
+        "Bedragen hebben een decimale komma ('321,44') en de datum is tekst; de Transform-stap zet die bewust om",
+        "Tekst neemt minder geheugen in dan getallen",
+        "pandas kan geen 2,3 miljoen getallen inlezen",
+        "Power BI kan alleen tekstkolommen importeren"
+      ],
+      "answer": 0,
+      "explanation": "Zo raadt pandas niet zelf het type. In de Transform-stap zet `to_number` de bedragen om (komma wordt punt) en wordt de datum de `DateKey`. Tekst kost juist meer geheugen; daarom krijgen de kolommen van `fact` daarna kleine types zoals `int8`."
+    },
+    {
+      "id": "lu1-raw-layer",
+      "difficulty": "easy",
+      "question": "Wat is `raw` in het notebook?",
+      "options": [
+        "Een dict met alle bronbestanden, onveranderd ingelezen: de ruwe laag waar de Transform-stap uit leest",
+        "De opgeschoonde dimensietabellen",
+        "Een lijst met bestandsnamen",
+        "De feitentabel"
+      ],
+      "answer": 0,
+      "explanation": "Door de bron eerst ongewijzigd te bewaren, kun je in de verkenning en de validatie altijd terug naar de oorspronkelijke data, bijvoorbeeld om het aantal rijen en de totale omzet voor en na de ETL te vergelijken."
+    },
+    {
+      "id": "lu1-shape-table",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "raw = {'channel': pd.DataFrame({'Channel': [1, 2, 3, 4]}),",
+        "       'category': pd.DataFrame({'ProductCategoryKey': range(8), 'ProductCategory': range(8)})}",
+        "print(pd.DataFrame({name: df.shape for name, df in raw.items()}, index=['rows', 'columns']).T)"
+      ],
+      "options": [
+        "          rows  columns\nchannel      4        1\ncategory     8        2",
+        "         channel  category\nrows           4         8\ncolumns        1         2",
+        "          rows  columns\nchannel      1        4\ncategory     2        8",
+        "          shape\nchannel  (4, 1)\ncategory (8, 2)"
+      ],
+      "answer": 0,
+      "explanation": "De dict comprehension maakt per tabel een kolom met `(rijen, kolommen)`; `index=['rows', 'columns']` geeft die twee waarden een naam. `.T` draait de tabel, zodat elke tabel een rij wordt. Zo maakt het notebook het overzicht van alle bronbestanden.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-timing",
+      "difficulty": "easy",
+      "question": "Wat doen `t0 = time.time()` en `time.time() - t0` rond het inlezen van de verkoopdata?",
+      "options": [
+        "Ze meten hoe lang het inlezen duurt; het notebook print 'Sales read in 9.4 s'",
+        "Ze stoppen het inlezen na 10 seconden",
+        "Ze zetten de verkoopdatum om naar een tijdstempel",
+        "Ze vertragen het inlezen om de server te sparen"
+      ],
+      "answer": 0,
+      "explanation": "`time.time()` geeft het huidige moment in seconden. Het verschil tussen twee momenten is de doorlooptijd. In de f-string toont `:.1f` die met één decimaal."
+    },
+    {
+      "id": "lu1-wb-json-index",
+      "difficulty": "medium",
+      "question": "Waarom staat er `[1]` achter `.json()` in `fetch_worldbank`?",
+      "code": [
+        "meta = pd.json_normalize(requests.get(f'{base}/country?format=json&per_page=400', timeout=60).json()[1])"
+      ],
+      "options": [
+        "De World Bank API geeft een lijst van twee delen terug: `[0]` is metadata (zoals het aantal pagina's), `[1]` is de data",
+        "Om de eerste rij met kolomnamen over te slaan",
+        "Om alleen het tweede land te lezen",
+        "Omdat Python vanaf 1 telt"
+      ],
+      "answer": 0,
+      "explanation": "Het antwoord van de API ziet eruit als `[{\"page\": 1, \"pages\": 1, ...}, [ {land}, {land}, ... ]]`. Alleen het tweede element bevat de landen; `json_normalize` maakt daar een tabel van."
+    },
+    {
+      "id": "lu1-json-normalize",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld van de API",
+        "records = [{'id': 'NLD', 'name': 'Netherlands',",
+        "            'region': {'id': 'ECS', 'value': 'Europe & Central Asia'}}]",
+        "print(pd.json_normalize(records).columns.tolist())"
+      ],
+      "options": [
+        "`['id', 'name', 'region.id', 'region.value']`",
+        "`['id', 'name', 'region']`",
+        "`['id', 'name', 'value']`",
+        "`['NLD', 'Netherlands', 'ECS', 'Europe & Central Asia']`"
+      ],
+      "answer": 0,
+      "explanation": "`json_normalize` maakt van een geneste dict losse kolommen, met een punt tussen de namen. Daarom gebruikt de code `'region.value'` en `'incomeLevel.value'` en hernoemt die daarna naar `Region` en `IncomeLevel`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-wb-aggregates",
+      "difficulty": "medium",
+      "question": "Waarom haalt `fetch_worldbank` de rijen met regio 'Aggregates' weg?",
+      "code": [
+        "meta = meta[meta['region.value'].str.strip() != 'Aggregates']          # leave out totals such as 'World'"
+      ],
+      "options": [
+        "De API levert ook totalen, zoals 'World' en 'Euro area'; dat zijn geen landen",
+        "Die rijen hebben geen ISO3-code",
+        "Om alleen landen in Europa over te houden",
+        "Omdat die rijen dubbel in de data staan"
+      ],
+      "answer": 0,
+      "explanation": "De World Bank publiceert indicatoren ook voor groepen landen. Die horen niet in een landendimensie: ze zouden bij het koppelen op naam niets opleveren of het aantal landen vertekenen. `.str.strip()` haalt eerst eventuele spaties weg."
+    },
+    {
+      "id": "lu1-wb-concat",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "pop = pd.DataFrame({'ISO3': ['NLD', 'NLD'], 'Year': ['2011', '2012'],",
+        "                    'Population': [16.7, 16.8]}).set_index(['ISO3', 'Year'])",
+        "gdp = pd.DataFrame({'ISO3': ['NLD', 'NLD'], 'Year': ['2011', '2012'],",
+        "                    'GDPperCapitaUSD': [54.2, 50.1]}).set_index(['ISO3', 'Year'])",
+        "values = pd.concat([pop, gdp], axis=1).reset_index().astype({'Year': int})",
+        "print(values.columns.tolist(), values['Year'].tolist())"
+      ],
+      "options": [
+        "`['ISO3', 'Year', 'Population', 'GDPperCapitaUSD'] [2011, 2012]`",
+        "`['ISO3', 'Year', 'Population', 'GDPperCapitaUSD'] ['2011', '2012']`",
+        "`['Population', 'GDPperCapitaUSD'] [2011, 2012]`",
+        "`['ISO3', 'Year', 'Population', 'ISO3', 'Year', 'GDPperCapitaUSD'] [2011, 2012]`"
+      ],
+      "answer": 0,
+      "explanation": "`concat` met `axis=1` zet de indicatoren naast elkaar, uitgelijnd op de index (ISO3, Year). `reset_index()` maakt van die index weer gewone kolommen, en `astype({'Year': int})` maakt van het jaar uit de API (tekst) een getal.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-wb-inner-merge",
+      "difficulty": "hard",
+      "question": "`fetch_worldbank` eindigt met `meta.merge(values, on='ISO3')`. Wat gebeurt er met de aggregaten die nog in `values` staan?",
+      "options": [
+        "Die vallen weg: `merge` is standaard een inner join en de aggregaten zijn eerder uit `meta` gefilterd",
+        "Die blijven staan, met een lege landnaam",
+        "Die worden opgeteld bij het land met dezelfde code",
+        "De merge geeft een fout"
+      ],
+      "answer": 0,
+      "explanation": "De indicatoren zijn opgehaald voor `country/all`, dus inclusief aggregaten. Een inner join houdt alleen ISO3-codes over die in beide tabellen staan, en `meta` bevat na het filter alleen echte landen."
+    },
+    {
+      "id": "lu1-wb-cache",
+      "difficulty": "medium",
+      "question": "Wat doet dit blok?",
+      "code": [
+        "wb_path = os.path.join(DATA_DIR, WB_FILE)",
+        "if os.path.exists(wb_path):",
+        "    raw['worldbank'] = pd.read_csv(wb_path)",
+        "else:",
+        "    raw['worldbank'] = fetch_worldbank()",
+        "    raw['worldbank'].to_csv(wb_path, index=False)"
+      ],
+      "options": [
+        "Staat het CSV-bestand er al, dan leest het notebook dat (hetzelfde bestand als in Power BI); anders haalt het de data via de API op en slaat het die op",
+        "Het verwijdert het oude bestand en haalt altijd nieuwe data op",
+        "Het haalt de data op en vergelijkt die met het bestand",
+        "Het slaat het bestand op als het nog niet bestaat, maar leest altijd de API"
+      ],
+      "answer": 0,
+      "explanation": "Zo werken het notebook en Power BI met precies dezelfde World Bank-data, ook als de API later andere cijfers geeft. Bovendien hoeft het notebook niet bij elke run online te gaan."
+    },
+    {
+      "id": "lu1-wb-651",
+      "difficulty": "easy",
+      "question": "`raw['worldbank']` heeft 651 rijen en 217 landen. Hoe kom je aan 651?",
+      "options": [
+        "217 landen × 3 jaar (2011 t/m 2013)",
+        "217 landen × 3 indicatoren",
+        "651 landen, waarvan 217 met data",
+        "217 landen plus 434 aggregaten"
+      ],
+      "answer": 0,
+      "explanation": "De tabel heeft één rij per land per jaar. De drie indicatoren (bevolking, BBP per inwoner en internetgebruik) zijn kolommen, geen rijen."
+    }
+  ]
+}

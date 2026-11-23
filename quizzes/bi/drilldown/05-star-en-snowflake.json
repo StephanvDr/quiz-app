@@ -1,0 +1,316 @@
+{
+  "topic": "Star & snowflake",
+  "questions": [
+    {
+      "id": "schema-01",
+      "question": "Wat is een snowflake schema?",
+      "options": [
+        "Een star schema waarvan de dimensies zijn genormaliseerd in sub-dimensietabellen",
+        "Een schema zonder feitentabel",
+        "Een schema voor ongestructureerde data",
+        "Een star schema met meerdere feitentabellen"
+      ],
+      "answer": 0,
+      "explanation": "Bijvoorbeeld DimHotel → DimStad → DimLand: de dimensie vertakt in genormaliseerde tabellen."
+    },
+    {
+      "id": "schema-02",
+      "question": "Wat is een star schema?",
+      "options": [
+        "Eén feitentabel in het midden met platte, gedenormaliseerde dimensietabellen eromheen",
+        "Een volledig genormaliseerd model in 3NF",
+        "Een schema met alleen dimensietabellen",
+        "Meerdere feitentabellen die aan elkaar gekoppeld zijn"
+      ],
+      "answer": 0,
+      "explanation": "De feitentabel vormt het hart, de dimensies vormen de punten van de ster."
+    },
+    {
+      "id": "schema-03",
+      "question": "Waarom heet het snowflake schema zo?",
+      "options": [
+        "Het diagram vertakt aan de punten van de ster, zoals een sneeuwvlok",
+        "Het is uitgevonden door Snowflake Inc.",
+        "Het werkt alleen in de cloud",
+        "De data is 'bevroren' en verandert nooit"
+      ],
+      "answer": 0,
+      "explanation": "De naam komt van de vorm van het diagram, niet van het bedrijf."
+    },
+    {
+      "id": "schema-04",
+      "question": "Wat is een voordeel van snowflake ten opzichte van star?",
+      "options": [
+        "Minder redundantie in de dimensies",
+        "Minder joins",
+        "Eenvoudiger voor eindgebruikers",
+        "Meestal snellere queries"
+      ],
+      "answer": 0,
+      "explanation": "Normaliseren voorkomt herhaling, bijvoorbeeld de landnaam bij elk hotel. De andere opties zijn juist voordelen van star."
+    },
+    {
+      "id": "schema-05",
+      "question": "Wat is een nadeel van snowflake?",
+      "options": [
+        "Meer joins, dus complexere en vaak tragere queries",
+        "Meer redundantie",
+        "Geen ondersteuning voor hiërarchieën",
+        "Feitentabellen worden breder"
+      ],
+      "answer": 0,
+      "explanation": "Elke extra vertakking is een extra join bij het bevragen."
+    },
+    {
+      "id": "schema-06",
+      "question": "Welk schema raadt Microsoft aan voor Power BI-modellen?",
+      "options": [
+        "Star schema",
+        "Snowflake schema",
+        "Eén platte tabel",
+        "Een 3NF-model"
+      ],
+      "answer": 0,
+      "explanation": "Power BI werkt het best met een star schema: filters lopen dan eenvoudig van dimensie naar feit."
+    },
+    {
+      "id": "schema-07",
+      "question": "DimHotel verwijst naar DimStad, die naar DimLand verwijst. Welk schema is dit?",
+      "options": [
+        "Snowflake",
+        "Star",
+        "Galaxy",
+        "Data vault"
+      ],
+      "answer": 0,
+      "explanation": "Een dimensie die naar andere dimensietabellen vertakt, is snowflaking."
+    },
+    {
+      "id": "schema-08",
+      "question": "Welke vorm hebben feiten- en dimensietabellen typisch?",
+      "options": [
+        "Feiten: lang en smal. Dimensies: kort en breed",
+        "Feiten: kort en breed. Dimensies: lang en smal",
+        "Allebei lang en smal",
+        "Allebei kort en breed"
+      ],
+      "answer": 0,
+      "explanation": "Feitentabellen hebben miljoenen rijen met weinig kolommen; dimensies minder rijen met veel beschrijvende kolommen."
+    },
+    {
+      "id": "schema-09",
+      "question": "Wat staat er in een dimensietabel?",
+      "options": [
+        "Beschrijvende context: wie, wat, waar, wanneer",
+        "Meetwaarden zoals omzet en aantallen",
+        "Alleen foreign keys",
+        "Logbestanden van de ETL"
+      ],
+      "answer": 0,
+      "explanation": "Dimensies geven de feiten betekenis; je filtert en groepeert erop."
+    },
+    {
+      "id": "schema-10",
+      "question": "Wat is een surrogate key?",
+      "options": [
+        "Een betekenisloze, door het datawarehouse gegenereerde sleutel",
+        "Het klantnummer uit het bronsysteem",
+        "Een sleutel van twee gecombineerde kolommen",
+        "Een tijdelijke sleutel in de staging area"
+      ],
+      "answer": 0,
+      "explanation": "Meestal een oplopend getal dat het datawarehouse zelf uitdeelt, los van de bron."
+    },
+    {
+      "id": "schema-11",
+      "question": "Waarom gebruik je surrogate keys in dimensies?",
+      "options": [
+        "Ze maken historie (SCD type 2) mogelijk en maken je onafhankelijk van bronsleutels",
+        "Ze zijn makkelijker te onthouden voor gebruikers",
+        "Ze vervangen de feitentabel",
+        "Ze zijn verplicht in SQL"
+      ],
+      "answer": 0,
+      "explanation": "Bij SCD 2 heeft dezelfde klant meerdere rijen, die elk een eigen sleutel nodig hebben. Ook bij een bronmigratie blijft het datawarehouse stabiel."
+    },
+    {
+      "id": "schema-12",
+      "question": "Wat is een natural key (business key)?",
+      "options": [
+        "De sleutel uit het bronsysteem, zoals een klantnummer",
+        "Een sleutel die het datawarehouse genereert",
+        "Een sleutel zonder betekenis",
+        "Een sleutel die alleen in feitentabellen voorkomt"
+      ],
+      "answer": 0,
+      "explanation": "De natural key bewaar je wel in de dimensie, om terug te kunnen koppelen naar de bron."
+    },
+    {
+      "id": "schema-13",
+      "question": "Wat doet SCD type 1?",
+      "options": [
+        "De oude waarde overschrijven, zonder historie",
+        "Een nieuwe rij toevoegen met geldigheidsdatums",
+        "Een extra kolom met de vorige waarde toevoegen",
+        "De wijziging negeren"
+      ],
+      "answer": 0,
+      "explanation": "Type 1 is geschikt voor correcties, zoals een tikfout in een naam."
+    },
+    {
+      "id": "schema-14",
+      "question": "Wat doet SCD type 2?",
+      "options": [
+        "Een nieuwe rij toevoegen met geldigheidsdatums, zodat de volledige historie bewaard blijft",
+        "De oude waarde overschrijven",
+        "Een kolom 'vorige waarde' toevoegen",
+        "De dimensie elke nacht volledig opnieuw laden"
+      ],
+      "answer": 0,
+      "explanation": "Elke versie krijgt een eigen rij en surrogate key, met bijvoorbeeld geldig_van, geldig_tot en een is_actueel-vlag."
+    },
+    {
+      "id": "schema-15",
+      "question": "Wat doet SCD type 3?",
+      "options": [
+        "Een extra kolom toevoegen met de vorige waarde, voor beperkte historie",
+        "Een nieuwe rij per wijziging toevoegen",
+        "De waarde overschrijven",
+        "Een aparte historietabel bijhouden"
+      ],
+      "answer": 0,
+      "explanation": "Type 3 bewaart alleen 'huidig' en 'vorig'; handig bij een eenmalige herindeling."
+    },
+    {
+      "id": "schema-16",
+      "question": "Een vaste gast verhuist van Breda naar Groningen. Je wilt de omzet van vóór de verhuizing aan Breda blijven toerekenen. Welk SCD-type gebruik je?",
+      "options": [
+        "Type 2",
+        "Type 1",
+        "Type 3",
+        "Type 0"
+      ],
+      "answer": 0,
+      "explanation": "Alleen type 2 bewaart per periode de juiste waarde, zodat oude feiten aan de oude rij gekoppeld blijven."
+    },
+    {
+      "id": "schema-17",
+      "question": "Wat is een degenerate dimension?",
+      "options": [
+        "Een dimensiesleutel zonder eigen dimensietabel, zoals een ordernummer in de feitentabel",
+        "Een dimensie met fouten",
+        "Een dimensie zonder surrogate key",
+        "Een dimensie die niet meer gebruikt wordt"
+      ],
+      "answer": 0,
+      "explanation": "Het ordernummer heeft geen extra attributen, maar is nuttig om regels te groeperen. Daarom staat het direct in de feitentabel."
+    },
+    {
+      "id": "schema-18",
+      "question": "Wat is een role-playing dimension?",
+      "options": [
+        "Eén dimensie die in meerdere rollen wordt gebruikt, zoals DimDatum als boekingsdatum én aankomstdatum",
+        "Een dimensie voor gebruikersrollen en rechten",
+        "Een dimensie die per afdeling anders is",
+        "Een dimensie die alleen in rapporten bestaat"
+      ],
+      "answer": 0,
+      "explanation": "Dezelfde tabel wordt meerdere keren gekoppeld, elke keer via een andere foreign key."
+    },
+    {
+      "id": "schema-19",
+      "question": "Wat is een junk dimension?",
+      "options": [
+        "Een dimensie die losse vlaggen en indicatoren met weinig waarden bundelt",
+        "Een dimensie met verouderde data",
+        "Een dimensie die je beter kunt verwijderen",
+        "Een tijdelijke dimensie in de staging area"
+      ],
+      "answer": 0,
+      "explanation": "In plaats van tien ja/nee-kolommen in de feitentabel bundel je die combinaties in één kleine dimensie."
+    },
+    {
+      "id": "schema-20",
+      "question": "Wat is een galaxy schema (fact constellation)?",
+      "options": [
+        "Meerdere feitentabellen die dimensies delen",
+        "Een snowflake schema met veel vertakkingen",
+        "Een schema met één enorme feitentabel",
+        "Een star schema in de cloud"
+      ],
+      "answer": 0,
+      "explanation": "Bijvoorbeeld FactBoeking en FactRestaurant, die allebei DimDatum en DimHotel gebruiken."
+    },
+    {
+      "id": "schema-21",
+      "question": "Wat is Snowflake (met hoofdletter)?",
+      "options": [
+        "Een cloud data platform waarin opslag en rekenkracht gescheiden zijn",
+        "Een andere naam voor het snowflake schema",
+        "Een ETL-tool van Microsoft",
+        "Een maturitymodel"
+      ],
+      "answer": 0,
+      "explanation": "Let op de dubbele betekenis: het snowflake schema is een modelvorm, Snowflake is een product."
+    },
+    {
+      "id": "schema-22",
+      "question": "Waar of onwaar: In een star schema zijn de dimensietabellen genormaliseerd tot 3NF.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "In een star schema zijn de dimensies juist gedenormaliseerd: plat, één tabel per dimensie.",
+      "shuffle": false
+    },
+    {
+      "id": "schema-23",
+      "question": "Wanneer kan snowflaking toch verstandig zijn?",
+      "options": [
+        "Bij zeer grote dimensies met vaak wijzigende hiërarchieën, waar onderhoud zwaarder weegt dan snelheid",
+        "Als eindgebruikers zelf rapporten bouwen",
+        "Als querysnelheid het belangrijkst is",
+        "Altijd in Power BI"
+      ],
+      "answer": 0,
+      "explanation": "Snowflake is een bewuste afweging: minder redundantie en eenvoudiger onderhoud tegenover meer joins."
+    },
+    {
+      "id": "schema-24",
+      "question": "Wat is de relatie tussen een feitentabel en een dimensietabel in een star schema?",
+      "options": [
+        "Veel-op-één: veel feitrijen verwijzen naar één dimensierij",
+        "Eén-op-één",
+        "Eén-op-veel: één feitrij verwijst naar veel dimensierijen",
+        "Veel-op-veel"
+      ],
+      "answer": 0,
+      "explanation": "Duizenden verkopen verwijzen naar hetzelfde hotel. Het filter loopt van de één-kant (dimensie) naar de veel-kant (feit)."
+    },
+    {
+      "id": "schema-25",
+      "question": "Waarom gebruik je een aparte datumdimensie?",
+      "options": [
+        "Om op jaar, kwartaal, maand, weekdag of feestdag te filteren zonder ingewikkelde datumfuncties",
+        "Omdat datums niet in een feitentabel mogen staan",
+        "Om opslag te besparen",
+        "Omdat SQL geen datumtype kent"
+      ],
+      "answer": 0,
+      "explanation": "Een datumdimensie bevat per dag kant-en-klare attributen, zoals weeknummer, seizoen en vakantieperiode."
+    },
+    {
+      "id": "schema-26",
+      "question": "Een query op een star schema filtert op vier dimensies. Hoeveel joins vanaf de feitentabel heb je nodig?",
+      "options": [
+        "Vier: één per dimensie",
+        "Eén",
+        "Acht",
+        "Dat hangt af van het aantal rijen"
+      ],
+      "answer": 0,
+      "explanation": "In een star schema ligt elke dimensie één join van de feitentabel. In een snowflake komen er joins bij."
+    }
+  ]
+}

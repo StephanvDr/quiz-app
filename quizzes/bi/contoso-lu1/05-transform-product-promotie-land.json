@@ -1,0 +1,333 @@
+{
+  "topic": "Transform: product, promotie en land",
+  "questions": [
+    {
+      "id": "lu1-subcategory-merge",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "sub = pd.DataFrame({'ProductSubcategoryKey': [8, 6], 'ProductCategoryKey': [1, 1],",
+        "                    'ProductSubcategory': ['Audio Accessories', 'Bluetooth Headphones']})",
+        "cat = pd.DataFrame({'ProductCategoryKey': [1], 'ProductCategory': ['Audio']})",
+        "dim_subcategory = (sub",
+        "    .merge(cat, on='ProductCategoryKey', how='left')",
+        "    .rename(columns={'ProductSubcategoryKey': 'SubcategoryKey', 'ProductSubcategory': 'Subcategory',",
+        "                     'ProductCategoryKey': 'CategoryKey', 'ProductCategory': 'Category'})",
+        "    [['SubcategoryKey', 'Subcategory', 'CategoryKey', 'Category']])",
+        "print(dim_subcategory.shape, dim_subcategory['Category'].tolist())"
+      ],
+      "options": [
+        "`(2, 4) ['Audio', 'Audio']`",
+        "`(1, 4) ['Audio']`",
+        "`(2, 5) ['Audio', 'Audio']`",
+        "`(2, 4) ['Audio', nan]`"
+      ],
+      "answer": 0,
+      "explanation": "Elke subcategorie krijgt via `ProductCategoryKey` de naam van haar categorie, dus beide rijen krijgen `Audio`. `rename` geeft de kolommen de namen uit het Power BI-model en de lijst `[[...]]` kiest de vier kolommen in een vaste volgorde.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-subdimension",
+      "difficulty": "medium",
+      "question": "Waarom hangt DimProductSubcategory niet direct aan het feit?",
+      "options": [
+        "Het feit bevat alleen `ProductKey`; de subcategorie hangt via `SubcategoryKey` aan DimProduct, als subdimensie zoals in het Power BI-model",
+        "Omdat pandas maar één merge per tabel toestaat",
+        "Omdat subcategorieën niet in de verkoopdata voorkomen",
+        "Omdat de subcategorie een feit is en geen dimensie"
+      ],
+      "answer": 0,
+      "explanation": "Product → subcategorie → categorie is een hiërarchie. Het notebook maakt er één subdimensie onder DimProduct van (een snowflake-tak). Voor de grafieken voegt `product_full` die weer samen met het product."
+    },
+    {
+      "id": "lu1-product-fk",
+      "difficulty": "easy",
+      "question": "Welke kolom in `dim_product` is de foreign key naar de subdimensie?",
+      "options": [
+        "`SubcategoryKey`",
+        "`ProductKey`",
+        "`ClassName`",
+        "`BrandName`"
+      ],
+      "answer": 0,
+      "explanation": "`'SubcategoryKey': pr['ProductSubcategoryKey']  # FK to the sub-dimension`. `ProductKey` is de primaire sleutel van DimProduct zelf, waarmee het feit naar het product verwijst."
+    },
+    {
+      "id": "lu1-promo-date-sets",
+      "difficulty": "medium",
+      "question": "De promotiebron heeft twee keer de kolommen `Year`, `Quarter`, `Month` en `Day`. Hoe gebruikt het notebook die?",
+      "code": [
+        "'StartDate':       date_from_parts(pm['Year.1'], pm['Month.1'], pm['Day.1']),",
+        "'EndDate':         date_from_parts(pm['Year'], pm['Month'], pm['Day']),"
+      ],
+      "options": [
+        "De eerste set is de einddatum en de tweede set (`.1`) de startdatum",
+        "De eerste set is de startdatum en de tweede set de einddatum",
+        "Beide sets zijn de startdatum; de tweede is een kopie",
+        "De tweede set wordt weggegooid"
+      ],
+      "answer": 0,
+      "explanation": "In de output zie je dat dit klopt: de North America Spring Promotion loopt van 1 januari tot 31 maart 2011. De kolommen hebben in de bron dezelfde naam; pandas maakte er `Year.1` enzovoort van."
+    },
+    {
+      "id": "lu1-date-from-parts",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "def date_from_parts(year, month, day):",
+        "    return pd.to_datetime(year.astype(str) + '-' + month + '-' + day.astype(str), format='%Y-%B-%d')",
+        "",
+        "print(date_from_parts(pd.Series([2011]), pd.Series(['March']), pd.Series([31])).dt.strftime('%Y-%m-%d').tolist())"
+      ],
+      "options": [
+        "`['2011-03-31']`",
+        "`['2011-March-31']`",
+        "`['2011-31-03']`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "De drie delen worden de tekst `'2011-March-31'`. De format-string vertelt hoe die te lezen: jaar, volledige maandnaam (`%B`), dag. Het jaar en de dag zijn getallen, dus die worden eerst tekst met `astype(str)`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-percent-b",
+      "difficulty": "easy",
+      "question": "Wat betekent `%B` in `format='%Y-%B-%d'`?",
+      "options": [
+        "De volledige maandnaam, zoals 'March'",
+        "De afgekorte maandnaam, zoals 'Mar'",
+        "Het maandnummer, zoals 03",
+        "De dag van de week"
+      ],
+      "answer": 0,
+      "explanation": "In de promotietabel staat de maand voluit. `%b` zou de afkorting lezen en `%m` het maandnummer."
+    },
+    {
+      "id": "lu1-scholl-typo",
+      "difficulty": "easy",
+      "question": "Wat doet `pm['PromotionName'].str.replace('Scholl', 'School', regex=False)`?",
+      "options": [
+        "Het herstelt de typfout 'Scholl' in de namen van de Back-to-School-promoties",
+        "Het verwijdert de schoolpromoties",
+        "Het telt hoe vaak 'Scholl' voorkomt",
+        "Het maakt de namen korter"
+      ],
+      "answer": 0,
+      "explanation": "Zonder deze correctie zou het promotietype ook niet gevonden worden, want `str.extract` zoekt naar 'Back-to-School'."
+    },
+    {
+      "id": "lu1-promo-region-extract",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "name = pd.Series(['Asian Holiday Promotion', 'North America Spring Promotion', 'No Discount'])",
+        "region = (name.str.extract(r'^(North America|Asian|European)')[0]",
+        "              .map({'North America': 'North America', 'Asian': 'Asia', 'European': 'Europe'})",
+        "              .fillna('All regions'))",
+        "print(region.tolist())"
+      ],
+      "options": [
+        "`['Asia', 'North America', 'All regions']`",
+        "`['Asian', 'North America', 'No Discount']`",
+        "`['Asia', 'North America', nan]`",
+        "`['Asia', 'America', 'All regions']`"
+      ],
+      "answer": 0,
+      "explanation": "`^` betekent 'aan het begin van de naam' en `|` 'of'. `map` vertaalt het bijvoeglijk naamwoord naar de regionaam (`Asian` wordt `Asia`). Een naam zonder regio geeft `NaN`, en `fillna` maakt daar `All regions` van.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-promo-extract-0",
+      "difficulty": "hard",
+      "question": "Waarom staat er `[0]` achter `name.str.extract(r'^(North America|Asian|European)')`?",
+      "options": [
+        "`str.extract` geeft een DataFrame met één kolom per groep tussen haakjes; `[0]` pakt die eerste groep als Series",
+        "Om alleen de eerste letter te houden",
+        "Om alleen de eerste promotie te nemen",
+        "Om lege resultaten op 0 te zetten"
+      ],
+      "answer": 0,
+      "explanation": "De kolommen van het resultaat heten 0, 1, ... naar de groepen in het patroon. Met één groep is `[0]` de enige kolom, en op een Series kun je daarna `.map()` en `.fillna()` toepassen."
+    },
+    {
+      "id": "lu1-promo-type",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "name = pd.Series(['European Holiday Promotion', 'No Discount'])",
+        "print(name.str.extract(r'(Spring|Summer|Back-to-School|Holiday)')[0].fillna('No discount').tolist())"
+      ],
+      "options": [
+        "`['Holiday', 'No discount']`",
+        "`['European Holiday Promotion', 'No discount']`",
+        "`['Holiday', nan]`",
+        "`['Holiday', 'No Discount']`"
+      ],
+      "answer": 0,
+      "explanation": "Het patroon vindt het type ergens in de naam, want er staat geen `^` voor. Promoties zonder type krijgen `No discount`, met een kleine d, de waarde voor `PromotionType`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-promo-duration",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld: promotie 20",
+        "start = pd.Series(pd.to_datetime(['2013-01-01']))",
+        "end = pd.Series(pd.to_datetime(['2014-03-31']))",
+        "print((end - start).dt.days.tolist())"
+      ],
+      "options": [
+        "`[454]`",
+        "`[455]`",
+        "`[15]`",
+        "`[1]`"
+      ],
+      "answer": 0,
+      "explanation": "Twee datums van elkaar aftrekken geeft een tijdsduur (Timedelta); `.dt.days` geeft het aantal dagen. 454 dagen is veel meer dan 183, dus het notebook markeert deze promotie als verdacht.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-promo-suspicious",
+      "difficulty": "medium",
+      "question": "Wat laat deze controle zien?",
+      "code": [
+        "duration = (dim_promotion['EndDate'] - dim_promotion['StartDate']).dt.days",
+        "dim_promotion.loc[(duration > 183) & (dim_promotion['PromotionKey'] != 1),",
+        "                  ['PromotionKey', 'PromotionName', 'StartDate', 'EndDate']]"
+      ],
+      "options": [
+        "Promoties die langer dan een half jaar lopen, behalve No Discount; dat was promotie 20 (1-1-2013 tot 31-3-2014)",
+        "Alle promoties die in 2013 begonnen",
+        "Promoties zonder einddatum",
+        "Promoties met meer dan 183 verkopen"
+      ],
+      "answer": 0,
+      "explanation": "Een seizoenspromotie duurt normaal een kwartaal. 'No Discount' (key 1) loopt van 2007 tot 2014 en is geen echte actie, dus die wordt uitgesloten. De controle markeert alleen; de data blijft zoals hij is."
+    },
+    {
+      "id": "lu1-country-mean",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "wb = pd.DataFrame({'ISO3': ['NLD'] * 3, 'CountryName': ['Netherlands'] * 3,",
+        "                   'Population': [16.7, 16.8, 16.8]})",
+        "wb_avg = wb.groupby(['ISO3', 'CountryName'], as_index=False)[['Population']].mean()",
+        "print(wb_avg.round(2).values.tolist())"
+      ],
+      "options": [
+        "`[['NLD', 'Netherlands', 16.77]]`",
+        "`[[16.77]]`",
+        "`[['NLD', 'Netherlands', 50.3]]`",
+        "`[['NLD', 'Netherlands', 16.7], ['NLD', 'Netherlands', 16.8], ['NLD', 'Netherlands', 16.8]]`"
+      ],
+      "answer": 0,
+      "explanation": "Per land wordt het gemiddelde over 2011–2013 genomen, de periode van de verkoopdata. Door de beschrijvende kolommen in de `groupby` op te nemen, blijven ze in het resultaat staan; `as_index=False` houdt ze als gewone kolommen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-country-mapping",
+      "difficulty": "medium",
+      "question": "Waarom heeft het notebook de mappingtabel `DIFFERENT_NAMES`?",
+      "code": [
+        "DIFFERENT_NAMES = {'Iran': 'Iran, Islamic Rep.', 'Kyrgyzstan': 'Kyrgyz Republic', 'Russia': 'Russian Federation',",
+        "                   'South Korea': 'Korea, Rep.', 'Syria': 'Syrian Arab Republic'}"
+      ],
+      "options": [
+        "Vijf landen heten bij de World Bank anders; zonder mapping mislukt de koppeling op naam voor die landen",
+        "Om de landnamen in het dashboard te vertalen",
+        "Om landen samen te voegen",
+        "Omdat deze landen geen ISO3-code hebben"
+      ],
+      "answer": 0,
+      "explanation": "Contoso heeft geen ISO-code per land, dus de koppeling gaat op naam. De mapping vult de kolom `WB_Name`; de Contoso-naam zelf blijft staan als `CountryName`."
+    },
+    {
+      "id": "lu1-country-replace",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "DIFFERENT_NAMES = {'Russia': 'Russian Federation', 'South Korea': 'Korea, Rep.'}",
+        "# voorbeeld",
+        "countries = pd.DataFrame({'Country': ['Russia', 'Germany', 'South Korea']})",
+        "countries['WB_Name'] = countries['Country'].replace(DIFFERENT_NAMES)",
+        "print(countries['WB_Name'].tolist())"
+      ],
+      "options": [
+        "`['Russian Federation', 'Germany', 'Korea, Rep.']`",
+        "`['Russian Federation', nan, 'Korea, Rep.']`",
+        "`['Russia', 'Germany', 'South Korea']`",
+        "`KeyError`"
+      ],
+      "answer": 0,
+      "explanation": "`replace` met een dict vervangt alleen de namen die in de dict staan; andere namen, zoals Germany, blijven gelijk. `map` zou de namen die niet in de dict staan juist leeg maken.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-country-left-join",
+      "difficulty": "hard",
+      "question": "Waarom koppelt het notebook de Contoso-landen met `how='left'` aan de World Bank-data?",
+      "code": [
+        "dim_country = countries.merge(wb_avg, left_on='WB_Name', right_on='CountryName', how='left')"
+      ],
+      "options": [
+        "Zodat alle 34 Contoso-landen blijven staan, ook een land zonder match, zoals Taiwan",
+        "Om alle 217 World Bank-landen in de dimensie te krijgen",
+        "Omdat een inner join in pandas niet kan met `left_on`",
+        "Om de World Bank-landen links in de tabel te zetten"
+      ],
+      "answer": 0,
+      "explanation": "Met een inner join zou Taiwan uit de landendimensie verdwijnen, en zouden winkels in dat land geen `CountryKey` krijgen. Met een left join blijft het land staan, met lege indicatoren, en de print `Not found in World Bank` laat zien welk land het betreft."
+    },
+    {
+      "id": "lu1-taiwan",
+      "difficulty": "medium",
+      "question": "Hoe gaat het notebook om met Taiwan?",
+      "options": [
+        "Taiwan staat niet in de World Bank-data: de ISO3-code TWN wordt met de hand ingevuld, de indicatoren blijven leeg en de inkomensgroep wordt Unknown",
+        "Taiwan wordt uit de data verwijderd",
+        "Taiwan krijgt de cijfers van China",
+        "Taiwan krijgt het gemiddelde van alle landen"
+      ],
+      "answer": 0,
+      "explanation": "De sleutel is nodig omdat feitregels via `CountryKey` naar het land verwijzen. Er worden geen cijfers verzonnen. Een land zonder bevolkingscijfer valt in US04 weg (`dropna`), en de ondertitel van die grafiek noemt zulke landen."
+    },
+    {
+      "id": "lu1-taiwan-loc",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "dim_country = pd.DataFrame({'Country': ['Taiwan', 'Japan'], 'ISO3': [None, 'JPN']})",
+        "dim_country.loc[dim_country['Country'] == 'Taiwan', 'ISO3'] = 'TWN'",
+        "print(dim_country['ISO3'].tolist())"
+      ],
+      "options": [
+        "`['TWN', 'JPN']`",
+        "`['TWN', 'TWN']`",
+        "`[None, 'JPN']`",
+        "`['Taiwan', 'JPN']`"
+      ],
+      "answer": 0,
+      "explanation": "`loc[rijen, kolom] = waarde` past alleen de rijen aan waar de voorwaarde True is, in de genoemde kolom. Dit is de veilige manier om een deel van een DataFrame te wijzigen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-country-key",
+      "difficulty": "easy",
+      "question": "Welke kolom wordt de sleutel van DimCountry?",
+      "options": [
+        "De ISO3-code, zoals NLD, hernoemd naar `CountryKey`",
+        "De Contoso-landnaam",
+        "Een oplopend nummer dat het notebook maakt",
+        "`GeographyKey`"
+      ],
+      "answer": 0,
+      "explanation": "ISO3 is een internationale standaardcode en de sleutel in de World Bank-data. Na de `rename` heet hij `CountryKey`, net als in de feitentabel."
+    }
+  ]
+}

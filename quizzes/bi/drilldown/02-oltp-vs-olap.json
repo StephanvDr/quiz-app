@@ -1,0 +1,267 @@
+{
+  "topic": "OLTP vs OLAP",
+  "questions": [
+    {
+      "id": "olap-01",
+      "question": "Waar staat OLTP voor?",
+      "options": [
+        "Online Transaction Processing",
+        "Online Table Partitioning",
+        "Operational Logical Transfer Protocol",
+        "Offline Transaction Processing"
+      ],
+      "answer": 0,
+      "explanation": "OLTP-systemen verwerken de dagelijkse transacties van het bedrijf."
+    },
+    {
+      "id": "olap-02",
+      "question": "Waar staat OLAP voor?",
+      "options": [
+        "Online Analytical Processing",
+        "Online Aggregated Partitioning",
+        "Operational Logical Access Protocol",
+        "Online Application Processing"
+      ],
+      "answer": 0,
+      "explanation": "OLAP-systemen zijn gemaakt om data te analyseren, niet om transacties vast te leggen."
+    },
+    {
+      "id": "olap-03",
+      "question": "Het kassasysteem van een hotelrestaurant legt elke verkoop vast. Wat voor systeem is dit?",
+      "options": [
+        "OLTP",
+        "OLAP",
+        "Een data mart",
+        "Een semantisch model"
+      ],
+      "answer": 0,
+      "explanation": "Transacties vastleggen terwijl ze gebeuren is de kern van OLTP."
+    },
+    {
+      "id": "olap-04",
+      "question": "Een Power BI-model waarmee het management omzettrends over vijf jaar analyseert, is een voorbeeld van:",
+      "options": [
+        "OLAP",
+        "OLTP",
+        "Een staging area",
+        "Change Data Capture"
+      ],
+      "answer": 0,
+      "explanation": "Analyse van historische data met aggregaties is OLAP."
+    },
+    {
+      "id": "olap-05",
+      "question": "Welk datamodel past het best bij een OLTP-systeem?",
+      "options": [
+        "Genormaliseerd (3NF)",
+        "Star schema",
+        "Snowflake schema",
+        "Eén brede, platte tabel"
+      ],
+      "answer": 0,
+      "explanation": "Normaliseren voorkomt redundantie en update-anomalieën. Dat is belangrijk als er voortdurend geschreven wordt."
+    },
+    {
+      "id": "olap-06",
+      "question": "Welke query is typisch voor OLAP?",
+      "options": [
+        "Omzet per hotel per maand over drie jaar (SUM met GROUP BY)",
+        "Eén nieuwe reservering toevoegen",
+        "Het e-mailadres van één gast wijzigen",
+        "De status van één bestelling opvragen"
+      ],
+      "answer": 0,
+      "explanation": "OLAP-queries lezen veel rijen en aggregeren. OLTP-queries raken een paar rijen tegelijk."
+    },
+    {
+      "id": "olap-07",
+      "question": "Waar staat ACID voor?",
+      "options": [
+        "Atomicity, Consistency, Isolation, Durability",
+        "Aggregation, Consistency, Indexing, Distribution",
+        "Accuracy, Completeness, Integrity, Durability",
+        "Atomicity, Concurrency, Integrity, Data"
+      ],
+      "answer": 0,
+      "explanation": "ACID garandeert dat transacties betrouwbaar worden verwerkt: de kern van OLTP-databases."
+    },
+    {
+      "id": "olap-08",
+      "question": "Waar of onwaar: In een OLTP-systeem worden oude waarden vaak overschreven, waardoor historie verloren gaat.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 0,
+      "explanation": "Een adreswijziging overschrijft het oude adres. Daarom bewaar je historie in het datawarehouse.",
+      "shuffle": false
+    },
+    {
+      "id": "olap-09",
+      "question": "Waarom rapporteer je liever niet rechtstreeks op het OLTP-systeem?",
+      "options": [
+        "Zware analysequeries vertragen het operationele systeem",
+        "OLTP-databases ondersteunen geen SELECT-queries",
+        "Rapportagetools kunnen geen SQL lezen",
+        "OLTP-systemen bevatten geen actuele data"
+      ],
+      "answer": 0,
+      "explanation": "Analysequeries concurreren met de transacties waar het bedrijf op draait. Bovendien is het model niet gemaakt voor analyse en ontbreekt historie."
+    },
+    {
+      "id": "olap-10",
+      "question": "Je gaat van omzet per maand naar omzet per jaar. Welke OLAP-bewerking is dit?",
+      "options": [
+        "Roll-up",
+        "Drill-down",
+        "Slice",
+        "Pivot"
+      ],
+      "answer": 0,
+      "explanation": "Roll-up aggregeert naar een hoger niveau in een hiërarchie."
+    },
+    {
+      "id": "olap-11",
+      "question": "Je gaat van het jaartotaal naar de omzet per dag. Welke OLAP-bewerking is dit?",
+      "options": [
+        "Drill-down",
+        "Roll-up",
+        "Dice",
+        "Slice"
+      ],
+      "answer": 0,
+      "explanation": "Drill-down gaat naar meer detail: een lager niveau in de hiërarchie."
+    },
+    {
+      "id": "olap-12",
+      "question": "Je zet de dimensie Jaar vast op 2025 en bekijkt de rest van de kubus. Welke bewerking is dit?",
+      "options": [
+        "Slice",
+        "Dice",
+        "Pivot",
+        "Roll-up"
+      ],
+      "answer": 0,
+      "explanation": "Slice snijdt één plak uit de kubus door één dimensie op één waarde vast te zetten."
+    },
+    {
+      "id": "olap-13",
+      "question": "Je selecteert de jaren 2025 en 2026 én alleen hotels in Nederland en Duitsland. Welke bewerking is dit?",
+      "options": [
+        "Dice",
+        "Slice",
+        "Drill-down",
+        "Pivot"
+      ],
+      "answer": 0,
+      "explanation": "Dice selecteert een subkubus met meerdere waarden op meerdere dimensies tegelijk."
+    },
+    {
+      "id": "olap-14",
+      "question": "Je wisselt in een tabel de rijen (hotels) en kolommen (maanden) om. Welke bewerking is dit?",
+      "options": [
+        "Pivot",
+        "Dice",
+        "Roll-up",
+        "Slice"
+      ],
+      "answer": 0,
+      "explanation": "Pivot (rotate) draait de assen om; de data zelf verandert niet."
+    },
+    {
+      "id": "olap-15",
+      "question": "Wat is ROLAP?",
+      "options": [
+        "OLAP bovenop een relationele database, meestal met een star schema",
+        "OLAP met data in een voorberekende multidimensionale kubus",
+        "Een real-time variant van OLTP",
+        "Row-level security binnen een OLAP-kubus"
+      ],
+      "answer": 0,
+      "explanation": "Relational OLAP rekent op relationele tabellen. MOLAP gebruikt een eigen kubusopslag."
+    },
+    {
+      "id": "olap-16",
+      "question": "Wat is MOLAP?",
+      "options": [
+        "Data wordt voorgeaggregeerd opgeslagen in een multidimensionale kubus",
+        "OLAP direct bovenop het OLTP-systeem",
+        "OLAP zonder aggregaties",
+        "Een opslagvorm voor ongestructureerde data"
+      ],
+      "answer": 0,
+      "explanation": "Multidimensional OLAP berekent aggregaties vooraf: snel bij queries, maar het laden kost tijd."
+    },
+    {
+      "id": "olap-17",
+      "question": "Wie introduceerde de term OLAP in 1993?",
+      "options": [
+        "Edgar F. Codd",
+        "Ralph Kimball",
+        "Bill Inmon",
+        "Wayne Eckerson"
+      ],
+      "answer": 0,
+      "explanation": "Codd, de vader van het relationele model, formuleerde in 1993 regels voor OLAP."
+    },
+    {
+      "id": "olap-18",
+      "question": "Hoe komt data van de OLTP-systemen in het OLAP-systeem?",
+      "options": [
+        "Via ETL- of ELT-processen",
+        "Gebruikers typen het over",
+        "Via de gebruikersinterface van de bron",
+        "Automatisch, want het zijn dezelfde tabellen"
+      ],
+      "answer": 0,
+      "explanation": "Een ETL/ELT-proces haalt data uit de bronnen, transformeert die en laadt ze in het datawarehouse."
+    },
+    {
+      "id": "olap-19",
+      "question": "Welke opslagvorm is typisch voor analytische databases?",
+      "options": [
+        "Kolomgeoriënteerd",
+        "Rijgeoriënteerd",
+        "Key-value",
+        "Graaf"
+      ],
+      "answer": 0,
+      "explanation": "Kolomopslag leest alleen de benodigde kolommen en comprimeert goed: ideaal om veel rijen te aggregeren."
+    },
+    {
+      "id": "olap-20",
+      "question": "Waar of onwaar: OLAP-systemen hebben meestal veel meer gelijktijdige gebruikers dan OLTP-systemen.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "OLTP bedient veel medewerkers en applicaties tegelijk. OLAP heeft minder gebruikers met zwaardere queries.",
+      "shuffle": false
+    },
+    {
+      "id": "olap-21",
+      "question": "Welke eigenschap hoort bij OLAP?",
+      "options": [
+        "Historische data die wordt toegevoegd in plaats van overschreven",
+        "Veel kleine UPDATE's per seconde",
+        "Strikt genormaliseerd om redundantie te voorkomen",
+        "Geoptimaliseerd om één transactie snel vast te leggen"
+      ],
+      "answer": 0,
+      "explanation": "Een analytisch systeem bewaart historie en wordt vooral gelezen. De andere drie zijn OLTP-kenmerken."
+    },
+    {
+      "id": "olap-22",
+      "question": "De receptie checkt een gast in via het reserveringssysteem van het hotel (PMS). In welke categorie valt dit systeem?",
+      "options": [
+        "OLTP",
+        "OLAP",
+        "Data lake",
+        "Data mart"
+      ],
+      "answer": 0,
+      "explanation": "Het PMS legt operationele transacties vast: inchecken, uitchecken, betalingen."
+    }
+  ]
+}

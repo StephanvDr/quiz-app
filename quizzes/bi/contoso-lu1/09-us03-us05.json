@@ -1,0 +1,252 @@
+{
+  "topic": "US03, US04 en US05",
+  "questions": [
+    {
+      "id": "lu1-us03-reverse",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld, gesorteerd van groot naar klein",
+        "country = pd.DataFrame({'Country': ['United States', 'China', 'Germany'],",
+        "                        'SalesAmount': [570.0, 128.0, 79.0]})",
+        "top = country.head(10).iloc[::-1]                                      # reverse: largest at the top",
+        "print(top['Country'].tolist())"
+      ],
+      "options": [
+        "`['Germany', 'China', 'United States']`",
+        "`['United States', 'China', 'Germany']`",
+        "`['China', 'Germany', 'United States']`",
+        "`['Germany']`"
+      ],
+      "answer": 0,
+      "explanation": "`iloc[::-1]` keert de volgorde om. Dat is nodig omdat `barh` de eerste rij onderaan tekent; door om te keren komt het grootste land bovenaan, zoals in de staafgrafiek in Power BI.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us03-share",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "country = pd.DataFrame({'SalesAmount': [570.0, 128.0, 302.0]})",
+        "country['Share'] = country['SalesAmount'] / country['SalesAmount'].sum()",
+        "print(country['Share'].round(3).tolist())"
+      ],
+      "options": [
+        "`[0.57, 0.128, 0.302]`",
+        "`[57.0, 12.8, 30.2]`",
+        "`[0.333, 0.333, 0.333]`",
+        "`[570.0, 128.0, 302.0]`"
+      ],
+      "answer": 0,
+      "explanation": "Elke rij wordt gedeeld door het totaal (1.000), wat het aandeel als fractie geeft. `pct()` maakt er in de titel een percentage van, zoals de 57% voor de VS.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us03-colour",
+      "difficulty": "medium",
+      "question": "Wat doet `color=top['SalesRegion'].map(REGION_COLOUR)` in US03?",
+      "code": [
+        "REGION_COLOUR = {'North America': '#b31942', 'Europe': '#003399', 'Asia': '#00856a'}",
+        "ax.barh(top['Country'], top['SalesAmount'], color=top['SalesRegion'].map(REGION_COLOUR), height=0.68)"
+      ],
+      "options": [
+        "Elke staaf krijgt de kleur van zijn verkoopregio",
+        "Elke regio krijgt een eigen grafiek",
+        "Het sorteert de landen per regio",
+        "Het filtert de landen buiten de drie regio's weg"
+      ],
+      "answer": 0,
+      "explanation": "`map` zet per land de regionaam om in een kleurcode, en `barh` accepteert een lijst met één kleur per staaf. De legenda wordt apart gemaakt met `Patch`-objecten per regio."
+    },
+    {
+      "id": "lu1-us03-query",
+      "difficulty": "easy",
+      "question": "Wat doet `.query(\"StoreType == 'Store'\")` bij de berekening van de omzet per winkel per jaar?",
+      "code": [
+        "store_rows = star(fact, 'store', 'geography', 'date').query(\"StoreType == 'Store'\")"
+      ],
+      "options": [
+        "Het houdt alleen de verkoop van fysieke winkels over; online, catalogus en resellers tellen niet mee",
+        "Het houdt alleen de winkels die open zijn",
+        "Het zoekt de winkel met de meeste omzet",
+        "Het telt het aantal winkels"
+      ],
+      "answer": 0,
+      "explanation": "De kaart 'Sales per Store per Year' gaat over fysieke winkels. `query` filtert rijen met een voorwaarde als tekst, hier hetzelfde als `df[df['StoreType'] == 'Store']`."
+    },
+    {
+      "id": "lu1-us03-nunique",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "rows = pd.DataFrame({'SalesRegion': ['Asia'] * 3, 'Year': [2011] * 3,",
+        "                     'StoreKey': [1, 1, 2], 'SalesAmount': [5.0, 3.0, 4.0]})",
+        "per_store = rows.groupby(['SalesRegion', 'Year']).agg(Sales=('SalesAmount', 'sum'), Stores=('StoreKey', 'nunique'))",
+        "print((per_store['Sales'] / per_store['Stores']).tolist())"
+      ],
+      "options": [
+        "`[6.0]`",
+        "`[4.0]`",
+        "`[12.0]`",
+        "`[5.0, 3.0, 4.0]`"
+      ],
+      "answer": 0,
+      "explanation": "`nunique` telt verschillende winkels (2), niet het aantal regels (3). De omzet van 12 gedeeld door 2 winkels is 6 per winkel. Met `'count'` zou je ten onrechte door 3 delen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us03-all-regions",
+      "difficulty": "hard",
+      "question": "Waarom berekent US03 de rij 'All regions' apart, in plaats van het gemiddelde te nemen van de drie regio's?",
+      "options": [
+        "De regio's hebben een verschillend aantal winkels; een gemiddelde van gemiddelden zou kleine regio's te zwaar laten wegen",
+        "Omdat `mean()` niet werkt op bedragen die als tekst zijn opgemaakt",
+        "Omdat er maar twee regio's zijn",
+        "Het maakt niet uit; het resultaat is hetzelfde"
+      ],
+      "answer": 0,
+      "explanation": "Voor 'All regions' deelt het notebook per jaar de totale omzet door het totale aantal winkels met verkoop, net als een measure zonder regiofilter in Power BI. Het opmaken met `.map(usd)` gebeurt pas aan het eind."
+    },
+    {
+      "id": "lu1-us03-map-usd",
+      "difficulty": "medium",
+      "question": "Wat doet `per_store['PerStore'].unstack().map(usd)`?",
+      "options": [
+        "Het zet de regio's als rijen en de jaren als kolommen, en maakt van elk getal een bedrag zoals `$6,62M`",
+        "Het rekent de bedragen om naar dollars",
+        "Het sorteert de regio's op omzet",
+        "Het tekent een kaart van de regio's"
+      ],
+      "answer": 0,
+      "explanation": "`unstack()` verplaatst het jaar uit de index naar de kolommen. `DataFrame.map` past een functie toe op elke cel (vóór pandas 2.1 heette dat `applymap`). De getallen worden tekst, dus dit is alleen voor de weergave."
+    },
+    {
+      "id": "lu1-us04-per-capita",
+      "difficulty": "medium",
+      "question": "Wat berekent `pc['SalesAmount'] / YEARS / pc['Population']`?",
+      "options": [
+        "De omzet per inwoner per jaar: de totale omzet over 2011–2013, gedeeld door 3 jaar en door de bevolking",
+        "Het BBP per inwoner",
+        "De groei van de omzet per jaar",
+        "Het aantal klanten per land"
+      ],
+      "answer": 0,
+      "explanation": "De omzet van drie jaar wordt eerst per jaar gemaakt, en dan gedeeld door het aantal inwoners (het gemiddelde over 2011–2013). Zo kun je kleine en grote landen vergelijken."
+    },
+    {
+      "id": "lu1-us04-join",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "fact = pd.DataFrame({'CountryKey': ['USA', 'NLD', 'USA'], 'SalesAmount': [10.0, 2.0, 5.0]})",
+        "dim_country = pd.DataFrame({'CountryKey': ['NLD', 'USA'], 'Population': [16.8, 314.3]})",
+        "pc = (fact.groupby('CountryKey')['SalesAmount'].sum().to_frame()",
+        "      .join(dim_country.set_index('CountryKey')).reset_index())",
+        "print(pc.values.tolist())"
+      ],
+      "options": [
+        "`[['NLD', 2.0, 16.8], ['USA', 15.0, 314.3]]`",
+        "`[['USA', 15.0, 314.3], ['NLD', 2.0, 16.8]]`",
+        "`[['NLD', 2.0, 314.3], ['USA', 15.0, 16.8]]`",
+        "`[['USA', 10.0, 314.3], ['NLD', 2.0, 16.8], ['USA', 5.0, 314.3]]`"
+      ],
+      "answer": 0,
+      "explanation": "De `groupby` geeft de omzet per land, met `CountryKey` als index. `to_frame()` maakt er een DataFrame van, en `join` koppelt op de index: daarom krijgt DimCountry eerst `set_index('CountryKey')`. `reset_index()` maakt van de sleutel weer een kolom.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us04-dropna",
+      "difficulty": "medium",
+      "question": "Waarom doet US04 `pc = pc.dropna(subset=['Population'])`?",
+      "options": [
+        "Voor een land zonder World Bank-cijfers, zoals Taiwan, kun je geen omzet per inwoner berekenen",
+        "Om landen zonder omzet weg te laten",
+        "Om dubbele landen te verwijderen",
+        "Omdat log-schalen geen nullen aankunnen"
+      ],
+      "answer": 0,
+      "explanation": "Zonder bevolking is de omzet per inwoner `NaN`. De weggelaten landen worden eerst bewaard in `missing`, zodat de ondertitel van de grafiek ze kan noemen."
+    },
+    {
+      "id": "lu1-us04-candidate",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "pc = pd.DataFrame({'CountryName': ['Japan', 'United States', 'India', 'Germany'],",
+        "                   'GDPperCapita_USD': [42000, 51677, 1436, 45000],",
+        "                   'SalesPerCapita': [0.40, 5.04, 0.10, 2.75]})",
+        "median = pc['SalesPerCapita'].median()",
+        "pc['Candidate'] = (pc['GDPperCapita_USD'] > 30_000) & (pc['SalesPerCapita'] < median)",
+        "print(pc.loc[pc['Candidate'], 'CountryName'].tolist())"
+      ],
+      "options": [
+        "`['Japan']`",
+        "`['Japan', 'India']`",
+        "`['United States', 'Germany']`",
+        "`['India']`"
+      ],
+      "answer": 0,
+      "explanation": "Een kansrijk land is rijk (BBP per inwoner boven $30.000) en Contoso haalt er per inwoner minder dan de mediaan. India valt af op het BBP; de VS en Duitsland liggen boven de mediaan (hier 1,575).",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us04-log",
+      "difficulty": "medium",
+      "question": "Waarom gebruikt US04 voor beide assen een logaritmische schaal (`set_xscale('log')`, `set_yscale('log')`)?",
+      "options": [
+        "De landen verschillen wel 100 keer van elkaar; op een lineaire as zouden bijna alle punten op een hoop liggen",
+        "Omdat negatieve waarden anders niet passen",
+        "Om de grafiek op die in Excel te laten lijken",
+        "Omdat matplotlib dat verplicht bij een scatterplot"
+      ],
+      "answer": 0,
+      "explanation": "Zo staat het in de markdown: de landen verschillen wel 100 keer van elkaar, zowel in BBP per inwoner als in omzet per inwoner (van centen tot dollars). Op een log-schaal is elke stap op de as een factor, zodat ook de kleine waarden zichtbaar zijn."
+    },
+    {
+      "id": "lu1-us05-reuse",
+      "difficulty": "medium",
+      "question": "Waarom bewaart US05 `fact_product = star(fact, 'product')` in een eigen variabele?",
+      "code": [
+        "fact_product = star(fact, 'product')            # keep: also needed for US08"
+      ],
+      "options": [
+        "De merge van 2,3 miljoen regels met het product kost tijd, en US08 gebruikt hem opnieuw voor het Contoso-gemiddelde",
+        "Omdat `star()` maar één keer per notebook mag worden aangeroepen",
+        "Om het feit te overschrijven",
+        "Omdat US05 anders geen categorieën heeft"
+      ],
+      "answer": 0,
+      "explanation": "In US08 is `return_pct(fact_product)` het retourpercentage van heel Contoso, de grijze staven. Door de gekoppelde tabel te bewaren hoeft die zware merge niet opnieuw."
+    },
+    {
+      "id": "lu1-us05-ylim",
+      "difficulty": "hard",
+      "question": "Waarom zet US05 `ax.set_ylim(0, cat['Sales'].max() * 2)` en `ax2.set_ylim(0.40, 0.63)`?",
+      "options": [
+        "De kolommen vullen zo de onderste helft en de margelijn de bovenste helft, zodat labels en lijn elkaar niet raken",
+        "Om negatieve omzet te verbergen",
+        "Om de grafiek even hoog te maken als US01",
+        "Omdat de marge nooit boven de 63% komt"
+      ],
+      "answer": 0,
+      "explanation": "Zo staat het ook in het commentaar: 'columns in the lower half' en 'line in the upper half'. Met een y-as tot twee keer de hoogste omzet reikt de hoogste kolom tot halverwege."
+    },
+    {
+      "id": "lu1-us05-no-sales",
+      "difficulty": "medium",
+      "question": "De ondertitel van US05 berekent `raw['category'].shape[0] - len(cat)`. Wat is de uitkomst en wat betekent die?",
+      "options": [
+        "2: van de 8 categorieën hebben er 2 geen verkoop, namelijk Games and Toys en Home Appliances",
+        "8: alle categorieën zijn verkocht",
+        "6: zoveel categorieën zijn verkocht",
+        "0: het verschil is altijd nul"
+      ],
+      "answer": 0,
+      "explanation": "`cat` komt uit een `groupby` op de verkoopregels, dus bevat alleen categorieën met verkoop (6). De brontabel heeft er 8. In de conclusies: 'Games and Toys en Home Appliances staan wel in de data, maar hebben geen producten.'"
+    }
+  ]
+}

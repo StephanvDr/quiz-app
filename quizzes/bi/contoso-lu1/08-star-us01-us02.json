@@ -1,0 +1,278 @@
+{
+  "topic": "star(), US01 en US02",
+  "questions": [
+    {
+      "id": "lu1-star-purpose",
+      "difficulty": "medium",
+      "question": "Wat doet `star(fact, 'date', 'channel')`?",
+      "code": [
+        "def star(fact_rows, *names):",
+        "    df = fact_rows",
+        "    for name in names:",
+        "        dim, key = DIMENSIONS[name]",
+        "        df = df.merge(dim, on=key, how='left')",
+        "    return df"
+      ],
+      "options": [
+        "Het koppelt DimDate en DimChannel met een left join aan de feitregels, zoals een query op het sterschema",
+        "Het maakt een nieuwe dimensie met datum en kanaal",
+        "Het filtert de feitregels op datum en kanaal",
+        "Het tekent een sterdiagram van de data"
+      ],
+      "answer": 0,
+      "explanation": "Per gevraagde naam zoekt `star` de dimensie en de sleutel op in `DIMENSIONS` en voegt die kolommen toe aan de feitregels. Daarna kun je groeperen op bijvoorbeeld `Year` of `ChannelName`, zoals Power BI dat via de relaties doet."
+    },
+    {
+      "id": "lu1-star-args",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld: zelfde aanhef als star()",
+        "def demo(fact_rows, *names):",
+        "    return names",
+        "",
+        "print(demo('fact', 'date', 'channel'))"
+      ],
+      "options": [
+        "`('date', 'channel')`",
+        "`['date', 'channel']`",
+        "`('fact', 'date', 'channel')`",
+        "`date`"
+      ],
+      "answer": 0,
+      "explanation": "`*names` verzamelt alle overige positionele argumenten in een tuple. Het eerste argument gaat naar `fact_rows`. Zo kan `star()` met één, twee of drie dimensies worden aangeroepen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-star-columns",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "dim_date = pd.DataFrame({'DateKey': [20110101, 20110102], 'Year': [2011, 2011]})",
+        "dim_channel = pd.DataFrame({'ChannelKey': [1, 2], 'ChannelName': ['Store', 'Online']})",
+        "DIMENSIONS = {'date': (dim_date, 'DateKey'), 'channel': (dim_channel, 'ChannelKey')}",
+        "",
+        "def star(fact_rows, *names):",
+        "    df = fact_rows",
+        "    for name in names:",
+        "        dim, key = DIMENSIONS[name]",
+        "        df = df.merge(dim, on=key, how='left')",
+        "    return df",
+        "",
+        "fact = pd.DataFrame({'DateKey': [20110101, 20110102], 'ChannelKey': [2, 1], 'SalesAmount': [10.0, 20.0]})",
+        "print(star(fact, 'channel', 'date').columns.tolist())"
+      ],
+      "options": [
+        "`['DateKey', 'ChannelKey', 'SalesAmount', 'ChannelName', 'Year']`",
+        "`['DateKey', 'ChannelKey', 'SalesAmount', 'Year', 'ChannelName']`",
+        "`['ChannelName', 'Year', 'SalesAmount']`",
+        "`['DateKey', 'ChannelKey', 'SalesAmount', 'ChannelKey', 'ChannelName', 'DateKey', 'Year']`"
+      ],
+      "answer": 0,
+      "explanation": "Elke merge voegt de kolommen van de dimensie achteraan toe, in de volgorde van de aanroep: eerst kanaal, dan datum. De sleutel zelf komt niet dubbel, omdat er op die kolom wordt gekoppeld (`on=key`).",
+      "check": "output"
+    },
+    {
+      "id": "lu1-star-left",
+      "difficulty": "medium",
+      "question": "Waarom koppelt `star()` met `how='left'`?",
+      "options": [
+        "Zo blijven alle feitregels staan, ook als een sleutel geen match zou hebben; de validatie liet zien dat dat niet voorkomt",
+        "Omdat de dimensie links van het feit staat",
+        "Om alleen de feitregels met een match te houden",
+        "Omdat een left join sneller is dan een inner join"
+      ],
+      "answer": 0,
+      "explanation": "Met een left join kan een grafiek nooit stilletjes omzet verliezen. Omdat de validatie geen weesregels vond, zou een inner join hier hetzelfde resultaat geven, maar de left join is de veilige keuze."
+    },
+    {
+      "id": "lu1-product-full",
+      "difficulty": "medium",
+      "question": "Waarom gebruikt `DIMENSIONS` voor 'product' de tabel `product_full` in plaats van `dim_product`?",
+      "code": [
+        "product_full = dim_product.merge(dim_subcategory, on='SubcategoryKey', how='left')"
+      ],
+      "options": [
+        "`product_full` bevat het product mét subcategorie en categorie, zodat je met één merge op `Category` of `Subcategory` kunt groeperen",
+        "Omdat `dim_product` dubbele sleutels heeft",
+        "Omdat `product_full` minder kolommen heeft",
+        "Omdat `dim_product` alleen producten zonder verkoop bevat"
+      ],
+      "answer": 0,
+      "explanation": "Dit volgt de snowflake-tak product → subcategorie → categorie. US05 groepeert op `Category`, US07 op `Subcategory` en US08 weer op `Category`."
+    },
+    {
+      "id": "lu1-years",
+      "difficulty": "easy",
+      "question": "Waarvoor dient `YEARS = dim_date['Year'].nunique()`?",
+      "options": [
+        "Het is het aantal jaren (3), om een totaal over 2011–2013 om te rekenen naar een bedrag per jaar, zoals in US04 en US10",
+        "Het is het laatste jaar van de data",
+        "Het telt het aantal dagen per jaar",
+        "Het is een lijst met de jaren"
+      ],
+      "answer": 0,
+      "explanation": "`nunique()` telt de verschillende waarden. US04 deelt de omzet door `YEARS` en door de bevolking (omzet per inwoner per jaar), en US10 door `YEARS` en het oppervlak (omzet per m² per jaar)."
+    },
+    {
+      "id": "lu1-us01-margin",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "df = pd.DataFrame({'YearMonth': ['2011-01', '2011-01', '2011-02'],",
+        "                   'SalesAmount': [100.0, 50.0, 200.0], 'TotalCost': [40.0, 20.0, 90.0]})",
+        "monthly = df.groupby('YearMonth').agg(Sales=('SalesAmount', 'sum'), Cost=('TotalCost', 'sum'))",
+        "monthly['Margin'] = 1 - monthly['Cost'] / monthly['Sales']",
+        "print(monthly['Margin'].round(3).tolist())"
+      ],
+      "options": [
+        "`[0.6, 0.55]`",
+        "`[0.4, 0.45]`",
+        "`[0.6, 0.6, 0.55]`",
+        "`[90.0, 110.0]`"
+      ],
+      "answer": 0,
+      "explanation": "Per maand worden omzet en kosten opgeteld (named aggregation: `Sales=('SalesAmount', 'sum')`). De marge is `1 − kosten / omzet`: januari 1 − 60/150 = 0,6 en februari 1 − 90/200 = 0,55.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-ratio-of-sums",
+      "difficulty": "hard",
+      "question": "Waarom berekent US01 de marge uit de opgetelde omzet en kosten, en niet als gemiddelde van de marge per verkoopregel?",
+      "options": [
+        "Een gemiddelde van percentages telt kleine en grote verkopen even zwaar; de verhouding van de totalen is de echte marge",
+        "Omdat de marge per regel niet bestaat in de data",
+        "Omdat pandas geen gemiddelde van percentages kan berekenen",
+        "Het maakt niet uit; beide geven hetzelfde"
+      ],
+      "answer": 0,
+      "explanation": "Marge % is niet-additief. Een regel van $10 met 90% marge zou even zwaar wegen als een regel van $10.000 met 50%. Daarom tel je eerst teller en noemer op en deel je daarna, net als een DIVIDE-measure in Power BI."
+    },
+    {
+      "id": "lu1-yearmonth-datetime",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld: de index van monthly",
+        "idx = pd.Index(['2011-01', '2011-02'])",
+        "print(pd.to_datetime(idx + '-01').strftime('%d %b %Y').tolist())"
+      ],
+      "options": [
+        "`['01 Jan 2011', '01 Feb 2011']`",
+        "`['2011-01', '2011-02']`",
+        "`['01 Jan 2011', '01 Jan 2011']`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "`'2011-01' + '-01'` wordt `'2011-01-01'`, de eerste dag van de maand, en `to_datetime` maakt er een echte datum van. Zo zet matplotlib de staven van US01 op een tijdas.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-twinx",
+      "difficulty": "medium",
+      "question": "Waarom maakt US01 een tweede as met `ax2 = ax.twinx()`?",
+      "options": [
+        "Omzet (in dollars) en marge (in procenten) hebben een heel andere schaal; de marge krijgt een eigen y-as rechts",
+        "Om twee grafieken onder elkaar te tekenen",
+        "Om de x-as te verdubbelen",
+        "Om de legenda rechts te zetten"
+      ],
+      "answer": 0,
+      "explanation": "`twinx` maakt een as die dezelfde x-as deelt maar een eigen y-as heeft. De staven gebruiken de linker as (omzet per maand) en de lijn de rechter as, van 55% tot 65%, net als de combo-visual in Power BI."
+    },
+    {
+      "id": "lu1-us01-figures",
+      "difficulty": "easy",
+      "question": "Welke kerncijfers print US01, net als de kaarten in het dashboard?",
+      "options": [
+        "Omzet $8,34bn · brutomarge $4,79bn · marge 57,4% · groei 2013 t.o.v. 2011 −19%",
+        "Omzet $3,14bn · brutomarge $2,55bn · marge 19% · groei +57,4%",
+        "Omzet $8,34bn · brutomarge $8,34bn · marge 100% · groei 0%",
+        "Omzet $4,79bn · brutomarge $3,55bn · marge 74% · groei −8%"
+      ],
+      "answer": 0,
+      "explanation": "Brutomarge is omzet min kosten (`sales - cost`), marge % is `1 − cost / sales` en de groei is `per_year[2013] / per_year[2011] − 1`."
+    },
+    {
+      "id": "lu1-us02-unstack",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "df = pd.DataFrame({'ChannelName': ['Store', 'Store', 'Online', 'Online'], 'Year': [2011, 2012, 2011, 2012],",
+        "                   'SalesAmount': [100.0, 80.0, 10.0, 12.0]})",
+        "cy = df.groupby(['ChannelName', 'Year'])['SalesAmount'].sum().unstack()",
+        "print(cy.index.tolist(), cy.columns.tolist())"
+      ],
+      "options": [
+        "`['Online', 'Store'] [2011, 2012]`",
+        "`['Store', 'Online'] [2011, 2012]`",
+        "`[2011, 2012] ['Online', 'Store']`",
+        "`[('Online', 2011), ('Online', 2012), ('Store', 2011), ('Store', 2012)] ['SalesAmount']`"
+      ],
+      "answer": 0,
+      "explanation": "De `groupby` op twee kolommen geeft een MultiIndex (kanaal, jaar). `unstack()` verplaatst het binnenste niveau, het jaar, naar de kolommen. De kanalen staan alfabetisch, omdat `groupby` standaard sorteert.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us02-sort",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "cy = pd.DataFrame({2011: [10.0, 100.0], 2012: [12.0, 80.0]}, index=['Online', 'Store'])",
+        "cy = cy.loc[cy.sum(axis=1).sort_values(ascending=False).index]      # largest channel on the left",
+        "print(cy.index.tolist())"
+      ],
+      "options": [
+        "`['Store', 'Online']`",
+        "`['Online', 'Store']`",
+        "`[180.0, 22.0]`",
+        "`[2012, 2011]`"
+      ],
+      "answer": 0,
+      "explanation": "`sum(axis=1)` telt per kanaal alle jaren op. `sort_values` zet die totalen van groot naar klein, en de index van dat resultaat geeft de nieuwe volgorde voor `cy.loc[...]`. Zo staat het grootste kanaal links in de grafiek.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us02-shift",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "cy = pd.DataFrame({2011: [100.0, 10.0], 2012: [80.0, 12.0]}, index=['Store', 'Online'])",
+        "growth_py = cy / cy.shift(axis=1) - 1                                # growth vs. previous year",
+        "print(growth_py.round(2).values.tolist())"
+      ],
+      "options": [
+        "`[[nan, -0.2], [nan, 0.2]]`",
+        "`[[-0.2, nan], [0.2, nan]]`",
+        "`[[0.0, -0.2], [0.0, 0.2]]`",
+        "`[[nan, 0.8], [nan, 1.2]]`"
+      ],
+      "answer": 0,
+      "explanation": "`shift(axis=1)` schuift de kolommen één plek naar rechts, zodat elk jaar naast het jaar ervoor staat. Delen en 1 aftrekken geeft de groei: Store 80/100 − 1 = −0,2 en Online 12/10 − 1 = 0,2. 2011 heeft geen vorig jaar en wordt `NaN`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us02-offsets",
+      "difficulty": "hard",
+      "question": "In US02 staan de staven per kanaal op `x + (i - 1) * width`. Wat print deze code?",
+      "code": [
+        "width = 0.26",
+        "print([round((i - 1) * width, 2) for i in range(3)])"
+      ],
+      "options": [
+        "`[-0.26, 0.0, 0.26]`",
+        "`[0.0, 0.26, 0.52]`",
+        "`[-0.26, 0.26, 0.78]`",
+        "`[0.26, 0.26, 0.26]`"
+      ],
+      "answer": 0,
+      "explanation": "Voor de drie jaren (i = 0, 1, 2) wordt de verschuiving −width, 0 en +width. De staven van 2011, 2012 en 2013 staan dus links van, op en rechts van de kanaalpositie: een gegroepeerde staafgrafiek.",
+      "check": "output"
+    }
+  ]
+}

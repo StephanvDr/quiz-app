@@ -1,0 +1,296 @@
+{
+  "topic": "Transform: datum, kanaal, geografie en winkel",
+  "questions": [
+    {
+      "id": "lu1-to-number-output",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "def to_number(series):",
+        "    return pd.to_numeric(series.astype(str)",
+        "                         .str.replace('$', '', regex=False)    # remove the dollar sign",
+        "                         .str.replace(',', '.', regex=False))  # decimal comma -> point",
+        "",
+        "print(to_number(pd.Series(['321,44', '$143,26'])).tolist())"
+      ],
+      "options": [
+        "`[321.44, 143.26]`",
+        "`['321.44', '143.26']`",
+        "`[32144.0, 14326.0]`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "Eerst gaat het dollarteken weg, dan wordt de decimale komma een punt. Daarna kan `pd.to_numeric` de tekst omzetten naar echte getallen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-to-number-regex",
+      "difficulty": "hard",
+      "question": "Waarom staat `regex=False` in `to_number`? Wat print deze code?",
+      "code": [
+        "s = pd.Series(['$143,26'])          # voorbeeld",
+        "print(s.str.replace('$', '', regex=True).tolist(), s.str.replace('$', '', regex=False).tolist())"
+      ],
+      "options": [
+        "`['$143,26'] ['143,26']`",
+        "`['143,26'] ['143,26']`",
+        "`['143,26'] ['$143,26']`",
+        "`ValueError`"
+      ],
+      "answer": 0,
+      "explanation": "In een reguliere expressie betekent `$` 'einde van de tekst'. Met `regex=True` vervangt pandas dus het einde door niets en blijft het dollarteken staan. `regex=False` vervangt het letterlijke teken. In pandas 2 en nieuwer is `regex=False` de standaard; in de code staat het expliciet.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-to-number-astype-str",
+      "difficulty": "medium",
+      "question": "Waarom begint `to_number` met `series.astype(str)`?",
+      "options": [
+        "Zodat `.str` ook werkt als een kolom al getallen bevat; op een getallenkolom geeft `.str` een AttributeError",
+        "Om de decimale komma te bewaren",
+        "Om geheugen te besparen",
+        "Omdat `pd.to_numeric` alleen tekst accepteert"
+      ],
+      "answer": 0,
+      "explanation": "De `.str`-methoden werken alleen op tekst. Leest pandas een kolom toevallig als getallen in, dan zou `series.str.replace` een fout geven. Met `astype(str)` werkt de functie voor elke kolom. `pd.to_numeric` zelf accepteert ook gewoon getallen."
+    },
+    {
+      "id": "lu1-dimdate-format",
+      "difficulty": "medium",
+      "question": "Waarom staat er `format='%Y%m%d'` in deze regel van DimDate?",
+      "code": [
+        "'Date': pd.to_datetime(cal['DateInt'].astype(str), format='%Y%m%d'),"
+      ],
+      "options": [
+        "Het vertelt pandas dat 20110101 jaar-maand-dag is; een getal zonder format leest pandas als nanoseconden sinds 1970",
+        "Zo wordt de datum als tekst opgeslagen",
+        "Om de tijd van de dag weg te halen",
+        "Om de kalender op datum te sorteren"
+      ],
+      "answer": 0,
+      "explanation": "`pd.to_datetime(20110101)` geeft 1 januari 1970 plus 20.110.101 nanoseconden. `astype(str)` maakt er eerst de tekst `'20110101'` van, en de format-string leest die tekst precies, en snel."
+    },
+    {
+      "id": "lu1-day-of-week",
+      "difficulty": "easy",
+      "question": "Wat print deze code? 1 januari 2011 was een zaterdag.",
+      "code": [
+        "# voorbeeld",
+        "dates = pd.Series(pd.to_datetime(['2011-01-01', '2011-01-03']))",
+        "print((dates.dt.day_of_week + 1).tolist())"
+      ],
+      "options": [
+        "`[6, 1]`",
+        "`[5, 0]`",
+        "`[7, 2]`",
+        "`[1, 6]`"
+      ],
+      "answer": 0,
+      "explanation": "pandas telt de weekdagen van maandag = 0 tot zondag = 6. Met `+ 1` wordt maandag 1, net als in Power BI. Zaterdag wordt dus 6 en maandag 3 januari wordt 1, wat je ook in de output van DimDate ziet.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-month-short",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "dates = pd.Series(pd.to_datetime(['2011-01-15']))           # voorbeeld",
+        "print(pd.Series(['January']).str[:3][0], dates.dt.strftime('%Y-%m')[0])"
+      ],
+      "options": [
+        "`Jan 2011-01`",
+        "`January 2011-01-15`",
+        "`Jan 01-2011`",
+        "`Jan 2011-1`"
+      ],
+      "answer": 0,
+      "explanation": "`.str[:3]` neemt de eerste drie letters van elke naam, zoals bij `MonthShort`. `strftime('%Y-%m')` maakt van een datum de tekst jaar-maand, zoals bij `YearMonth`, waarop US01 per maand groepeert.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-quarter-replace",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "print(pd.Series(['Qtr 1', 'Qtr 4']).str.replace('Qtr ', 'Q', regex=False).tolist())"
+      ],
+      "options": [
+        "`['Q1', 'Q4']`",
+        "`['Qtr Q1', 'Qtr Q4']`",
+        "`['1', '4']`",
+        "`['QQ1', 'QQ4']`"
+      ],
+      "answer": 0,
+      "explanation": "`'Qtr '` (met spatie) wordt vervangen door `'Q'`. Zo wordt de kolom `Quarter` in DimDate korter, zoals in Power BI.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-dimdate-1096",
+      "difficulty": "medium",
+      "question": "Na `dim_date[dim_date['Year'].between(2011, 2013)]` heeft DimDate 1096 rijen. Waarom 1096?",
+      "options": [
+        "365 + 366 + 365 dagen: drie jaar, met 2012 als schrikkeljaar",
+        "3 × 365 dagen plus een rij met kolomnamen",
+        "Op zoveel dagen is er verkocht",
+        "`between` telt 2013 niet mee"
+      ],
+      "answer": 0,
+      "explanation": "`between` neemt beide grenzen mee, dus 2011, 2012 en 2013. DimDate heeft één rij per kalenderdag, ook op dagen zonder verkoop."
+    },
+    {
+      "id": "lu1-dimdate-why-limit",
+      "difficulty": "easy",
+      "question": "Waarom beperkt het notebook DimDate tot 2011–2013?",
+      "options": [
+        "Dat is de periode van de verkoopdata; de bronkalender loopt van 2005 tot en met 2018",
+        "Omdat pandas geen datums voor 2011 kent",
+        "Omdat de World Bank-data alleen tot 2013 loopt",
+        "Om de kalender sneller in te lezen"
+      ],
+      "answer": 0,
+      "explanation": "De verkenning toonde dat de kalender van 20050101 tot 20181231 loopt en de verkoopdata van 2011-01-01 tot 2013-12-31. Dagen buiten die periode zouden alleen lege jaren in de grafieken en slicers opleveren."
+    },
+    {
+      "id": "lu1-reset-index-drop",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "years = pd.DataFrame({'Year': [2010, 2011, 2012, 2013, 2014]})",
+        "kept = years[years['Year'].between(2011, 2013)]",
+        "print(kept.index.tolist(), kept.reset_index(drop=True).index.tolist())"
+      ],
+      "options": [
+        "`[1, 2, 3] [0, 1, 2]`",
+        "`[0, 1, 2] [0, 1, 2]`",
+        "`[1, 2, 3] [1, 2, 3]`",
+        "`[2011, 2012, 2013] [0, 1, 2]`"
+      ],
+      "answer": 0,
+      "explanation": "Een filter houdt de oude indexlabels. `reset_index(drop=True)` geeft een nieuwe index `0..n-1` en gooit de oude weg, in plaats van die als kolom `index` toe te voegen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-channel-rename",
+      "difficulty": "easy",
+      "question": "Waarom hernoemt het notebook in DimChannel de kolom `Channel` naar `ChannelKey`?",
+      "code": [
+        "dim_channel = raw['channel'].rename(columns={'Channel': 'ChannelKey'})"
+      ],
+      "options": [
+        "Zodat de sleutel net zo heet als in de feitentabel en het Power BI-model; dan koppelt `star()` op `ChannelKey`",
+        "Omdat `Channel` een gereserveerd woord is in Python",
+        "Om de kanalen te nummeren",
+        "Om de kolom te verbergen"
+      ],
+      "answer": 0,
+      "explanation": "In de bron heet de sleutel `Channel` en in de verkoopdata `channelKey`. Het notebook maakt er overal `ChannelKey` van, zodat `merge(..., on='ChannelKey')` werkt."
+    },
+    {
+      "id": "lu1-sales-region",
+      "difficulty": "medium",
+      "question": "Waarom heet de kolom `ContinentName` in DimGeography `SalesRegion`?",
+      "options": [
+        "Het is de verkoopregio van Contoso, geen echt continent: Australië valt bijvoorbeeld onder Asia",
+        "Omdat Power BI geen kolommen met 'Name' toestaat",
+        "Omdat er maar drie continenten zijn",
+        "Omdat de kolom de regio van de World Bank bevat"
+      ],
+      "answer": 0,
+      "explanation": "Contoso deelt de wereld op in drie verkoopregio's: North America, Europe en Asia. De naam `SalesRegion` voorkomt verwarring, zeker in US03, waar landen per verkoopregio een kleur krijgen."
+    },
+    {
+      "id": "lu1-geo-replace-fillna",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "countries = pd.Series(['the Netherlands', None, 'Germany'])",
+        "print(countries.replace({'the Netherlands': 'Netherlands'}).fillna('(continent)').tolist())"
+      ],
+      "options": [
+        "`['Netherlands', '(continent)', 'Germany']`",
+        "`['the Netherlands', '(continent)', 'Germany']`",
+        "`['Netherlands', None, 'Germany']`",
+        "`['Netherlands', '(continent)', '(continent)']`"
+      ],
+      "answer": 0,
+      "explanation": "`replace` past alleen de waarde uit de dict aan. `fillna` geeft de rijen zonder land (de continentrijen) het label `(continent)`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-store-split-join",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "names = pd.Series(['Contoso  Bellevue Store', ' Contoso Cambridge  Store '])",
+        "print(names.str.split().str.join(' ').tolist())"
+      ],
+      "options": [
+        "`['Contoso Bellevue Store', 'Contoso Cambridge Store']`",
+        "`['Contoso  Bellevue Store', ' Contoso Cambridge  Store ']`",
+        "`[['Contoso', 'Bellevue', 'Store'], ['Contoso', 'Cambridge', 'Store']]`",
+        "`['Contoso Bellevue Store', ' Contoso Cambridge Store ']`"
+      ],
+      "answer": 0,
+      "explanation": "`split()` zonder argument splitst op elke reeks spaties en laat lege stukken weg. `.str.join(' ')` plakt de woorden weer aan elkaar met één spatie. Zo verdwijnen dubbele spaties, en ook spaties aan het begin en eind.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-store-status-map",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "print(pd.Series(['On', 'Off', 'On']).map({'On': 'Open', 'Off': 'Closed'}).tolist())"
+      ],
+      "options": [
+        "`['Open', 'Closed', 'Open']`",
+        "`['On', 'Off', 'On']`",
+        "`['Open', nan, 'Open']`",
+        "`[True, False, True]`"
+      ],
+      "answer": 0,
+      "explanation": "`map` met een dict vervangt elke waarde door de bijbehorende waarde uit de dict. Een waarde die niet in de dict staat, zou `NaN` worden; hier komen alleen On en Off voor.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-store-int64",
+      "difficulty": "medium",
+      "question": "`EmployeeCount` heeft één lege waarde. Welke expressie maakt er gehele getallen van en laat die waarde leeg?",
+      "code": [
+        "employees = pd.Series([19.0, None, 26.0])          # voorbeeld"
+      ],
+      "options": [
+        "`employees.astype('Int64')`",
+        "`employees.astype(int)`",
+        "`employees.fillna(0).astype(int)`",
+        "`employees.round()`"
+      ],
+      "answer": 0,
+      "explanation": "Het nullable type `Int64` (hoofdletter I) bewaart een lege waarde als `<NA>`. `astype(int)` geeft een fout bij een lege waarde, en `fillna(0)` maakt van een onbekend aantal medewerkers ten onrechte 0.",
+      "check": "options"
+    },
+    {
+      "id": "lu1-store-where-physical",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "st = pd.DataFrame({'StoreType': ['Store', 'Online', 'Store'],",
+        "                   'SellingAreaSize': [455.0, 93800.0, 680.0]})",
+        "physical = st['StoreType'].eq('Store')",
+        "print(st['SellingAreaSize'].where(physical).tolist())"
+      ],
+      "options": [
+        "`[455.0, nan, 680.0]`",
+        "`[455.0, 680.0]`",
+        "`[nan, 93800.0, nan]`",
+        "`[455.0, 0.0, 680.0]`"
+      ],
+      "answer": 0,
+      "explanation": "`.eq('Store')` is hetzelfde als `== 'Store'`. `where(physical)` houdt de waarden waar de voorwaarde True is en maakt de rest leeg, zonder rijen weg te gooien. Het verkoopoppervlak van online-, catalogus- en reseller-vestigingen (tot 93.800 m²) zegt niets, dus dat wordt leeg; anders zou de omzet per m² in US10 niet kloppen.",
+      "check": "output"
+    }
+  ]
+}

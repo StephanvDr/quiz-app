@@ -22,6 +22,9 @@
   let current = { view: 'loading', subject: null };
   let session = null;
   let confirmingReset = false;
+  let desktop = null; // set when the desktop app serves the page: modules can be added and removed
+  let problems = []; // module files the desktop app could not load
+  const modulesView = { message: null, confirmRemove: null, library: null, libraryError: null, loading: false, checked: false };
   const saved = readSaved();
 
   /* ---------- saved progress and settings (a convenience, never required) ---------- */
@@ -41,7 +44,9 @@
   }
 
   function settingsFor(subject) {
-    return { ...DEFAULTS, ...saved.settings[subject.id] };
+    const settings = { ...DEFAULTS, ...saved.settings[subject.id] };
+    if (!hasLevels(subject)) settings.difficulty = 'all';
+    return settings;
   }
 
   function saveSettings(subject, settings) {
@@ -65,6 +70,11 @@
 
   function itemsOf(subject) {
     return subject.topics.flatMap((topic) => topic.questions.map((q) => ({ q, topic })));
+  }
+
+  /** Difficulty is optional; subjects without it get no difficulty filter. */
+  function hasLevels(subject) {
+    return itemsOf(subject).some(({ q }) => q.difficulty);
   }
 
   function tally(subject, items) {
@@ -226,8 +236,10 @@
     session = null;
     confirmingReset = false;
     const id = decodeURIComponent(location.hash.slice(1));
+    if (id !== 'modules') modulesView.message = null;
     const subject = subjects.find((s) => s.id === id);
     if (subject) renderSetup(subject);
+    else if (id === 'modules' && desktop) renderModules();
     else renderHome();
   }
 
@@ -247,9 +259,21 @@
     show('home', null, `<div class="view">
       <section class="group">
         <h1>Pick a subject</h1>
-        <p class="lede">Short multiple-choice rounds: read a snippet, then pick what it returns or which call does the job. Every answer comes with an explanation.</p>
+        <p class="lede">Short multiple-choice rounds with an explanation after every answer. The app remembers what you've mastered and what you missed.</p>
       </section>
       ${list || '<p class="status">No subjects yet. Add a folder with a quiz.json under quizzes/.</p>'}
+      ${desktop ? `<section class="category" aria-labelledby="modules-label">
+        <h2 class="eyebrow" id="modules-label">Modules</h2>
+        <a class="subject-card add-card" href="#modules">
+          <span class="badge add" aria-hidden="true">+</span>
+          <span class="subject-body">
+            <span class="subject-title">Add or update subjects</span>
+            <span class="subject-desc">Drop in a .quiz file, or install subjects from your GitHub library.${problems.length
+              ? ` <strong class="problem-count">${plural(problems.length, 'module file')} could not be loaded.</strong>` : ''}</span>
+          </span>
+          <span class="go" aria-hidden="true">→</span>
+        </a>
+      </section>` : ''}
     </div>`);
   }
 
@@ -342,10 +366,10 @@
           <span class="label" id="count-label">Questions per round</span>
           <div class="pills">${counts}</div>
         </div>
-        <div class="group" role="radiogroup" aria-labelledby="difficulty-label">
+        ${hasLevels(subject) ? `<div class="group" role="radiogroup" aria-labelledby="difficulty-label">
           <span class="label" id="difficulty-label">Difficulty</span>
           <div class="pills">${levels}</div>
-        </div>
+        </div>` : ''}
         <div class="group" role="radiogroup" aria-labelledby="pool-label">
           <span class="label" id="pool-label">Questions to draw from</span>
           <div class="pills">${pools}</div>
@@ -423,7 +447,9 @@
         </div>`;
     }
 
-    const dots = '●'.repeat(LEVELS.indexOf(q.difficulty) + 1).padEnd(3, '○');
+    const level = q.difficulty
+      ? `<div class="q-head"><span class="chip"><span class="dots" aria-hidden="true">${'●'.repeat(LEVELS.indexOf(q.difficulty) + 1).padEnd(3, '○')}</span>${q.difficulty}</span></div>`
+      : '';
     show('quiz', subject, `<div class="view">
       <div class="quiz-top">
         <div class="quiz-meta">
@@ -435,7 +461,7 @@
         </div>
       </div>
       <article class="question" aria-labelledby="question-text">
-        <div class="q-head"><span class="chip"><span class="dots" aria-hidden="true">${dots}</span>${q.difficulty}</span></div>
+        ${level}
         <p class="prompt" id="question-text">${inline(q.question, language)}</p>
         ${q.code ? cell(q.code, language, index + 1) : ''}
         <ol class="options" aria-label="Answers">${options}</ol>
@@ -539,6 +565,275 @@
     window.setTimeout(() => { announcer.textContent = text; }, 50);
   }
 
+  /* ---------- modules (desktop app only) ---------- */
+
+  async function api(method, path, body) {
+    let response;
+    try {
+      response = await fetch(path, {
+        method,
+        cache: 'no-store',
+        headers: { 'X-Code-Quiz': '1', 'Content-Type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+    } catch {
+      showStopped();
+      throw new Error('Code Quiz is not running anymore. Close this window and open Code Quiz again.');
+    }
+    let data = {};
+    try { data = await response.json(); } catch { /* not JSON */ }
+    if (!response.ok) throw new Error(data.error || `The app answered ${response.status}.`);
+    return data;
+  }
+
+  async function reload() {
+    const data = await loadData();
+    subjects = data.subjects || [];
+    desktop = data.desktop || null;
+    problems = data.problems || [];
+  }
+
+  function sourceLabel(subject) {
+    const source = subject.source || { kind: 'built-in' };
+    let label = 'Built in';
+    if (source.kind === 'github') label = `From GitHub (${source.repo})`;
+    else if (source.kind === 'file') label = 'Added from a file';
+    return source.replaces ? `${label}, replaces the built-in version` : label;
+  }
+
+  function moduleRow(subject) {
+    const removable = subject.source && subject.source.kind !== 'built-in';
+    let actions = '';
+    if (removable && modulesView.confirmRemove === subject.id) {
+      actions = `<button type="button" class="btn danger" id="remove-confirm" data-action="remove-module" data-id="${esc(subject.id)}">Remove</button>
+        <button type="button" class="btn quiet" data-action="remove-cancel">Cancel</button>`;
+    } else if (removable) {
+      actions = `<button type="button" class="btn quiet" id="remove-${esc(subject.id)}" data-action="remove-ask" data-id="${esc(subject.id)}">Remove</button>`;
+    }
+    return `<li class="module-row">
+      ${badge(subject)}
+      <span class="module-body">
+        <span class="module-title">${esc(subject.title)}</span>
+        <span class="module-meta">${plural(itemsOf(subject).length, 'question')} · ${esc(sourceLabel(subject))}</span>
+      </span>
+      <span class="module-actions">${actions}</span>
+    </li>`;
+  }
+
+  function libraryRow(entry) {
+    const action = entry.state === 'current'
+      ? '<span class="state-ok">✓ Up to date</span>'
+      : `<button type="button" class="btn${entry.state === 'new' ? ' primary' : ''}" id="install-${esc(entry.id)}" data-action="library-install" data-id="${esc(entry.id)}">${entry.state === 'new' ? 'Install' : 'Update'}</button>`;
+    const meta = [entry.category, plural(entry.topics, 'topic'), entry.state === 'update' ? 'update available' : ''].filter(Boolean);
+    return `<li class="module-row">
+      ${badge(entry)}
+      <span class="module-body">
+        <span class="module-title">${esc(entry.title)}</span>
+        <span class="module-meta">${esc(meta.join(' · '))}</span>
+      </span>
+      <span class="module-actions">${action}</span>
+    </li>`;
+  }
+
+  function libraryResults() {
+    if (modulesView.loading) return '<p class="status">Checking GitHub…</p>';
+    if (modulesView.libraryError) return `<p class="notice bad">${esc(modulesView.libraryError)}</p>`;
+    if (!modulesView.library) return '';
+    return modulesView.library.subjects.length
+      ? `<ul class="module-list">${modulesView.library.subjects.map(libraryRow).join('')}</ul>`
+      : '<p class="status">No subjects found in the quizzes/ folder of this branch.</p>';
+  }
+
+  // Redraws only the library results, so a check that finishes in the
+  // background never resets the form or the file input.
+  function showLibraryResults() {
+    const box = current.view === 'modules' && app.querySelector('.library-results');
+    if (box) box.innerHTML = libraryResults();
+  }
+
+  function renderModules({ focusId, top = true } = {}) {
+    document.title = 'Modules · Code Quiz';
+    const library = desktop.library;
+    const { message } = modulesView;
+    const problemList = problems.map((p) => `<li><code>${esc(p.file)}</code>: ${esc(p.errors.slice(0, 3).join(' · '))}${
+      p.errors.length > 3 ? ` (and ${p.errors.length - 3} more)` : ''}</li>`).join('');
+
+    show('modules', null, `<div class="view">
+      <p class="crumbs"><a href="#">← All subjects</a></p>
+      <section class="group">
+        <h1>Modules</h1>
+        <p class="lede">Each subject is a module. Add one from a .quiz file, or install and update subjects from your GitHub library.</p>
+      </section>
+      ${message ? `<p class="notice ${message.kind}" id="modules-message" tabindex="-1">${esc(message.text)}</p>` : ''}
+      ${problems.length ? `<div class="notice bad" role="alert"><strong>Some module files could not be loaded</strong><ul>${problemList}</ul></div>` : ''}
+      <section class="group" aria-labelledby="installed-label">
+        <h2 id="installed-label">Installed</h2>
+        <ul class="module-list">${subjects.map(moduleRow).join('')}</ul>
+      </section>
+      <section class="group" aria-labelledby="add-label">
+        <h2 id="add-label">Add a module file</h2>
+        <label class="dropzone" for="module-file">
+          <input type="file" id="module-file" class="sr-only" accept=".quiz,.json,application/json" multiple>
+          <span class="dropzone-title">Drop a <code>.quiz</code> file here, or click to choose one</span>
+          <span class="hint">You can drop files anywhere in this window. On Windows, opening a .quiz file adds it too.</span>
+        </label>
+        <p class="hint">Every .quiz file in the modules folder is loaded when the app starts: <code class="path">${esc(desktop.modulesDir)}</code>
+          <button type="button" class="btn quiet" id="open-folder" data-action="open-folder">Open folder</button></p>
+      </section>
+      <section class="group" aria-labelledby="library-label">
+        <h2 id="library-label">GitHub library</h2>
+        <p class="lede">Install and update subjects straight from the <code>quizzes/</code> folder of a GitHub repository.</p>
+        <form class="library-form" id="library-form">
+          <span class="field"><label for="lib-repo">Repository</label>
+            <input id="lib-repo" name="repo" value="${esc(library.repo)}" placeholder="owner/name" autocomplete="off" spellcheck="false"></span>
+          <span class="field"><label for="lib-branch">Branch</label>
+            <input id="lib-branch" name="branch" value="${esc(library.branch)}" autocomplete="off" spellcheck="false"></span>
+          <span class="field"><label for="lib-token">Access token ${library.hasToken ? '<span class="saved">saved</span>' : ''}</label>
+            <input id="lib-token" name="token" type="password" autocomplete="off"
+              placeholder="${library.hasToken ? 'Leave empty to keep the saved token' : 'Only for a private repository'}"></span>
+          <span class="form-actions">
+            <button type="submit" class="btn" id="lib-save">Save and check</button>
+            ${library.hasToken ? '<button type="button" class="btn quiet" id="lib-forget" data-action="forget-token">Forget token</button>' : ''}
+          </span>
+        </form>
+        <p class="hint">A private repository needs a fine-grained token with read-only access to its <strong>Contents</strong>. The token is stored on this computer only.</p>
+        <div class="library-results" aria-live="polite">${libraryResults()}</div>
+      </section>
+    </div>`, { top: top && !focusId });
+    if (focusId) document.getElementById(focusId)?.focus();
+    if (!modulesView.checked) {
+      modulesView.checked = true;
+      checkLibrary();
+    }
+  }
+
+  // Shows the outcome of an action at the top of the Modules view and moves
+  // focus there, so it is both visible and read out.
+  function finishModules(message) {
+    modulesView.message = message;
+    if (location.hash === '#modules') renderModules({ focusId: 'modules-message' });
+    else location.hash = 'modules';
+  }
+
+  async function importFiles(files) {
+    const lines = [];
+    let added = 0;
+    for (const file of files) {
+      let module;
+      try {
+        if (file.size > 20000000) throw new Error('too large');
+        module = JSON.parse(await file.text());
+      } catch {
+        lines.push(`${file.name} is not a quiz module.`);
+        continue;
+      }
+      try {
+        const result = await api('POST', '/api/modules', module);
+        lines.push(`Added ${result.title} (${plural(result.questions, 'question')}).`);
+        added += 1;
+      } catch (error) {
+        lines.push(`${file.name} was not added. ${error.message.split('\n').slice(0, 3).join(' · ')}`);
+      }
+    }
+    if (!lines.length) return;
+    if (added) {
+      try { await reload(); } catch { /* the stopped notice is already showing */ }
+    }
+    finishModules({ kind: added === files.length ? 'ok' : 'bad', text: lines.join(' ') });
+    if (added && modulesView.library) checkLibrary();
+  }
+
+  async function removeModule(id) {
+    const subject = subjects.find((s) => s.id === id);
+    modulesView.confirmRemove = null;
+    try {
+      await api('DELETE', `/api/modules/${encodeURIComponent(id)}`);
+      await reload();
+      const restored = subject && subject.source.replaces ? ' The built-in version is back.' : '';
+      finishModules({ kind: 'ok', text: `Removed ${subject ? subject.title : id}.${restored}` });
+      if (modulesView.library) checkLibrary();
+    } catch (error) {
+      finishModules({ kind: 'bad', text: error.message });
+    }
+  }
+
+  let libraryChecks = 0;
+
+  async function checkLibrary() {
+    const run = ++libraryChecks;
+    modulesView.loading = true;
+    modulesView.libraryError = null;
+    showLibraryResults();
+    let library = null;
+    let problem = null;
+    try {
+      library = await api('GET', '/api/library');
+    } catch (error) {
+      problem = error.message;
+    }
+    if (run !== libraryChecks) return; // a newer check has started
+    Object.assign(modulesView, { library, libraryError: problem, loading: false });
+    showLibraryResults();
+  }
+
+  async function installFromLibrary(button) {
+    button.disabled = true;
+    button.textContent = 'Installing…';
+    try {
+      const added = await api('POST', '/api/library/install', { id: button.dataset.id });
+      await reload();
+      finishModules({ kind: 'ok', text: `Installed ${added.title} from GitHub (${plural(added.questions, 'question')}).` });
+      checkLibrary();
+    } catch (error) {
+      finishModules({ kind: 'bad', text: error.message });
+    }
+  }
+
+  async function saveLibrary(form, extra = {}) {
+    const body = { repo: form.repo.value.trim(), branch: form.branch.value.trim(), ...extra };
+    if (form.token.value.trim()) body.token = form.token.value.trim();
+    try {
+      desktop.library = (await api('POST', '/api/settings', body)).library;
+    } catch (error) {
+      // Keep what was typed so it can be corrected.
+      modulesView.libraryError = error.message;
+      showLibraryResults();
+      return;
+    }
+    modulesView.message = null;
+    renderModules({ focusId: extra.clearToken ? 'lib-token' : 'lib-save' });
+    checkLibrary();
+  }
+
+  function showStopped() {
+    if (document.getElementById('stopped')) return;
+    const notice = document.createElement('p');
+    notice.id = 'stopped';
+    notice.className = 'notice bad stopped';
+    notice.setAttribute('role', 'alert');
+    notice.textContent = 'Code Quiz is not running anymore. Close this window and open Code Quiz again.';
+    app.before(notice);
+  }
+
+  function startDesktop() {
+    window.setInterval(() => { fetch('/api/ping', { cache: 'no-store' }).catch(showStopped); }, 30000);
+    const hasFiles = (event) => [...((event.dataTransfer && event.dataTransfer.types) || [])].includes('Files');
+    window.addEventListener('dragover', (event) => {
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      document.body.classList.add('dropping');
+    });
+    window.addEventListener('dragleave', (event) => {
+      if (!event.relatedTarget) document.body.classList.remove('dropping');
+    });
+    window.addEventListener('drop', (event) => {
+      document.body.classList.remove('dropping');
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      importFiles([...event.dataTransfer.files]);
+    });
+  }
+
   /* ---------- events ---------- */
 
   app.addEventListener('click', (event) => {
@@ -584,13 +879,38 @@
         confirmingReset = false;
         renderSetup(subject, { focusId: 'reset-open' });
         break;
+      case 'remove-ask':
+        modulesView.confirmRemove = el.dataset.id;
+        renderModules({ focusId: 'remove-confirm' });
+        break;
+      case 'remove-cancel':
+        modulesView.confirmRemove = null;
+        renderModules({ top: false });
+        break;
+      case 'remove-module': removeModule(el.dataset.id); break;
+      case 'library-install': installFromLibrary(el); break;
+      case 'forget-token': saveLibrary(document.getElementById('library-form'), { clearToken: true }); break;
+      case 'open-folder':
+        api('POST', '/api/open-folder').catch((error) => finishModules({ kind: 'bad', text: error.message }));
+        break;
       default:
     }
+  });
+
+  app.addEventListener('submit', (event) => {
+    if (event.target.id !== 'library-form') return;
+    event.preventDefault();
+    saveLibrary(event.target);
   });
 
   app.addEventListener('change', (event) => {
     const input = event.target;
     const subject = current.subject;
+    if (input.id === 'module-file') {
+      importFiles([...input.files]);
+      input.value = '';
+      return;
+    }
     if (current.view !== 'setup' || !input.matches('input')) return;
     const settings = settingsFor(subject);
     if (input.dataset.topic) {
@@ -636,16 +956,21 @@
 
   loadData().then((data) => {
     subjects = data.subjects || [];
+    desktop = data.desktop || null;
+    problems = data.problems || [];
+    if (desktop) startDesktop();
     window.addEventListener('hashchange', route);
     route();
   }).catch((error) => {
     const fromDisk = location.protocol === 'file:';
+    const stopped = error instanceof TypeError && location.hostname === '127.0.0.1';
+    let advice = 'Fix the problems below in the quiz files, then reload this page.';
+    if (fromDisk) advice = 'This page needs its quiz data. Run <code>python quiz.py</code> and open the address it prints, or open the single file made by <code>python quiz.py build</code>.';
+    if (stopped) advice = 'Code Quiz is not running anymore. Close this window and open Code Quiz again.';
     show('error', null, `<div class="error" role="alert">
       <h1>The quizzes didn't load</h1>
-      <p>${fromDisk
-        ? 'This page needs its quiz data. Run <code>python quiz.py</code> and open the address it prints, or open the single file made by <code>python quiz.py build</code>.'
-        : 'Fix the problems below in the quiz files, then reload this page.'}</p>
-      <pre>${esc(error.message)}</pre>
+      <p>${advice}</p>
+      ${stopped ? '' : `<pre>${esc(error.message)}</pre>`}
     </div>`);
   });
 })();

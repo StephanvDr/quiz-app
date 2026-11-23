@@ -1,0 +1,253 @@
+{
+  "topic": "Instellingen en hulpfuncties",
+  "questions": [
+    {
+      "id": "lu1-fmt-output",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "def fmt(x, dec=0):",
+        "    return f'{x:,.{dec}f}'.replace(',', '_').replace('.', ',').replace('_', '.')",
+        "",
+        "print(fmt(1234.5, 1))"
+      ],
+      "options": [
+        "`1.234,5`",
+        "`1,234.5`",
+        "`1234,5`",
+        "`1.234.5`"
+      ],
+      "answer": 0,
+      "explanation": "`f'{x:,.1f}'` geeft eerst de Engelse notatie `1,234.5`. Daarna wisselt `fmt` de komma en de punt om, zodat het getal eruitziet zoals in het Power BI-dashboard: een punt voor duizendtallen en een komma voor decimalen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-fmt-underscore",
+      "difficulty": "medium",
+      "question": "Waarom vervangt `fmt()` de komma's eerst door een `_`?",
+      "code": [
+        "return f'{x:,.{dec}f}'.replace(',', '_').replace('.', ',').replace('_', '.')"
+      ],
+      "options": [
+        "Om komma en punt om te wisselen: zonder tijdelijk teken is na de tweede stap elk scheidingsteken een komma",
+        "Omdat een f-string geen komma's mag bevatten",
+        "Om de duizendtallen weg te halen",
+        "Omdat Power BI een underscore als scheidingsteken gebruikt"
+      ],
+      "answer": 0,
+      "explanation": "Doe je eerst `.replace(',', '.')` en dan `.replace('.', ',')`, dan wordt `1,234.5` eerst `1.234.5` en daarna `1,234,5`. Met `_` als tussenstap blijven de duizendtallen apart: `1_234.5`, dan `1_234,5`, dan `1.234,5`."
+    },
+    {
+      "id": "lu1-usd-output",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "def usd(x, dec=2):",
+        "    for size, unit in [(1e9, 'bn'), (1e6, 'M'), (1e3, 'K')]:",
+        "        if abs(x) >= size:",
+        "            return f'${fmt(x / size, dec)}{unit}'",
+        "    return f'${fmt(x, dec)}'",
+        "",
+        "print(usd(8_341_224_365), usd(15_150_000), usd(950))"
+      ],
+      "options": [
+        "`$8,34bn $15,15M $950,00`",
+        "`$8.341.224.365 $15.150.000 $950`",
+        "`$8,34bn $15,15M $0,95K`",
+        "`$8,3bn $15,2M $950`"
+      ],
+      "answer": 0,
+      "explanation": "`usd` neemt de eerste eenheid waar het bedrag in past (eerst bn, dan M, dan K) en deelt erdoor. 950 is kleiner dan 1.000, dus dat bedrag krijgt geen eenheid, wel 2 decimalen (`dec=2`). Zo toont Power BI bedragen ook.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-usd-order",
+      "difficulty": "medium",
+      "question": "Waarom doorloopt `usd()` de eenheden van groot naar klein: eerst bn, dan M, dan K?",
+      "code": [
+        "for size, unit in [(1e9, 'bn'), (1e6, 'M'), (1e3, 'K')]:"
+      ],
+      "options": [
+        "De eerste eenheid waar het bedrag in past wint; begon je bij K, dan kreeg elk bedrag boven de 1.000 de eenheid K, ook 8 miljard",
+        "Omdat Python een lijst van achteren naar voren doorloopt",
+        "Zodat kleine bedragen worden afgerond op miljarden",
+        "De volgorde maakt niet uit, want `return` stopt de lus niet"
+      ],
+      "answer": 0,
+      "explanation": "Bij het eerste `size` waarvoor `abs(x) >= size` geldt, geeft `return` direct het resultaat terug en stopt de lus. Daarom moet de grootste eenheid vooraan staan."
+    },
+    {
+      "id": "lu1-pct-output",
+      "difficulty": "easy",
+      "question": "Wat print deze code?",
+      "code": [
+        "def pct(x, dec=1):",
+        "    return f'{fmt(x * 100, dec)}%'",
+        "",
+        "def pct_sign(x, dec=0):",
+        "    return ('+' if x >= 0 else '−') + pct(abs(x), dec)",
+        "",
+        "print(pct(0.574), pct_sign(-0.19), pct_sign(0.104, 1))"
+      ],
+      "options": [
+        "`57,4% −19% +10,4%`",
+        "`57,4% −19% 10,4%`",
+        "`0,6% −0,2% +0,1%`",
+        "`57% −19% +10%`"
+      ],
+      "answer": 0,
+      "explanation": "`pct` vermenigvuldigt met 100 en formatteert met `fmt`, standaard met 1 decimaal. `pct_sign` zet er zelf een plus of een echt minteken (−) voor, standaard zonder decimalen; met `dec=1` krijg je er één.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-pct-sign-abs",
+      "difficulty": "medium",
+      "question": "Waarom gebruikt `pct_sign()` `abs(x)`?",
+      "code": [
+        "def pct_sign(x, dec=0):",
+        "    return ('+' if x >= 0 else '−') + pct(abs(x), dec)"
+      ],
+      "options": [
+        "Het teken zet de functie er zelf voor; zonder `abs` zou een daling als `−-19%` verschijnen",
+        "Omdat een percentage niet negatief mag zijn",
+        "Om af te ronden op hele procenten",
+        "Om een daling als groei te tonen"
+      ],
+      "answer": 0,
+      "explanation": "`pct(-0.19, 0)` geeft `-19%`. Zet de functie daar nog een minteken voor, dan krijg je twee mintekens. Daarom gaat de absolute waarde naar `pct` en bepaalt de conditie het teken."
+    },
+    {
+      "id": "lu1-diff-colour",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "def diff_colour(x, higher_is_better=True):",
+        "    if pd.isna(x) or x == 0:",
+        "        return INK_2",
+        "    return GREEN if (x > 0) == higher_is_better else RED",
+        "",
+        "print(diff_colour(0.05) == GREEN, diff_colour(0.05, higher_is_better=False) == RED, diff_colour(0) == INK_2)"
+      ],
+      "options": [
+        "`True True True`",
+        "`True False True`",
+        "`False True True`",
+        "`True True False`"
+      ],
+      "answer": 0,
+      "explanation": "Groen betekent 'beter'. Meestal is hoger beter (groei), maar bij retouren (US08) is hoger juist slechter: daarom bestaat `higher_is_better=False`. Nul of `NaN` krijgt de neutrale kleur `INK_2`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-parse-math",
+      "difficulty": "medium",
+      "question": "Waarom staat `'text.parse_math': False` in `plt.rcParams`?",
+      "code": [
+        "'text.parse_math': False,    # do not read '$' in texts as a formula"
+      ],
+      "options": [
+        "De titels bevatten dollartekens ($8,34bn); matplotlib leest tekst tussen twee `$` anders als wiskundige formule",
+        "Om berekeningen in de grafieken uit te zetten",
+        "Zodat getallen in de grafieken niet worden afgerond",
+        "Zodat matplotlib sneller tekent"
+      ],
+      "answer": 0,
+      "explanation": "matplotlib heeft 'mathtext': tekst tussen twee dollartekens wordt als formule weergegeven. Een titel met `$3,14bn ... $2,55bn` zou dan verminkt worden. Met deze instelling blijven dollartekens gewone tekens."
+    },
+    {
+      "id": "lu1-axisbelow",
+      "difficulty": "easy",
+      "question": "Wat doet `'axes.axisbelow': True` in `plt.rcParams`?",
+      "options": [
+        "De rasterlijnen komen achter de staven te liggen",
+        "De x-as staat onder de grafiek in plaats van erboven",
+        "De legenda komt onder de grafiek",
+        "De assen worden verborgen"
+      ],
+      "answer": 0,
+      "explanation": "Zonder deze instelling kunnen de rasterlijnen over de staven heen lopen. Het commentaar in het notebook zegt het ook: grid behind the bars."
+    },
+    {
+      "id": "lu1-float-format",
+      "difficulty": "medium",
+      "question": "Wat doet deze regel?",
+      "code": [
+        "pd.set_option('display.float_format', lambda x: f'{x:,.2f}')"
+      ],
+      "options": [
+        "Kommagetallen worden in tabellen getoond met duizendtallen en 2 decimalen; de data zelf verandert niet",
+        "Alle kommagetallen in de DataFrames worden afgerond op 2 decimalen",
+        "Getallen worden met een decimale komma getoond, zoals `1.234,56`",
+        "Alleen de eerste 2 kolommen van elke tabel worden getoond"
+      ],
+      "answer": 0,
+      "explanation": "Het is alleen een weergave-instelling. Daarom staat de bevolking in de World Bank-tabel als `29,347,708.00` (Engelse notatie). Berekeningen gebruiken de volledige waarden; de Nederlandse notatie komt pas met `fmt()`."
+    },
+    {
+      "id": "lu1-header-position",
+      "difficulty": "hard",
+      "question": "Waarom zet `header()` de titel op hoogte `1 - 0.12 / h`?",
+      "code": [
+        "h = fig.get_figheight()",
+        "fig.text(0.012, 1 - 0.12 / h, title, fontsize=13.5, fontweight='bold', va='top', color=INK)"
+      ],
+      "options": [
+        "`fig.text` werkt met fracties van de figuur (0 tot 1); zo staat de titel bij elke figuurhoogte 0,12 inch onder de bovenrand",
+        "Zo wordt de titel 12% kleiner dan de figuur",
+        "Om de titel onder de grafiek te zetten",
+        "`h` is het aantal staven, zodat de titel boven de hoogste staaf staat"
+      ],
+      "answer": 0,
+      "explanation": "Een vaste fractie zoals 0,98 zou bij een hoge figuur verder van de rand staan dan bij een lage. Door 0,12 inch te delen door de hoogte in inches, staat de titel in elke grafiek even ver van de bovenkant."
+    },
+    {
+      "id": "lu1-show-function",
+      "difficulty": "easy",
+      "question": "Wat doet de hulpfunctie `show(fig, name)`?",
+      "code": [
+        "def show(fig, name):",
+        "    fig.tight_layout(rect=[0, 0, 1, 1 - 0.8 / fig.get_figheight()])",
+        "    fig.savefig(os.path.join(OUTPUT_DIR, f'{name}.png'), dpi=150)",
+        "    plt.show()"
+      ],
+      "options": [
+        "De layout afmaken met ruimte voor de titel, de grafiek als PNG opslaan in de map grafieken en hem tonen",
+        "Alleen de grafiek tonen",
+        "De grafiek naar Power BI uploaden",
+        "De data van de grafiek als CSV opslaan"
+      ],
+      "answer": 0,
+      "explanation": "`rect` laat bovenin ruimte vrij voor de titel en ondertitel van `header()`. `savefig` bewaart de grafiek voor het verslag (150 dpi) en `plt.show()` toont hem in het notebook."
+    },
+    {
+      "id": "lu1-as-usd-formatter",
+      "difficulty": "medium",
+      "question": "De y-as gebruikt `as_usd = mtick.FuncFormatter(lambda x, _: usd(x, 1).replace(',0', '') if x else '$0')`. Wat print deze code?",
+      "code": [
+        "print(usd(2e9, 1).replace(',0', ''), usd(1.5e9, 1).replace(',0', ''))"
+      ],
+      "options": [
+        "`$2bn $1,5bn`",
+        "`$2,0bn $1,5bn`",
+        "`$2bn $1bn`",
+        "`$2.000.000.000 $1.500.000.000`"
+      ],
+      "answer": 0,
+      "explanation": "`usd(2e9, 1)` geeft `$2,0bn`. `.replace(',0', '')` haalt de overbodige `,0` weg, zodat de as hele eenheden toont en alleen een decimaal waar die iets zegt, zoals `$1,5bn`.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-lambda-underscore",
+      "difficulty": "medium",
+      "question": "Wat betekent de `_` in `lambda x, _: ...` bij `mtick.FuncFormatter`?",
+      "options": [
+        "matplotlib geeft twee argumenten mee, de waarde en de positie van het label; de positie wordt niet gebruikt",
+        "Het is de vorige waarde op de as",
+        "Het tweede argument mag weg; de `_` is alleen opmaak",
+        "Het maakt de variabele privé"
+      ],
+      "answer": 0,
+      "explanation": "`FuncFormatter` roept de functie aan als `f(x, pos)`. Met alleen `lambda x:` zou dat een TypeError geven. `_` is de gebruikelijke naam voor een argument dat je niet gebruikt."
+    }
+  ]
+}

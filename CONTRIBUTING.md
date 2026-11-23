@@ -39,7 +39,7 @@ To add a subject, say SQL, create `quizzes/sql/postgres/quiz.json` plus a topic 
 | --- | --- | --- |
 | `title`, `category` | required | Subjects are grouped under their category on the home page. |
 | `badge` | optional | Short text on the subject's tile, such as the import alias `pd`. |
-| `language` | optional | Syntax highlighting: `python` or `sql`. Other values show plain code. |
+| `language` | optional | Syntax highlighting: `python` or `sql`. Other values show plain code; leave it out for subjects without code. |
 | `description`, `note` | optional | Shown on the subject page. `note` is a good place for assumptions. |
 | `prelude` | optional | Code that `verify` runs before every snippet. It isn't shown in questions. |
 
@@ -69,14 +69,14 @@ To add a subject, say SQL, create `quizzes/sql/postgres/quiz.json` plus a topic 
 | Field | | |
 | --- | --- | --- |
 | `id` | required | Lowercase words joined by hyphens, unique within the subject. Progress is saved per id, so keep it stable. |
-| `difficulty` | required | `easy`, `medium` or `hard`. |
+| `difficulty` | optional | `easy`, `medium` or `hard`. The difficulty filter only appears for subjects that use it. |
 | `question`, `explanation` | required | Text with `` `code` `` and `**bold**`. Explanations can also have paragraphs (blank lines) and fenced code blocks. |
 | `code` | optional | The snippet, as a string or a list of lines. |
 | `options` | required | 2 to 6 answers. An option containing a line break is shown as preformatted text, which suits printed DataFrames. |
 | `answer` | required | Index of the correct option. The app shuffles options, so it can always be `0`. |
 | `check` | optional | How `verify` tests the question; see below. |
 | `expect` | optional | With `"check": "options"`: a Python expression the answer must equal. |
-| `shuffle` | optional | `false` keeps the options in file order. |
+| `shuffle` | optional | `false` keeps the options in file order, e.g. `["True", "False"]` for true/false questions. |
 
 ### Checked answers
 
@@ -99,20 +99,80 @@ and file or database I/O) are validated for structure only, so review them by ha
 | `python quiz.py build [--out DIR]` | Write the single-file app to `dist/index.html`. |
 | `python quiz.py validate` | Check every quiz file's structure: required fields, unique ids, valid answer indexes. |
 | `python quiz.py verify [SUBJECT]` | Run the checked questions. Needs `pip install -r requirements-dev.txt`. |
-| `python -m unittest discover -s tests` | Tests for `quiz.py`. |
+| `python quiz.py app [--import FILE]` | Run the desktop app, adding a module file first if given. |
+| `python quiz.py quit` | Stop a running desktop app. |
+| `python quiz.py pack [SUBJECT ...] [--out DIR]` | Write subjects as `.quiz` module files to `dist/modules/`. |
+| `python installer/build.py` | Build the Windows installer; see below. |
+| `python -m unittest discover -s tests` | Tests for `quiz.py` and the desktop app. |
 
-GitHub Actions runs all of these on every push (`.github/workflows/ci.yml`).
+GitHub Actions runs the checks on every push (`.github/workflows/ci.yml`).
+
+## Module files
+
+A module file (`.quiz`) is one subject in a single JSON file: the `quiz.json` as `subject`,
+and each topic file as an entry of `topics`, with its file name in `file` (that sets the
+order). Make one with `python quiz.py pack python-pandas`, which writes
+`dist/modules/python-pandas.quiz`; without a subject id it packs every subject.
+
+```json
+{
+  "format": "code-quiz-module",
+  "version": 1,
+  "id": "sql-basics",
+  "subject": { "title": "SQL basics", "category": "SQL", "language": "sql" },
+  "topics": [
+    { "file": "01-select", "topic": "SELECT", "questions": [] }
+  ]
+}
+```
+
+The app checks a module like `python quiz.py validate` checks the quiz folders, and says what
+is wrong when it can't add one. Modules installed from GitHub are read straight from the
+`quizzes/` folder of the repository, so to publish new questions, add them to the repository
+and push.
+
+The GitHub token a user enters is saved in `settings.json` in the app's data folder and is
+only sent to `api.github.com`.
+
+## Building the installer
+
+```bash
+python installer/build.py
+```
+
+This writes `dist/CodeQuiz-Setup-<version>.exe` and works on Windows, Linux or macOS with
+[NSIS](https://nsis.sourceforge.io) installed (`apt install nsis` or `brew install makensis`).
+It downloads Python 3.13 for Windows once (the official `python` package on NuGet, checked
+against a pinned SHA-512), trims what the app doesn't use, and packs it with the app and the
+subjects in `quizzes/`. The installer script is `installer/codequiz.nsi`. The app installs
+into `%LOCALAPPDATA%\Programs\Code Quiz`.
+
+The "Windows installer" workflow (`.github/workflows/installer.yml`) also builds it; the
+installer is attached to the run as an artifact. To publish a release, raise `VERSION` in
+`quiz.py`, then push a matching tag:
+
+```bash
+git tag v1.0.1
+```
+
+```bash
+git push origin v1.0.1
+```
+
+The workflow then attaches the installer to a GitHub release for that tag.
 
 ## Library versions
 
-The checked answers are verified against pandas 3.1 and scikit-learn 1.9. After upgrading a
-library, run `python quiz.py verify` to see which answers changed.
+The checked answers are verified against pandas 3.1 and scikit-learn 1.9. The Contoso
+questions are also meant to work on pandas 2.2. After upgrading a library, run
+`python quiz.py verify` to see which answers changed.
 
 ## Layout
 
 ```
-quiz.py              serve, build, validate and verify (standard library only)
-app/                 the web app: index.html, styles.css, app.js (no dependencies)
+quiz.py              serve, build, validate, verify, pack and the desktop app (standard library only)
+app/                 the web app: index.html, styles.css, app.js, icon.svg (no dependencies)
 quizzes/             the questions
-tests/test_quiz.py   unit tests for quiz.py
+installer/           build.py, the NSIS script, the icon and the setup wizard image
+tests/               unit tests for quiz.py and the desktop app
 ```

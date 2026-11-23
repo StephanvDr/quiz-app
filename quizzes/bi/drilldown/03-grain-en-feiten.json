@@ -1,0 +1,243 @@
+{
+  "topic": "Grain & feiten",
+  "questions": [
+    {
+      "id": "grain-01",
+      "question": "Wat is de grain van een feitentabel?",
+      "options": [
+        "Wat één rij in de feitentabel precies voorstelt",
+        "Het aantal kolommen in de tabel",
+        "Hoe vaak de tabel ververst wordt",
+        "De opslaggrootte in gigabytes"
+      ],
+      "answer": 0,
+      "explanation": "Grain = granulariteit: het detailniveau van één rij, bijvoorbeeld 'één rij per kassabonregel'."
+    },
+    {
+      "id": "grain-02",
+      "question": "Wat is de juiste volgorde van Kimballs vier ontwerpstappen?",
+      "options": [
+        "Bedrijfsproces kiezen → grain declareren → dimensies kiezen → feiten kiezen",
+        "Feiten kiezen → dimensies kiezen → grain declareren → bedrijfsproces kiezen",
+        "Dimensies kiezen → bedrijfsproces kiezen → feiten kiezen → grain declareren",
+        "Grain declareren → feiten kiezen → bedrijfsproces kiezen → dimensies kiezen"
+      ],
+      "answer": 0,
+      "explanation": "Eerst het proces, dan de grain. Pas als de grain vastligt, weet je welke dimensies en feiten passen."
+    },
+    {
+      "id": "grain-03",
+      "question": "Welke ontwerpstap komt direct na het kiezen van het bedrijfsproces?",
+      "options": [
+        "De grain declareren",
+        "De dimensies kiezen",
+        "De feiten kiezen",
+        "De ETL bouwen"
+      ],
+      "answer": 0,
+      "explanation": "De grain is de eerste echte ontwerpbeslissing. Alles daarna moet consistent zijn met die grain."
+    },
+    {
+      "id": "grain-04",
+      "question": "Waarom kies je bij voorkeur de fijnste (atomaire) grain?",
+      "options": [
+        "Optellen naar boven kan altijd, uitsplitsen naar beneden niet",
+        "Het kost minder opslag",
+        "Queries zijn daardoor altijd sneller",
+        "Je hebt dan minder dimensies nodig"
+      ],
+      "answer": 0,
+      "explanation": "Atomaire data beantwoordt ook vragen die je nu nog niet kent. Een grove grain sluit vragen voorgoed uit."
+    },
+    {
+      "id": "grain-05",
+      "question": "Een feitentabel heeft als grain 'één rij per hotel per dag'. Kun je de omzet per kamertype rapporteren?",
+      "options": [
+        "Nee, kamertype zit niet in de grain",
+        "Ja, met een filter in het rapport",
+        "Ja, met een DAX-measure",
+        "Alleen als je een snowflake schema gebruikt"
+      ],
+      "answer": 0,
+      "explanation": "Wat niet in de grain zit, kun je niet uitsplitsen. Daarvoor heb je een fijnere grain nodig, bijvoorbeeld per kamertype per dag."
+    },
+    {
+      "id": "grain-06",
+      "question": "Wat is het risico van een gemengde grain, zoals dagtotalen en losse transacties in één feitentabel?",
+      "options": [
+        "Dubbeltellingen bij het aggregeren",
+        "De tabel wordt te smal",
+        "Dimensies kunnen niet meer gekoppeld worden",
+        "Queries geven een foutmelding"
+      ],
+      "answer": 0,
+      "explanation": "Als totalen en details naast elkaar staan, telt een SUM ze allebei op."
+    },
+    {
+      "id": "grain-07",
+      "question": "De grain is 'één rij per order' (orderkop). Welke dimensie kun je niet zomaar koppelen?",
+      "options": [
+        "Product",
+        "Klant",
+        "Orderdatum",
+        "Winkel"
+      ],
+      "answer": 0,
+      "explanation": "Eén order bevat meerdere producten. Voor product heb je een grain per orderregel nodig."
+    },
+    {
+      "id": "grain-08",
+      "question": "Wat is een transactie-feitentabel?",
+      "options": [
+        "Eén rij per gebeurtenis, zoals elke verkoop of betaling",
+        "Eén rij per vaste periode, zoals voorraad per dag",
+        "Eén rij per proces die bij elke mijlpaal wordt bijgewerkt",
+        "Een tabel zonder meetwaarden"
+      ],
+      "answer": 0,
+      "explanation": "Het meest voorkomende type: elke gebeurtenis wordt één rij."
+    },
+    {
+      "id": "grain-09",
+      "question": "Wat is een periodic snapshot-feitentabel?",
+      "options": [
+        "Eén rij per vaste periode, zoals de voorraadstand per product per dag",
+        "Eén rij per losse transactie",
+        "Eén rij per order die bij elke mijlpaal wordt bijgewerkt",
+        "Een kopie van het OLTP-systeem op één moment"
+      ],
+      "answer": 0,
+      "explanation": "Een snapshot legt de stand op vaste momenten vast, ook als er niets gebeurd is."
+    },
+    {
+      "id": "grain-10",
+      "question": "Wat is een accumulating snapshot-feitentabel?",
+      "options": [
+        "Eén rij per procesinstantie die wordt bijgewerkt naarmate mijlpalen worden bereikt",
+        "Eén rij per dag met de stand van dat moment",
+        "Eén rij per losse gebeurtenis die nooit wordt aangepast",
+        "Een tabel die alle snapshots bij elkaar optelt"
+      ],
+      "answer": 0,
+      "explanation": "Denk aan een boeking: geboekt, ingecheckt, uitgecheckt, betaald. Eén rij die per mijlpaal wordt aangevuld."
+    },
+    {
+      "id": "grain-11",
+      "question": "Welk feit is volledig additief?",
+      "options": [
+        "Omzet",
+        "Voorraadstand",
+        "Bezettingsgraad (%)",
+        "Gemiddelde kamerprijs"
+      ],
+      "answer": 0,
+      "explanation": "Omzet mag je optellen over alle dimensies: hotels, producten én tijd."
+    },
+    {
+      "id": "grain-12",
+      "question": "Welk feit is semi-additief?",
+      "options": [
+        "Voorraadstand aan het eind van de dag",
+        "Aantal verkochte producten",
+        "Omzet",
+        "Aantal overnachtingen"
+      ],
+      "answer": 0,
+      "explanation": "Een stand mag je optellen over producten of locaties, maar niet over tijd: vijf dagstanden optellen geeft onzin."
+    },
+    {
+      "id": "grain-13",
+      "question": "Welk feit is niet-additief?",
+      "options": [
+        "Bezettingsgraad (%)",
+        "Aantal overnachtingen",
+        "Omzet",
+        "Aantal geboekte kamers"
+      ],
+      "answer": 0,
+      "explanation": "Percentages en ratio's mag je niet optellen. Je berekent ze opnieuw uit de onderdelen."
+    },
+    {
+      "id": "grain-14",
+      "question": "Je wilt de bezettingsgraad per regio tonen. Wat sla je het best op in de feitentabel?",
+      "options": [
+        "Bezette en beschikbare kamers; het percentage bereken je in de rapportage",
+        "Het percentage per hotel, dat je per regio middelt",
+        "Alleen het regiogemiddelde",
+        "Niets, want Power BI berekent dit zelf"
+      ],
+      "answer": 0,
+      "explanation": "Ratio's middelen geeft fouten bij ongelijke hotelgroottes. Tel teller en noemer op en deel daarna."
+    },
+    {
+      "id": "grain-15",
+      "question": "Waar of onwaar: Een feitentabel bevat vooral beschrijvende tekstvelden, zoals hotelnaam en stad.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 1,
+      "explanation": "Beschrijvende velden horen in dimensietabellen. Een feitentabel bevat meetwaarden en sleutels.",
+      "shuffle": false
+    },
+    {
+      "id": "grain-16",
+      "question": "Waar of onwaar: Alle feiten in een feitentabel moeten passen bij de gedeclareerde grain.",
+      "options": [
+        "Waar",
+        "Onwaar"
+      ],
+      "answer": 0,
+      "explanation": "Kimball noemt dit 'true to the grain'. Een meetwaarde op een ander niveau hoort in een andere feitentabel.",
+      "shuffle": false
+    },
+    {
+      "id": "grain-17",
+      "question": "Welke zin beschrijft een grain goed?",
+      "options": [
+        "Eén rij per boeking per overnachting",
+        "De tabel met alle hotelinformatie",
+        "Alle omzet van 2025",
+        "Een tabel met twaalf kolommen"
+      ],
+      "answer": 0,
+      "explanation": "Een goede graindeclaratie zegt precies wat één rij betekent, in businesstermen."
+    },
+    {
+      "id": "grain-18",
+      "question": "Wat is een factless fact table?",
+      "options": [
+        "Een feitentabel zonder meetwaarden die alleen vastlegt dát iets gebeurde",
+        "Een feitentabel waarvan de data ontbreekt",
+        "Een dimensietabel zonder sleutels",
+        "Een feitentabel met alleen tekst"
+      ],
+      "answer": 0,
+      "explanation": "Bijvoorbeeld de aanwezigheid van studenten bij colleges: de rij zelf is het feit, en tellen doe je met COUNT."
+    },
+    {
+      "id": "grain-19",
+      "question": "Welke grain is het fijnst?",
+      "options": [
+        "Eén rij per kassabonregel",
+        "Eén rij per kassabon",
+        "Eén rij per winkel per dag",
+        "Eén rij per winkel per maand"
+      ],
+      "answer": 0,
+      "explanation": "Een bonregel is het kleinste meetbare niveau: product, aantal en prijs per regel."
+    },
+    {
+      "id": "grain-20",
+      "question": "Wat staat er typisch in een feitentabel?",
+      "options": [
+        "Meetwaarden en foreign keys naar dimensies",
+        "Alleen beschrijvende attributen",
+        "Hiërarchieën zoals stad, land en regio",
+        "Gebruikersrechten en rollen"
+      ],
+      "answer": 0,
+      "explanation": "Lang en smal: veel rijen met getallen en sleutels. De context staat in de dimensies."
+    }
+  ]
+}

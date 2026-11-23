@@ -1,0 +1,337 @@
+{
+  "topic": "Store Manager: US06 t/m US10",
+  "questions": [
+    {
+      "id": "lu1-store-year-params",
+      "difficulty": "easy",
+      "question": "Wat doen de variabelen `STORE` en `YEAR` aan het begin van sectie 6?",
+      "code": [
+        "STORE = 'Contoso Baumholder Store'    # <-- choose the store here (like the slicer in Power BI)",
+        "YEAR = 2013                           # <-- year for US06 (like the year slicer)"
+      ],
+      "options": [
+        "Ze kiezen het filiaal en het jaar, net als de slicers in het Power BI-dashboard",
+        "Ze filteren de hele feitentabel blijvend op één winkel",
+        "Ze bepalen welke grafieken worden opgeslagen",
+        "Ze zijn alleen commentaar en worden niet gebruikt"
+      ],
+      "answer": 0,
+      "explanation": "Pas je `STORE` aan en draai je de cellen opnieuw, dan maken US06 t/m US10 de grafieken voor een ander filiaal. Het dashboard opent op Contoso Baumholder Store, dus het notebook gebruikt dat filiaal als voorbeeld."
+    },
+    {
+      "id": "lu1-store-lookup",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "dim_store = pd.DataFrame({'StoreKey': [4, 199],",
+        "                          'StoreName': ['Contoso Bellevue Store', 'Contoso Baumholder Store']})",
+        "store = dim_store.set_index('StoreName').loc['Contoso Baumholder Store']",
+        "print(type(store).__name__, store['StoreKey'])"
+      ],
+      "options": [
+        "`Series 199`",
+        "`DataFrame 199`",
+        "`Series 1`",
+        "`KeyError`"
+      ],
+      "answer": 0,
+      "explanation": "Met de winkelnaam als index kun je de rij opzoeken met `.loc[naam]`. Eén rij komt terug als Series, met de kolomnamen als labels, dus `store['StoreKey']` geeft de sleutel. De echte sleutel van Baumholder is hier niet belangrijk; 199 is een voorbeeld.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-store-fs",
+      "difficulty": "easy",
+      "question": "Wat bevat `fs = fact[fact['StoreKey'] == store['StoreKey']]`?",
+      "options": [
+        "Alleen de feitregels van het gekozen filiaal",
+        "De feitregels van alle filialen behalve het gekozen filiaal",
+        "Eén regel met de totale omzet van het filiaal",
+        "De rij van het filiaal uit DimStore"
+      ],
+      "answer": 0,
+      "explanation": "De vergelijking geeft een boolean mask en `fact[mask]` houdt de regels waar die True is. Voor Baumholder zijn dat 5.234 regels met samen $15,15M omzet. US06 t/m US09 werken met `fs`."
+    },
+    {
+      "id": "lu1-country-key-iloc",
+      "difficulty": "hard",
+      "question": "Waarom mag het notebook het land van het filiaal uit de eerste feitregel halen, met `fs['CountryKey'].iloc[0]`?",
+      "options": [
+        "Alle regels van één winkel hebben hetzelfde land, omdat `CountryKey` via de winkel is opgezocht",
+        "Omdat de eerste regel altijd de grootste verkoop is",
+        "Omdat de feitregels op land gesorteerd zijn",
+        "Omdat `iloc[0]` het meest voorkomende land geeft"
+      ],
+      "answer": 0,
+      "explanation": "In de Transform-stap kreeg elke feitregel `CountryKey` van zijn winkel. Binnen `fs` is die waarde dus overal gelijk, en elke regel geeft hetzelfde land. `COUNTRY_KEY` bepaalt in US10 met welke winkels Baumholder wordt vergeleken."
+    },
+    {
+      "id": "lu1-us06-reindex",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "fs_dates = pd.DataFrame({'MonthOfYear': [1, 1, 3], 'Year': [2012, 2013, 2013],",
+        "                         'SalesAmount': [5.0, 7.0, 4.0]})",
+        "m = (fs_dates.groupby(['MonthOfYear', 'Year'])['SalesAmount'].sum()",
+        "     .unstack(fill_value=0).reindex(index=range(1, 13), columns=[2011, 2012, 2013], fill_value=0))",
+        "print(m.shape, m[2013].tolist()[:3])"
+      ],
+      "options": [
+        "`(12, 3) [7.0, 0.0, 4.0]`",
+        "`(2, 2) [7.0, 4.0]`",
+        "`(12, 3) [7.0, nan, 4.0]`",
+        "`(3, 12) [7.0, 0.0, 4.0]`"
+      ],
+      "answer": 0,
+      "explanation": "`unstack` zet de jaren als kolommen. `reindex` dwingt alle 12 maanden en alle 3 jaren af, ook als het filiaal in een maand of jaar niets verkocht; `fill_value=0` zet daar 0 neer. Zo heeft de grafiek altijd 12 staven.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us06-replace-zero",
+      "difficulty": "hard",
+      "question": "Waarom staat er `previous_year.replace(0, np.nan)` in de groeiberekening van US06?",
+      "code": [
+        "growth_month = this_year / previous_year.replace(0, np.nan) - 1"
+      ],
+      "options": [
+        "Delen door 0 geeft `inf`; met `NaN` krijgt een maand zonder omzet vorig jaar geen groeilabel",
+        "Om maanden zonder omzet uit de grafiek te halen",
+        "Omdat pandas niet door nul kan delen en dan stopt",
+        "Om de groei af te ronden"
+      ],
+      "answer": 0,
+      "explanation": "pandas geeft bij delen door 0 geen fout maar `inf`, en dat zou als label `+inf%` verschijnen. De lus tekent alleen een label als `pd.notna(g)`, dus `NaN` slaat zo'n maand netjes over."
+    },
+    {
+      "id": "lu1-us06-growth",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "this_year = pd.Series([7.0, 0.0, 4.0], index=[1, 2, 3])",
+        "previous_year = pd.Series([5.0, 2.0, 0.0], index=[1, 2, 3])",
+        "print((this_year / previous_year.replace(0, np.nan) - 1).round(2).tolist())"
+      ],
+      "options": [
+        "`[0.4, -1.0, nan]`",
+        "`[0.4, -1.0, inf]`",
+        "`[1.4, 0.0, nan]`",
+        "`[0.4, nan, nan]`"
+      ],
+      "answer": 0,
+      "explanation": "Januari: 7/5 − 1 = 0,4 (+40%). Februari: 0/2 − 1 = −1 (−100%, niets verkocht). Maart: vorig jaar 0, dus `NaN` en geen label.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us06-label-position",
+      "difficulty": "medium",
+      "question": "Waarvoor gebruikt US06 `top = np.maximum(this_year, previous_year)`?",
+      "options": [
+        "Het groeilabel komt boven de hoogste van de twee: de kolom van dit jaar of de lijn van vorig jaar",
+        "Om de beste maand te vinden",
+        "Om de y-as te beginnen bij het maximum",
+        "Om alleen maanden met groei te tonen"
+      ],
+      "answer": 0,
+      "explanation": "`np.maximum` vergelijkt per maand de twee waarden en neemt de grootste. Zo valt het label nooit over de kolom of de stippellijn heen."
+    },
+    {
+      "id": "lu1-us07-top10",
+      "difficulty": "medium",
+      "question": "Wat berekent `share_top10 = top10['Sales'].sum() / sub['Sales'].sum()` in US07?",
+      "options": [
+        "Welk deel van de omzet van het filiaal uit de top 10 subcategorieën komt; bij Baumholder 84%",
+        "De gemiddelde omzet per subcategorie",
+        "Het aandeel van de top 10 in de omzet van heel Contoso",
+        "Het aantal verkochte stuks in de top 10"
+      ],
+      "answer": 0,
+      "explanation": "`sub` bevat alle subcategorieën die het filiaal verkoopt (22 bij Baumholder), gesorteerd op omzet; `top10` zijn de eerste 10. Hun omzet gedeeld door de totale omzet van het filiaal geeft het aandeel in de titel."
+    },
+    {
+      "id": "lu1-return-pct",
+      "difficulty": "medium",
+      "question": "Wat print deze code?",
+      "code": [
+        "def return_pct(df):",
+        "    r = df.groupby('Category')[['ReturnQuantity', 'SalesQuantity']].sum()",
+        "    return r['ReturnQuantity'] / r['SalesQuantity']",
+        "",
+        "# voorbeeld",
+        "df = pd.DataFrame({'Category': ['Audio', 'Audio', 'TV and Video'],",
+        "                   'ReturnQuantity': [1, 0, 2], 'SalesQuantity': [50, 50, 100]})",
+        "print(return_pct(df).to_dict())"
+      ],
+      "options": [
+        "`{'Audio': 0.01, 'TV and Video': 0.02}`",
+        "`{'Audio': 0.02, 'TV and Video': 0.02}`",
+        "`{'Audio': 1, 'TV and Video': 2}`",
+        "`{'Audio': 0.01, 'TV and Video': 0.01}`"
+      ],
+      "answer": 0,
+      "explanation": "Per categorie worden de geretourneerde en de verkochte stuks eerst opgeteld en daarna gedeeld: Audio 1/100 en TV and Video 2/100. Dezelfde functie geeft voor `fs` het filiaal en voor `fact_product` heel Contoso.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us08-higher-is-worse",
+      "difficulty": "hard",
+      "question": "Waarom roept US08 `diff_colour(d, higher_is_better=False)` aan?",
+      "options": [
+        "Bij retouren is meer slechter: een hoger retour % dan Contoso moet rood worden",
+        "Omdat het verschil altijd negatief is",
+        "Om de kleuren van US06 om te draaien voor de afwisseling",
+        "Omdat retouren in procentpunten zijn"
+      ],
+      "answer": 0,
+      "explanation": "Met de standaardwaarde zou een positief verschil groen worden. Voor retouren is dat verkeerd om: Baumholder zit in alle 6 categorieën boven het Contoso-gemiddelde, en dat hoort rood te zijn."
+    },
+    {
+      "id": "lu1-us08-percentage-points",
+      "difficulty": "medium",
+      "question": "In US08 is `ret['Difference'] = ret['Store'] - ret['Contoso']`. Baumholder heeft bij TV and Video 1,64% retouren en Contoso 1,20%. Wat is het verschil?",
+      "options": [
+        "0,44 procentpunt",
+        "37% meer",
+        "0,44%, dus Baumholder retourneert 0,44% van Contoso",
+        "1,64 / 1,20 = 1,37"
+      ],
+      "answer": 0,
+      "explanation": "Het verschil tussen twee percentages is een verschil in procentpunten: 1,64 − 1,20 = 0,44. De conclusie zegt het precies zo: '0,44 procentpunt hoger'. Een relatieve stijging zou 1,64 / 1,20 − 1 ≈ 37% zijn."
+    },
+    {
+      "id": "lu1-us09-days",
+      "difficulty": "medium",
+      "question": "Waarom gebruikt US09 `Days=('DateKey', 'nunique')` en niet `('DateKey', 'count')`?",
+      "code": [
+        "promo = (star(fs, 'promotion').groupby('PromotionName')",
+        "         .agg(Sales=('SalesAmount', 'sum'), Cost=('TotalCost', 'sum'), Discount=('DiscountAmount', 'sum'),",
+        "              Days=('DateKey', 'nunique')))"
+      ],
+      "options": [
+        "`nunique` telt verschillende dagen met verkoop; `count` zou het aantal verkoopregels tellen",
+        "`count` werkt niet op sleutels",
+        "`nunique` slaat dagen zonder korting over",
+        "Er is geen verschil"
+      ],
+      "answer": 0,
+      "explanation": "Op één dag zijn er veel verkoopregels. Voor de omzet per dag moet je delen door het aantal dagen, dus tel je de unieke `DateKey`'s per promotie."
+    },
+    {
+      "id": "lu1-us09-uplift",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld",
+        "promo = pd.DataFrame({'PerDay': [100.0, 112.0, 90.0]},",
+        "                     index=['No Discount', 'European Spring Promotion', 'Holiday'])",
+        "baseline = promo.loc['No Discount', 'PerDay']",
+        "promo['Uplift'] = (promo['PerDay'] / baseline - 1).where(promo.index != 'No Discount')",
+        "print(promo['Uplift'].round(2).tolist())"
+      ],
+      "options": [
+        "`[nan, 0.12, -0.1]`",
+        "`[0.0, 0.12, -0.1]`",
+        "`[nan, 1.12, 0.9]`",
+        "`[0.12, -0.1]`"
+      ],
+      "answer": 0,
+      "explanation": "Elke promotie wordt vergeleken met de omzet per dag zonder korting: 112/100 − 1 = +12% en 90/100 − 1 = −10%. `where` maakt de referentie zelf leeg (`NaN`), zodat No Discount geen label krijgt.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us09-best",
+      "difficulty": "medium",
+      "question": "Wat doen deze twee regels?",
+      "code": [
+        "promotions = promo.drop(index='No Discount')",
+        "best = promotions['Uplift'].idxmax()"
+      ],
+      "options": [
+        "Ze zoeken de naam van de promotie met de grootste uplift, zonder de referentie",
+        "Ze verwijderen de promotie met de meeste korting",
+        "Ze geven de hoogste uplift als getal",
+        "Ze sorteren de promoties op uplift"
+      ],
+      "answer": 0,
+      "explanation": "`idxmax()` geeft het indexlabel van het maximum, hier de promotienaam. Als die uplift positief is, noemt de titel de beste promotie; anders staat er dat geen promotie per dag meer verkoopt."
+    },
+    {
+      "id": "lu1-us09-caveat",
+      "difficulty": "medium",
+      "question": "Welke kanttekening plaatst het notebook bij de vergelijking in US09?",
+      "options": [
+        "De acties vallen in andere seizoenen dan de dagen zonder korting, dus een deel van het verschil kan door het seizoen komen",
+        "De kortingspercentages zijn onbekend",
+        "Promotiedagen tellen dubbel mee",
+        "De vergelijking geldt alleen voor 2013"
+      ],
+      "answer": 0,
+      "explanation": "De vergelijking per dag is eerlijk, omdat een dag óf een actiedag óf een dag zonder korting is, nooit allebei. Maar de Holiday-promotie valt bijvoorbeeld in een ander deel van het jaar dan de gewone dagen."
+    },
+    {
+      "id": "lu1-us10-per-m2",
+      "difficulty": "medium",
+      "question": "Wat berekent US10 met `w['SalesAmount'] / YEARS / w['SellingArea_m2']`, en welke winkels tellen mee?",
+      "options": [
+        "De omzet per m² verkoopoppervlak per jaar, alleen voor fysieke winkels in hetzelfde land",
+        "De omzet per m² van alle Contoso-winkels wereldwijd",
+        "Het verkoopoppervlak per jaar",
+        "De omzet per medewerker"
+      ],
+      "answer": 0,
+      "explanation": "`w` begint met de feitregels in `COUNTRY_KEY` en houdt daarna alleen `StoreType == 'Store'`. Online, catalogus en reseller hebben geen echt verkoopoppervlak; dat is in DimStore al leeg gemaakt met `where(physical)`."
+    },
+    {
+      "id": "lu1-us10-rank",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "# voorbeeld: StoreKey → omzet per m²",
+        "per_m2 = pd.Series([9.90, 10.53, 10.10, 6.13], index=[11, 12, 13, 14])",
+        "print(int(per_m2.rank(ascending=False)[13]))"
+      ],
+      "options": [
+        "`2`",
+        "`3`",
+        "`1`",
+        "`4`"
+      ],
+      "answer": 0,
+      "explanation": "Met `ascending=False` krijgt de hoogste waarde rang 1: 10,53 is 1 en 10,10 is 2. `[13]` zoekt winkel 13 op via het indexlabel, en `int()` maakt van de rang (een float) een heel getal voor de titel.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us10-window",
+      "difficulty": "hard",
+      "question": "Wat print deze code?",
+      "code": [
+        "w = pd.Series(range(30))          # voorbeeld: 30 winkels, gesorteerd",
+        "i = 3                             # positie van het gekozen filiaal",
+        "print(len(w.iloc[max(0, i - 10): i + 11]))"
+      ],
+      "options": [
+        "`14`",
+        "`21`",
+        "`11`",
+        "`13`"
+      ],
+      "answer": 0,
+      "explanation": "Normaal toont US10 10 winkels boven en 10 onder het filiaal (21 staven). Staat het filiaal op positie 3, dan kan het niet 10 plaatsen terug: `max(0, i - 10)` begint dan bij 0, en de slice `0:14` geeft 14 winkels. Een negatief begin zou vanaf het einde tellen.",
+      "check": "output"
+    },
+    {
+      "id": "lu1-us10-why-window",
+      "difficulty": "medium",
+      "question": "Waarom toont US10 bij meer dan 21 winkels alleen de 10 winkels boven en de 10 onder het filiaal?",
+      "options": [
+        "In een land met veel winkels, zoals de VS, wordt de grafiek anders te lang en onleesbaar",
+        "Omdat de rangschikking alleen voor 21 winkels werkt",
+        "Omdat Power BI maximaal 21 staven toont",
+        "Om de beste en slechtste winkels te verbergen"
+      ],
+      "answer": 0,
+      "explanation": "De rang en het aantal winkels in de titel komen nog uit de volledige lijst (`rank`, `n_stores`). Alleen de staven worden beperkt. Duitsland heeft 11 fysieke winkels, dus voor Baumholder zie je ze allemaal."
+    }
+  ]
+}
