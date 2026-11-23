@@ -1,0 +1,197 @@
+{
+  "topic": "Pitfalls 2: model choice and training",
+  "questions": [
+    {
+      "id": "overfitting-signal",
+      "difficulty": "easy",
+      "question": "Training accuracy 0.98, test accuracy 0.71. What is going on?",
+      "options": ["Overfitting", "Underfitting", "A good fit", "Data drift"],
+      "answer": 0,
+      "explanation": "A big gap between a high training score and a much lower test score is the signal for overfitting: the model learned noise in the training data instead of the general pattern."
+    },
+    {
+      "id": "underfitting-signal",
+      "difficulty": "easy",
+      "question": "Training accuracy 0.62, test accuracy 0.60. What is going on?",
+      "options": ["Underfitting", "Overfitting", "Data leakage", "A good fit"],
+      "answer": 0,
+      "explanation": "Both scores are low and close together: the model is too simple for the problem (too few features or too simple an algorithm). That is underfitting."
+    },
+    {
+      "id": "overfitting-remedy",
+      "difficulty": "medium",
+      "question": "Your decision tree overfits. Which change is **not** a remedy?",
+      "options": [
+        "Letting the tree grow deeper",
+        "Limiting `max_depth`",
+        "Collecting more training data",
+        "Switching to a Random Forest"
+      ],
+      "answer": 0,
+      "explanation": "A deeper tree is more complex and overfits even more. Limiting depth (a form of regularisation), more data and averaging many trees all reduce overfitting."
+    },
+    {
+      "id": "underfitting-remedy",
+      "difficulty": "medium",
+      "question": "Your model underfits. Which change is most likely to help?",
+      "options": [
+        "Add more informative features or use a more complex model",
+        "Increase the regularisation strength",
+        "Use fewer features",
+        "Make the test set larger"
+      ],
+      "answer": 0,
+      "explanation": "Underfitting means the model can't capture the pattern. Give it more to work with: better features or a more flexible algorithm. Stronger regularisation and fewer features push it further towards underfitting."
+    },
+    {
+      "id": "generalisation",
+      "difficulty": "easy",
+      "question": "What is **generalisation** (generaliseren)?",
+      "options": [
+        "Performing well on new, unseen data",
+        "Performing well on the training data",
+        "Using the same model for every problem",
+        "Removing specific features from the data"
+      ],
+      "answer": 0,
+      "explanation": "Generalisation is the actual goal of ML: doing well on data the model has never seen. It is the opposite of overfitting, where the model only does well on what it trained on."
+    },
+    {
+      "id": "model-bias",
+      "difficulty": "medium",
+      "question": "In the bias-variance sense, what is **bias** (systematische fout)?",
+      "options": [
+        "Error from wrong assumptions, like fitting a straight line to a curve; the underfitting side",
+        "Sensitivity to small changes in the training data; the overfitting side",
+        "Historical prejudice in the data, such as discrimination by gender",
+        "The intercept of a linear model"
+      ],
+      "answer": 0,
+      "explanation": "Model bias is a systematic error caused by assumptions that don't fit the data. Sensitivity to the training data is variance. Prejudice in the data is \"bias in data\" (fairness), a different meaning of the same word."
+    },
+    {
+      "id": "model-variance",
+      "difficulty": "medium",
+      "question": "In the bias-variance sense, what is **variance** (variantie)?",
+      "options": [
+        "How much the model changes when the training data changes a little; the overfitting side",
+        "Error from wrong assumptions; the underfitting side",
+        "The spread of the target values",
+        "The difference between the training and test set sizes"
+      ],
+      "answer": 0,
+      "explanation": "A high-variance model (such as a deep tree) reacts strongly to small changes in the training data: it fits the noise. That is the overfitting side of the trade-off."
+    },
+    {
+      "id": "bias-variance-tradeoff",
+      "difficulty": "medium",
+      "question": "Which statement about the **bias-variance trade-off** is correct?",
+      "options": [
+        "Simple models have high bias and low variance; complex models have low bias and high variance",
+        "Simple models have low bias and high variance; complex models the reverse",
+        "You can always reach zero bias and zero variance with enough tuning",
+        "Bias and variance only matter for regression"
+      ],
+      "answer": 0,
+      "explanation": "A straight line can't bend to the data (high bias) but barely changes when the data changes (low variance). A deep tree is the reverse. You aim for the sweet spot in between, which is what explains over- versus underfitting."
+    },
+    {
+      "id": "regularisation",
+      "difficulty": "easy",
+      "question": "What is **regularisation** (regularisatie)?",
+      "options": [
+        "A penalty on model complexity, such as Ridge (L2), Lasso (L1) or a maximum tree depth",
+        "Rescaling the features to the same range",
+        "Removing rows with missing values",
+        "Running the model on a regular schedule in production"
+      ],
+      "answer": 0,
+      "explanation": "Regularisation discourages the model from becoming too complex, for example by penalising large coefficients (Ridge/L2, Lasso/L1) or by limiting the depth of a tree. It fights overfitting."
+    },
+    {
+      "id": "tree-memorises-noise",
+      "difficulty": "hard",
+      "question": "The labels below are pure random noise. What does this print?",
+      "code": [
+        "from sklearn.tree import DecisionTreeClassifier",
+        "rng = np.random.default_rng(0)",
+        "X = rng.normal(size=(50, 2))",
+        "y = rng.integers(0, 2, size=50)",
+        "tree = DecisionTreeClassifier(random_state=42).fit(X, y)",
+        "print(tree.score(X, y))"
+      ],
+      "options": ["`1.0`", "`0.5`", "`0.0`", "`0.75`"],
+      "answer": 0,
+      "explanation": "An unlimited tree keeps splitting until every leaf is pure, so it gets 100 % **training** accuracy even on random labels. On new data it would score about 50 %. A perfect training score proves nothing; this is overfitting in its purest form.",
+      "check": "output"
+    },
+    {
+      "id": "parameter-vs-hyperparameter",
+      "difficulty": "medium",
+      "question": "For Logistic Regression, which pair is (parameter, hyperparameter)?",
+      "options": [
+        "`coef_` is a parameter; `C` (regularisation strength) is a hyperparameter",
+        "`C` is a parameter; `coef_` is a hyperparameter",
+        "`intercept_` and `coef_` are both hyperparameters",
+        "`random_state` is a parameter; `coef_` is a hyperparameter"
+      ],
+      "answer": 0,
+      "explanation": "Parameters are learned by `fit()`: the coefficients and the intercept. Hyperparameters are settings you choose before training, such as `C`, and they are not learned by `fit()`."
+    },
+    {
+      "id": "which-is-hyperparameter",
+      "difficulty": "easy",
+      "question": "Which of these is a **hyperparameter**?",
+      "options": [
+        "`k` (`n_neighbors`) in k-NN",
+        "The coefficients of a linear regression",
+        "The intercept of a linear regression",
+        "The split thresholds a decision tree learns"
+      ],
+      "answer": 0,
+      "explanation": "You choose k before training, like the learning rate, the regularisation strength or the tree depth. Coefficients, intercepts and split thresholds are learned from the data by `fit()`, so they are parameters."
+    },
+    {
+      "id": "hyperparameter-tuning",
+      "difficulty": "easy",
+      "question": "Which scikit-learn tools search systematically for good hyperparameters?",
+      "options": [
+        "`GridSearchCV` and `RandomizedSearchCV`",
+        "`StandardScaler` and `MinMaxScaler`",
+        "`train_test_split` and `KFold`",
+        "`predict` and `predict_proba`"
+      ],
+      "answer": 0,
+      "explanation": "`GridSearchCV` tries every combination in a grid and `RandomizedSearchCV` tries random samples, both scored with cross-validation. Leaving every hyperparameter at its default often gives sub-optimal performance."
+    },
+    {
+      "id": "linear-model-on-curve",
+      "difficulty": "hard",
+      "question": "The target is a perfect U-shaped curve. What does this print?",
+      "code": [
+        "from sklearn.linear_model import LinearRegression",
+        "X = np.arange(-3, 4).reshape(-1, 1)",
+        "y = X.ravel() ** 2",
+        "model = LinearRegression().fit(X, y)",
+        "print(round(float(model.coef_[0]), 2), round(abs(model.score(X, y)), 2))"
+      ],
+      "options": ["`0.0 0.0`", "`2.0 1.0`", "`1.0 1.0`", "`0.0 1.0`"],
+      "answer": 0,
+      "explanation": "y = x² is symmetric around 0, so the best straight line is flat (coefficient 0) and explains none of the variance (R² = 0), even on the training data. A linear model on a non-linear pattern gives systematic error: bias, the underfitting side.",
+      "check": "output"
+    },
+    {
+      "id": "wrong-feature-scale",
+      "difficulty": "medium",
+      "question": "In a k-NN model, one feature is income in euros (20 000-80 000) and another is age (18-70). What happens without scaling?",
+      "options": [
+        "Income dominates the distances, so age barely affects the prediction",
+        "Age dominates because it has fewer distinct values",
+        "Nothing; k-NN rescales the features internally",
+        "The model raises an error"
+      ],
+      "answer": 0,
+      "explanation": "A difference of 1 000 euros dwarfs a difference of 30 years in a Euclidean distance. Scale-sensitive algorithms (SVM, k-NN, regularised regression) let the large-range feature dominate. Scale the features first, in a pipeline."
+    }
+  ]
+}

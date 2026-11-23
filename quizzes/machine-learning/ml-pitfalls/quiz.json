@@ -1,0 +1,9 @@
+{
+  "title": "ML pitfalls",
+  "category": "Machine Learning",
+  "badge": "ML",
+  "language": "python",
+  "description": "Supervised-learning terminology and the classic pitfalls: the train/test workflow, algorithms, data quality, over- and underfitting, evaluation metrics, and drift in production.",
+  "note": "Based on DAT lesson 19-11-2026 (ML-valkuilen). Snippets assume `import numpy as np`; scikit-learn imports are written out. Answers to the code questions are checked by running them with scikit-learn.",
+  "prelude": ["import numpy as np"]
+}

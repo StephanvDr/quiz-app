@@ -1,0 +1,177 @@
+{
+  "topic": "Pitfalls 4: implementation in practice",
+  "questions": [
+    {
+      "id": "concept-drift",
+      "difficulty": "easy",
+      "question": "What is **concept drift**?",
+      "options": [
+        "The relationship between X and y changes over time",
+        "The distribution of the inputs X changes, while the relationship stays the same",
+        "The model's code changes between versions",
+        "The test set gets larger over time"
+      ],
+      "answer": 0,
+      "explanation": "With concept drift, the same inputs now lead to a different outcome, for example because customer behaviour changed. The model ages quickly. A change in the inputs alone is data drift."
+    },
+    {
+      "id": "data-drift",
+      "difficulty": "easy",
+      "question": "What is **data drift**?",
+      "options": [
+        "The distribution of the inputs X changes, even if the relationship with y stays the same",
+        "The relationship between X and y changes",
+        "Data is lost while copying it between systems",
+        "The labels in the training data are wrong"
+      ],
+      "answer": 0,
+      "explanation": "Data drift means the model sees different kinds of inputs than it was trained on. It is often an early warning signal for concept drift, and you can detect it without labels."
+    },
+    {
+      "id": "hotel-concept-drift",
+      "difficulty": "hard",
+      "question": "A hotel model predicts cancellations. Which change is **concept drift** rather than data drift?",
+      "options": [
+        "Guests with the same booking profile now cancel far more often, because free cancellation became the norm",
+        "More bookings now come from a new country",
+        "Bookings are made further in advance than before",
+        "The share of business travellers drops"
+      ],
+      "answer": 0,
+      "explanation": "In the first option the inputs look the same but the outcome changed: the X → y relationship moved, which is concept drift. The other three are shifts in the input distribution (data drift); the model may still be right for each booking, but it now sees a different mix."
+    },
+    {
+      "id": "old-training-data",
+      "difficulty": "hard",
+      "question": "Your hotel model was trained on 2019-2021 stays and runs in 2026. Which two pitfalls are you most exposed to?",
+      "options": [
+        "Concept/data drift and a non-representative dataset (2019-2021 included the pandemic years)",
+        "Underfitting and a wrong loss function",
+        "Too much data and wrong feature scale",
+        "Data leakage and a high learning rate"
+      ],
+      "answer": 0,
+      "explanation": "Travel behaviour in 2026 differs from 2019-2021, and the pandemic made those years unusual. The training data no longer represents today, and both the inputs and the relationships have likely shifted. Monitoring and a retraining strategy address this."
+    },
+    {
+      "id": "bias-in-data",
+      "difficulty": "medium",
+      "question": "A hiring model learns from ten years of past decisions in which women were hired less often. Which pitfall is this?",
+      "options": [
+        "Bias in data (fairness): historical prejudice that the model reproduces",
+        "Model bias: a too-simple model that underfits",
+        "Data drift",
+        "Overfitting"
+      ],
+      "answer": 0,
+      "explanation": "Bias in data is historical prejudice or skew (gender, age, origin) baked into the labels. The model learns it as a pattern, which is an ethical and legal risk. It is a different meaning of \"bias\" than model bias in the bias-variance trade-off."
+    },
+    {
+      "id": "two-kinds-of-bias",
+      "difficulty": "medium",
+      "question": "\"Bias\" means two different things in this lesson. Which pair is right?",
+      "options": [
+        "Model bias: error from wrong assumptions (underfitting). Bias in data: historical prejudice or skew in the data",
+        "Model bias: prejudice in the data. Bias in data: the intercept",
+        "Both mean the intercept of a linear model",
+        "Both mean the model is overfitting"
+      ],
+      "answer": 0,
+      "explanation": "Model bias is a statistical concept from the bias-variance trade-off. Bias in data is a fairness concept. A low-bias (complex) model can still be very unfair if its data is biased."
+    },
+    {
+      "id": "monitoring",
+      "difficulty": "easy",
+      "question": "What happens without **monitoring** of a deployed model?",
+      "options": [
+        "Performance can degrade unnoticed as the world changes",
+        "The model stops making predictions",
+        "The model retrains itself automatically",
+        "Nothing; a model that passed testing stays good"
+      ],
+      "answer": 0,
+      "explanation": "Monitoring continuously tracks the model's inputs and performance in production. Without it, drift can quietly make the predictions worse for months before anyone notices."
+    },
+    {
+      "id": "retraining-strategy",
+      "difficulty": "easy",
+      "question": "What is a **retraining strategy** (retrainingstrategie)?",
+      "options": [
+        "A plan for when and how to retrain: on a schedule or triggered by detected drift",
+        "Training the same model again with a different `random_state` until the test score improves",
+        "Retraining on the test set after deployment",
+        "Switching to a different algorithm every month"
+      ],
+      "answer": 0,
+      "explanation": "Models age, so you decide in advance when to retrain: for example every quarter, or as soon as monitoring detects drift. It is part of MLOps."
+    },
+    {
+      "id": "black-box",
+      "difficulty": "easy",
+      "question": "Why is a **black box** model (onverklaarbaar model) a pitfall?",
+      "options": [
+        "Its decisions are hard to explain, so it is hard to validate and not transparent to stakeholders",
+        "It is always less accurate than a simple model",
+        "It can only be used for regression",
+        "It can't be deployed to production"
+      ],
+      "answer": 0,
+      "explanation": "Complex models such as deep neural networks (and to a lesser degree random forests) can be accurate, but you can't easily tell why they decide what they do. That makes it hard to spot errors or bias, and hard to justify a decision to the people affected."
+    },
+    {
+      "id": "explainability",
+      "difficulty": "easy",
+      "question": "Which techniques belong to **explainability** (XAI, verklaarbaarheid)?",
+      "options": [
+        "Feature importance, SHAP and LIME",
+        "GridSearchCV and RandomizedSearchCV",
+        "StandardScaler and MinMaxScaler",
+        "Accuracy and F1-score"
+      ],
+      "answer": 0,
+      "explanation": "Feature importance, SHAP and LIME show which features drive a model's predictions, overall or for one prediction. They are the counter-measure for black boxes."
+    },
+    {
+      "id": "feature-importance",
+      "difficulty": "hard",
+      "question": "Only the first feature carries information about `y`. What does this print?",
+      "code": [
+        "from sklearn.tree import DecisionTreeClassifier",
+        "X = np.array([[0, 5], [1, 3], [2, 5], [3, 3]])",
+        "y = np.array([0, 0, 1, 1])",
+        "tree = DecisionTreeClassifier(random_state=0).fit(X, y)",
+        "print(tree.feature_importances_.tolist())"
+      ],
+      "options": ["`[1.0, 0.0]`", "`[0.5, 0.5]`", "`[0.0, 1.0]`", "`[0.75, 0.25]`"],
+      "answer": 0,
+      "explanation": "One split on the first feature (≤ 1.5) separates the classes perfectly, so the tree never uses the second feature. `feature_importances_` sums to 1 and gives all of it to feature 0. This is one of the simplest explainability tools.",
+      "check": "output"
+    },
+    {
+      "id": "correlation-vs-causality",
+      "difficulty": "medium",
+      "question": "Ice-cream sales correlate with drownings. What does an ML model learn from that, and what may you **not** conclude?",
+      "options": [
+        "It learns that ice-cream sales help predict drownings; you may not conclude that ice cream causes drowning",
+        "It learns that ice cream causes drowning, so banning ice cream would save lives",
+        "It learns nothing, because the correlation is not causal",
+        "It learns that drownings cause ice-cream sales"
+      ],
+      "answer": 0,
+      "explanation": "Both are driven by a third factor: warm weather. A correlation is enough for prediction, so the model can use it. But ML learns patterns, not causes; drawing policy conclusions from it, like banning ice cream, is the correlation-causality pitfall."
+    },
+    {
+      "id": "causality-needs",
+      "difficulty": "medium",
+      "question": "What does it take to claim **causality** (causaliteit) rather than correlation?",
+      "options": [
+        "Showing that changing X actually changes Y, for example with a controlled experiment",
+        "A very high correlation coefficient",
+        "A model with a high R² on the test set",
+        "A large feature importance for X"
+      ],
+      "answer": 0,
+      "explanation": "Strong correlations, high R² and large feature importances all describe patterns in the data. Causality requires showing that intervening on X changes Y, such as a randomised experiment (A/B test)."
+    }
+  ]
+}

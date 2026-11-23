@@ -1,0 +1,196 @@
+{
+  "topic": "Algorithms",
+  "questions": [
+    {
+      "id": "logreg-is-classification",
+      "difficulty": "easy",
+      "question": "What kind of algorithm is **Logistic Regression**, the Case 0 model?",
+      "options": [
+        "A classification algorithm, despite the name",
+        "A regression algorithm that predicts a continuous number",
+        "A clustering algorithm",
+        "A decision tree with a logistic split rule"
+      ],
+      "answer": 0,
+      "explanation": "Despite the name, Logistic Regression is a **classification** algorithm. It outputs a probability per class through an S-curve (the sigmoid) and predicts the class whose probability is above the threshold, 0.5 by default."
+    },
+    {
+      "id": "logreg-sigmoid",
+      "difficulty": "medium",
+      "question": "How does Logistic Regression turn its input into a probability between 0 and 1?",
+      "options": [
+        "With an S-shaped curve, the sigmoid",
+        "By taking a majority vote of the nearest neighbours",
+        "By counting the training rows in each leaf",
+        "By dividing by the largest feature value"
+      ],
+      "answer": 0,
+      "explanation": "Logistic Regression computes a linear combination of the features and squeezes it through the sigmoid, which maps any number to a value between 0 and 1. That value is the probability of class 1."
+    },
+    {
+      "id": "linreg-formula",
+      "difficulty": "easy",
+      "question": "Which formula does Linear Regression use to predict?",
+      "options": [
+        "ŷ = intercept + Σ coefficient × feature",
+        "ŷ = majority vote of the k closest points",
+        "ŷ = 1 / (1 + e^(−feature))",
+        "ŷ = the most common class in the training set"
+      ],
+      "answer": 0,
+      "explanation": "Linear Regression fits a straight line (or plane) through the data: the intercept plus each feature times its coefficient. It assumes the relationship between features and target is linear."
+    },
+    {
+      "id": "linreg-learns-line",
+      "difficulty": "easy",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.linear_model import LinearRegression",
+        "X = np.array([[0], [1], [2], [3]])",
+        "y = 2 * X.ravel() + 1",
+        "model = LinearRegression().fit(X, y)",
+        "print(round(float(model.intercept_), 2), round(float(model.coef_[0]), 2))"
+      ],
+      "options": ["`1.0 2.0`", "`2.0 1.0`", "`0.0 2.0`", "`1.0 1.0`"],
+      "answer": 0,
+      "explanation": "The data lies exactly on y = 2x + 1. `intercept_` is the prediction when the feature is 0 (1.0) and `coef_` is how much the prediction rises per unit of the feature (2.0).",
+      "check": "output"
+    },
+    {
+      "id": "intercept-meaning",
+      "difficulty": "easy",
+      "question": "What does the **intercept** (`model.intercept_`) of a linear regression mean?",
+      "options": [
+        "The predicted value when all features are 0",
+        "How much the prediction changes per unit of a feature",
+        "The average error of the model",
+        "The share of the variance the model explains"
+      ],
+      "answer": 0,
+      "explanation": "The intercept is where the line crosses the y-axis: the prediction when every feature is 0. The per-unit change is the coefficient; the share of explained variance is R²."
+    },
+    {
+      "id": "coefficient-meaning",
+      "difficulty": "medium",
+      "question": "A linear model predicting a grade has coefficient 0.3 for `study_hours`. What does that mean?",
+      "options": [
+        "One extra study hour raises the predicted grade by 0.3, with the other features held constant",
+        "Study hours explain 30 % of the grade",
+        "30 % of the students study enough to pass",
+        "Studying one hour more makes the student 0.3 times as likely to pass"
+      ],
+      "answer": 0,
+      "explanation": "A coefficient (regressiecoëfficiënt) is how much the prediction changes when that feature increases by one unit, with all other features held constant. It describes the model's prediction, not a proven cause."
+    },
+    {
+      "id": "coefficients-comparable",
+      "difficulty": "medium",
+      "question": "A model has coefficient 5.0 for `hours` (range 1-10) and 0.2 for `income_eur` (range 20 000-80 000). What can you conclude about which feature matters more?",
+      "options": [
+        "Nothing yet: coefficients are only comparable when the features are on the same scale",
+        "`hours` matters 25 times more than `income_eur`",
+        "`income_eur` matters more because its values are larger",
+        "Both matter equally because both coefficients are positive"
+      ],
+      "answer": 0,
+      "explanation": "A coefficient is per unit of its feature, and one euro is a much smaller step than one hour. 0.2 × 60 000 euros of range is a far bigger effect than 5 × 9 hours. Standardise the features first if you want to compare coefficients."
+    },
+    {
+      "id": "decision-tree",
+      "difficulty": "easy",
+      "question": "Which description fits a **Decision Tree** (`DecisionTreeClassifier`)?",
+      "options": [
+        "Splits the data with yes/no questions on features; easy to explain, but overfits easily when deep",
+        "Many trees on random subsets of the data that take a majority vote",
+        "Classifies a point by the majority of its k closest training points",
+        "Finds the boundary with the largest margin between the classes"
+      ],
+      "answer": 0,
+      "explanation": "A decision tree asks a sequence of yes/no questions such as \"hours > 4.5?\". You can read the rules, which makes it easy to explain, but a deep tree can memorise the training data. The other options describe Random Forest, k-NN and SVM."
+    },
+    {
+      "id": "random-forest",
+      "difficulty": "easy",
+      "question": "How does a **Random Forest** compare to a single decision tree?",
+      "options": [
+        "Usually more robust, because many trees on random subsets vote, but less explainable",
+        "Easier to explain, because it has fewer rules",
+        "Always faster to train",
+        "Identical, but with a random `random_state`"
+      ],
+      "answer": 0,
+      "explanation": "A Random Forest trains many decision trees on random subsets of rows and features and lets them take a majority vote. Averaging out individual trees' mistakes makes it more robust, but you can no longer read one simple set of rules."
+    },
+    {
+      "id": "knn-how",
+      "difficulty": "easy",
+      "question": "How does **k-Nearest Neighbors** (`KNeighborsClassifier`) classify a new point?",
+      "options": [
+        "By a majority vote of the k closest training points",
+        "By fitting a straight line through the data",
+        "By asking yes/no questions on the features",
+        "By averaging the predictions of k decision trees"
+      ],
+      "answer": 0,
+      "explanation": "k-NN looks up the k training points closest to the new point (by distance) and predicts their most common class. It is distance-based, which is why it is very sensitive to feature scale."
+    },
+    {
+      "id": "knn-predict",
+      "difficulty": "medium",
+      "question": "What does this print?",
+      "code": [
+        "from sklearn.neighbors import KNeighborsClassifier",
+        "X = np.array([[1], [2], [3], [10], [11], [12]])",
+        "y = np.array([0, 0, 0, 1, 1, 1])",
+        "knn = KNeighborsClassifier(n_neighbors=3).fit(X, y)",
+        "print(knn.predict([[4], [9]]).tolist())"
+      ],
+      "options": ["`[0, 1]`", "`[0, 0]`", "`[1, 1]`", "`[1, 0]`"],
+      "answer": 0,
+      "explanation": "For 4 the three closest points are 3, 2 and 1, all class 0. For 9 they are 10, 11 and 12, all class 1.",
+      "check": "output"
+    },
+    {
+      "id": "knn-k-too-large",
+      "difficulty": "hard",
+      "question": "What happens when you run this?",
+      "code": [
+        "from sklearn.neighbors import KNeighborsClassifier",
+        "X_train = np.array([[1, 5], [3, 10], [8, 25]])",
+        "y_train = np.array([0, 0, 1])",
+        "knn = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)",
+        "print(knn.predict([[4, 12]]))"
+      ],
+      "options": ["`ValueError`", "`[0]`", "`[1]`", "`[0 0 1]`"],
+      "answer": 0,
+      "explanation": "k-NN needs k neighbours, but the training set has only 3 rows. `predict()` raises a `ValueError` (\"Expected n_neighbors <= n_samples_fit\"). The lesson warns about this when you swap in `KNeighborsClassifier` on the tiny Case 0 dataset: k must not exceed the number of training rows.",
+      "check": "output"
+    },
+    {
+      "id": "svm",
+      "difficulty": "easy",
+      "question": "What does a **Support Vector Machine** (SVM) look for?",
+      "options": [
+        "The boundary with the largest margin between the classes",
+        "The k closest training points",
+        "The feature that best splits the data in two",
+        "The straight line with the smallest squared error"
+      ],
+      "answer": 0,
+      "explanation": "An SVM finds the decision boundary that leaves the widest gap (margin) between the classes. Like k-NN it works with distances, so it is also sensitive to feature scale."
+    },
+    {
+      "id": "scale-insensitive-model",
+      "difficulty": "medium",
+      "question": "Case 0's features are on different scales (hours ~1-10, exercises ~5-35). Which assignment model does **not** care about that?",
+      "options": [
+        "`DecisionTreeClassifier`",
+        "`KNeighborsClassifier`",
+        "An SVM",
+        "None of them; every model needs scaled features"
+      ],
+      "answer": 0,
+      "explanation": "A tree splits on one feature at a time with a threshold (\"exercises > 17?\"), and rescaling a feature just moves the threshold. k-NN and SVM compute distances across features, so the feature with the larger range dominates unless you scale."
+    }
+  ]
+}
