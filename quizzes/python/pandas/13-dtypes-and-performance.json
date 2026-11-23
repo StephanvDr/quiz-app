@@ -180,16 +180,18 @@
     {
       "id": "inplace-returns-none",
       "difficulty": "medium",
-      "question": "What does this print?",
+      "question": "What is wrong with this line in pandas 3.1?",
       "code": [
-        "df = pd.DataFrame({'a': [3, 1, 2]})",
-        "result = df.sort_values('a', inplace=True)",
-        "print(result)"
+        "df = df.sort_values('a', inplace=True)"
       ],
-      "options": ["`None`", "The sorted DataFrame", "The original, unsorted DataFrame", "`TypeError`"],
+      "options": [
+        "`inplace=True` returns `None`, so `df` becomes `None`, and `inplace` is deprecated",
+        "Nothing; it sorts `df` and keeps the result",
+        "It raises `TypeError` because `inplace` was removed",
+        "It sorts a copy and leaves `df` unsorted"
+      ],
       "answer": 0,
-      "explanation": "With `inplace=True` a method changes `df` itself and returns `None`, so `df = df.sort_values('a', inplace=True)` wipes out your DataFrame. Prefer the default `inplace=False` and assign the result; it reads better in chains and is usually just as fast.",
-      "check": "output"
+      "explanation": "With `inplace=True` a method changes the DataFrame itself and returns `None`, so assigning the result wipes out `df`. Since pandas 3.1, `inplace` on `sort_values` also emits a `Pandas4Warning`: it is deprecated and will be removed (PDEP-8). Write `df = df.sort_values('a')` instead; it reads better in chains and is just as fast."
     },
     {
       "id": "str-dtype-pandas3",

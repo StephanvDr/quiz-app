@@ -7,7 +7,7 @@ snippet and asks what it prints, or which call does the job, then explains the a
 either way.
 
 The first subject is **pandas**: 183 questions across 14 topics, aimed at data engineering
-and LLM work. 172 of them are checked by actually running the code, so the marked answers
+and LLM work. 171 of them are checked by actually running the code, so the marked answers
 are what pandas really does.
 
 The second subject is **ML pitfalls** (category Machine Learning): 104 questions across 7
@@ -172,7 +172,7 @@ GitHub Actions runs all of these on every push (`.github/workflows/ci.yml`).
 
 ## pandas versions
 
-Answers are verified against pandas 3.0. Almost all of them are the same on pandas 2.x. The
+Answers are verified against pandas 3.1. Almost all of them are the same on pandas 2.x. The
 few that cover pandas 3 changes (the `str` dtype, Copy-on-Write, removed APIs and the new
 frequency aliases) say "In pandas 3" and explain the 2.x behavior. After a pandas upgrade,
 run `python quiz.py verify` to see which answers changed.
