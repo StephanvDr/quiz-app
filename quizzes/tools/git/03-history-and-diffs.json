@@ -1,0 +1,168 @@
+{
+  "topic": "Reading history and diffs",
+  "questions": [
+    {
+      "id": "log-oneline",
+      "difficulty": "easy",
+      "question": "You want a compact history: one line per commit with its short hash and subject. Which command?",
+      "options": ["`git log --oneline`", "`git log -p`", "`git log --stat`", "`git show --short`"],
+      "answer": 0,
+      "explanation": "`--oneline` is short for `--pretty=oneline --abbrev-commit`. Add `-n 10` (or just `-10`) to limit the number of commits. `-p` shows each commit's full diff, and `--stat` lists the changed files."
+    },
+    {
+      "id": "log-graph-all",
+      "difficulty": "easy",
+      "question": "You want to see how all branches split off and merged, as a picture in the terminal. Which command?",
+      "options": [
+        "`git log --oneline --graph --all`",
+        "`git branch --graph`",
+        "`git log --merges`",
+        "`git show-branch --tree`"
+      ],
+      "answer": 0,
+      "explanation": "`--graph` draws the commit graph with ASCII lines, and `--all` includes every branch and tag instead of only the current branch. This is worth an alias: `git config --global alias.lg 'log --oneline --graph --all'`."
+    },
+    {
+      "id": "log-follow-file",
+      "difficulty": "medium",
+      "question": "You want the history of `src/billing.py`, including the commits from before it was renamed from `src/invoice.py`. Which command?",
+      "options": [
+        "`git log --follow -- src/billing.py`",
+        "`git log src/billing.py`",
+        "`git blame src/billing.py`",
+        "`git log --all src/billing.py`"
+      ],
+      "answer": 0,
+      "explanation": "`git log -- <path>` only shows commits that touched that exact path. `--follow` continues past renames. The `--` separates options and revisions from paths, which avoids confusion when a file has the same name as a branch."
+    },
+    {
+      "id": "log-pickaxe",
+      "difficulty": "hard",
+      "question": "Somebody added, and later removed, the string `API_KEY` somewhere in the code. Which command finds the commits that added or removed it?",
+      "options": [
+        "`git log -S 'API_KEY'`",
+        "`git log --grep='API_KEY'`",
+        "`git grep 'API_KEY'`",
+        "`git blame -S 'API_KEY'`"
+      ],
+      "answer": 0,
+      "explanation": "`-S` (the \"pickaxe\") lists commits where the number of occurrences of the string changed, which means it was added or removed. Add `-p` to see the diffs. `--grep` searches commit **messages**, and `git grep` searches the current files."
+    },
+    {
+      "id": "log-grep-message",
+      "difficulty": "easy",
+      "question": "Which command lists the commits whose **message** mentions \"invoice\"?",
+      "options": [
+        "`git log --grep=invoice`",
+        "`git log -S invoice`",
+        "`git grep invoice`",
+        "`git log -- invoice`"
+      ],
+      "answer": 0,
+      "explanation": "`--grep` filters on the commit message. Add `-i` for a case-insensitive search. It combines with other filters such as `--author` and `--since`."
+    },
+    {
+      "id": "log-author-since",
+      "difficulty": "medium",
+      "question": "For a standup you want your own commits from the last week. Which command?",
+      "options": [
+        "`git log --author='Ada' --since='1 week ago'`",
+        "`git log --user=Ada --days=7`",
+        "`git shortlog --since=7`",
+        "`git log -n 7 --author=Ada`"
+      ],
+      "answer": 0,
+      "explanation": "`--author` matches part of the author name or email, and `--since` / `--until` accept dates like `2026-11-01` or phrases like `'2 weeks ago'`. `-n 7` limits the output to 7 commits, not 7 days."
+    },
+    {
+      "id": "blame-lines",
+      "difficulty": "easy",
+      "question": "Line 42 of `config.py` has a strange value. Which command tells you who last changed that line, and in which commit?",
+      "options": [
+        "`git blame -L 42,42 config.py`",
+        "`git log -L 42 config.py`",
+        "`git show config.py:42`",
+        "`git who config.py`"
+      ],
+      "answer": 0,
+      "explanation": "`git blame` prints the commit, author and date of the last change for each line; `-L start,end` limits it to a range. Then use `git show <hash>` to see the whole commit and its message. `git log -L 42,42:config.py` exists too: it shows every commit that changed those lines."
+    },
+    {
+      "id": "show-commit",
+      "difficulty": "easy",
+      "question": "A colleague mentions commit `a1b2c3d`. Which command shows its message and the changes it made?",
+      "options": ["`git show a1b2c3d`", "`git log a1b2c3d`", "`git diff a1b2c3d`", "`git switch a1b2c3d`"],
+      "answer": 0,
+      "explanation": "`git show` prints the commit's metadata and its diff against its parent. `git log a1b2c3d` would list that commit **and all its ancestors**, and `git diff a1b2c3d` compares that commit with your current working tree."
+    },
+    {
+      "id": "show-file-at-commit",
+      "difficulty": "medium",
+      "question": "You want to read `src/app.js` as it was three commits ago, without changing your working tree. Which command?",
+      "options": [
+        "`git show HEAD~3:src/app.js`",
+        "`git restore --source=HEAD~3 src/app.js`",
+        "`git switch HEAD~3`",
+        "`git log -3 src/app.js`"
+      ],
+      "answer": 0,
+      "explanation": "The `<revision>:<path>` syntax names a file inside a commit; `git show` prints it. Redirect it to save a copy: `git show HEAD~3:src/app.js > old_app.js`. `git restore --source` would overwrite your working copy."
+    },
+    {
+      "id": "diff-no-args",
+      "difficulty": "easy",
+      "question": "What does `git diff` without arguments compare?",
+      "options": [
+        "The working tree with the staging area: changes you haven't staged",
+        "The staging area with the last commit",
+        "The working tree with the last commit",
+        "Your branch with `origin/main`"
+      ],
+      "answer": 0,
+      "explanation": "So after `git add`, those changes disappear from `git diff`. Use `git diff --staged` for staged changes, and `git diff HEAD` for both together."
+    },
+    {
+      "id": "log-two-dots",
+      "difficulty": "medium",
+      "question": "Which commits does this list?",
+      "code": "git log main..feature",
+      "options": [
+        "Commits on `feature` that are not on `main`",
+        "Commits on `main` that are not on `feature`",
+        "Commits on either branch but not on both",
+        "All commits made between the dates of `main` and `feature`"
+      ],
+      "answer": 0,
+      "explanation": "`A..B` means \"reachable from B but not from A\": what `feature` would add if merged into `main`. Swap them (`feature..main`) to see what's new on `main`. `git log origin/main..main` shows the commits you haven't pushed yet."
+    },
+    {
+      "id": "diff-three-dots",
+      "difficulty": "hard",
+      "question": "`main` and `feature` have both moved on since `feature` branched off. You want to see only the changes made **on `feature`**, the way a pull request shows them. Which command?",
+      "options": [
+        "`git diff main...feature`",
+        "`git diff main..feature`",
+        "`git diff feature`",
+        "`git log -p main`"
+      ],
+      "answer": 0,
+      "explanation": "With `git diff`, three dots compare `feature` with the **merge base** (the commit where it branched off), so new commits on `main` don't show up as \"removed\" lines. `main..feature` in `git diff` just compares the two tips directly. Note that dots mean something different in `git log`."
+    },
+    {
+      "id": "diff-stat",
+      "difficulty": "easy",
+      "question": "You want an overview of which files changed and how many lines, without the full diff. Which command?",
+      "options": ["`git diff --stat`", "`git diff --name-status --full`", "`git status -v`", "`git diff -U0`"],
+      "answer": 0,
+      "explanation": "`--stat` prints one line per file with a +/- bar and a summary line. `--name-only` gives just the file names, and `--name-status` adds a letter (A added, M modified, D deleted, R renamed). These options work for `git show` and `git log` too."
+    },
+    {
+      "id": "shortlog-count",
+      "difficulty": "medium",
+      "question": "Which command counts commits per author, sorted from most to fewest?",
+      "options": ["`git shortlog -sn`", "`git log --count`", "`git blame --summary`", "`git log --author --sort`"],
+      "answer": 0,
+      "explanation": "`git shortlog` groups commits by author; `-s` shows only the counts and `-n` sorts by count. Add `--since='1 month ago'` or a range such as `v1.0..v2.0` to narrow it down."
+    }
+  ]
+}

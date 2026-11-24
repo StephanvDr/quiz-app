@@ -39,7 +39,7 @@ To add a subject, say SQL, create `quizzes/sql/postgres/quiz.json` plus a topic 
 | --- | --- | --- |
 | `title`, `category` | required | Subjects are grouped under their category on the home page. |
 | `badge` | optional | Short text on the subject's tile, such as the import alias `pd`. |
-| `language` | optional | Syntax highlighting: `python` or `sql`. Other values show plain code; leave it out for subjects without code. |
+| `language` | optional | Syntax highlighting: `python`, `sql` or `shell` (tuned for `git` commands; snippets starting with `git` get a `$` prompt). Other values show plain code; leave it out for subjects without code. |
 | `description`, `note` | optional | Shown on the subject page. `note` is a good place for assumptions. |
 | `prelude` | optional | Code that `verify` runs before every snippet. It isn't shown in questions. |
 

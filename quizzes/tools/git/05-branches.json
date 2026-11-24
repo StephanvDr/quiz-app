@@ -1,0 +1,172 @@
+{
+  "topic": "Branches",
+  "questions": [
+    {
+      "id": "branch-is-pointer",
+      "difficulty": "easy",
+      "question": "What is a branch in Git?",
+      "options": [
+        "A movable label that points to one commit and moves forward when you commit",
+        "A full copy of the project's files in a separate folder",
+        "A list of all commits made by one developer",
+        "A separate repository that shares a remote"
+      ],
+      "answer": 0,
+      "explanation": "A branch is just a name for a commit, stored as a tiny file containing a hash. Creating one is instant and costs almost nothing, which is why Git encourages a branch per feature or fix."
+    },
+    {
+      "id": "create-and-switch",
+      "difficulty": "easy",
+      "question": "Which command creates a new branch `feature/login` and switches to it?",
+      "options": [
+        "`git switch -c feature/login`",
+        "`git branch feature/login`",
+        "`git switch feature/login`",
+        "`git commit -b feature/login`"
+      ],
+      "answer": 0,
+      "explanation": "`-c` means create. The classic equivalent is `git checkout -b feature/login`. `git branch feature/login` only creates the branch; you stay on the current one."
+    },
+    {
+      "id": "switch-existing",
+      "difficulty": "easy",
+      "question": "You're on `feature/login` and want to go back to `main`. Which command?",
+      "options": ["`git switch main`", "`git branch main`", "`git reset main`", "`git merge main`"],
+      "answer": 0,
+      "explanation": "`git switch main` (or `git checkout main`) updates your files to match `main` and makes it the current branch. `git switch -` jumps back to the previous branch, like `cd -`."
+    },
+    {
+      "id": "head-meaning",
+      "difficulty": "easy",
+      "question": "What does `HEAD` refer to?",
+      "options": [
+        "The commit you currently have checked out, usually through the current branch",
+        "The newest commit in the repository",
+        "The `main` branch",
+        "The latest commit on the remote"
+      ],
+      "answer": 0,
+      "explanation": "`HEAD` normally points to a branch name (such as `main`), which points to a commit. When you commit, the branch that `HEAD` points to moves forward. `cat .git/HEAD` shows something like `ref: refs/heads/main`."
+    },
+    {
+      "id": "branch-list-all",
+      "difficulty": "easy",
+      "question": "Which command lists your local branches **and** the remote-tracking branches such as `origin/main`?",
+      "options": ["`git branch -a`", "`git branch`", "`git branch -r`", "`git remote -v`"],
+      "answer": 0,
+      "explanation": "`git branch` lists local branches (the current one marked with `*`), `-r` lists only remote-tracking ones, and `-a` lists both. Run `git fetch` first to make sure the remote ones are up to date."
+    },
+    {
+      "id": "branch-vv",
+      "difficulty": "medium",
+      "question": "Which command shows, for every local branch, which remote branch it tracks and how many commits it is ahead or behind?",
+      "options": ["`git branch -vv`", "`git branch -a`", "`git status --all`", "`git remote show`"],
+      "answer": 0,
+      "explanation": "`-vv` shows each branch's last commit plus its upstream in brackets, such as `[origin/main: ahead 2, behind 1]`. The ahead/behind numbers are based on your last `git fetch`."
+    },
+    {
+      "id": "delete-merged",
+      "difficulty": "easy",
+      "question": "`feature/login` has been merged into `main` and you're done with it. Which command deletes the local branch?",
+      "options": [
+        "`git branch -d feature/login`",
+        "`git branch --remove feature/login`",
+        "`git switch -d feature/login`",
+        "`git push -d feature/login`"
+      ],
+      "answer": 0,
+      "explanation": "`-d` deletes the branch only if it is merged, as a safety check. `-D` deletes it regardless, so unmerged commits are only reachable through the reflog afterwards. You can't delete the branch you're on, so switch away first."
+    },
+    {
+      "id": "delete-remote-branch",
+      "difficulty": "medium",
+      "question": "How do you delete the branch `feature/login` on GitHub (the remote `origin`) from the command line?",
+      "options": [
+        "`git push origin --delete feature/login`",
+        "`git branch -d origin/feature/login`",
+        "`git remote remove feature/login`",
+        "`git fetch --delete feature/login`"
+      ],
+      "answer": 0,
+      "explanation": "Deleting on the server is a push. The short form is `git push origin :feature/login` (push \"nothing\" to that name). `git branch -d -r origin/feature/login` only deletes your local remote-tracking copy."
+    },
+    {
+      "id": "rename-branch",
+      "difficulty": "easy",
+      "question": "You're on a branch called `fix-loign` and notice the typo. How do you rename the current branch?",
+      "options": [
+        "`git branch -m fix-login`",
+        "`git switch -m fix-login`",
+        "`git mv fix-loign fix-login`",
+        "`git branch -r fix-login`"
+      ],
+      "answer": 0,
+      "explanation": "`git branch -m <new>` renames the current branch; `git branch -m <old> <new>` renames another one. If the old name was already pushed, push the new name and delete the old one on the remote."
+    },
+    {
+      "id": "branches-merged",
+      "difficulty": "medium",
+      "question": "You want to clean up: which local branches are already fully merged into `main`?",
+      "options": [
+        "`git branch --merged main`",
+        "`git log --merges main`",
+        "`git branch --contains`",
+        "`git status --merged`"
+      ],
+      "answer": 0,
+      "explanation": "`--merged main` lists branches whose tip is reachable from `main`; those are safe to delete with `-d`. `--no-merged` shows the opposite. Branches merged with **squash** on GitHub won't appear here, because their original commits never reached `main`."
+    },
+    {
+      "id": "branch-from-commit",
+      "difficulty": "medium",
+      "question": "You want a new branch `hotfix` that starts at older commit `a1b2c3d`, not at your current commit. Which command?",
+      "options": [
+        "`git switch -c hotfix a1b2c3d`",
+        "`git switch -c hotfix` then `git reset a1b2c3d --soft`",
+        "`git branch a1b2c3d hotfix`",
+        "`git cherry-pick a1b2c3d hotfix`"
+      ],
+      "answer": 0,
+      "explanation": "Both `git branch <name> <start>` and `git switch -c <name> <start>` take a start point: a hash, tag or another branch. A common one is a release tag: `git switch -c hotfix v1.4.0`."
+    },
+    {
+      "id": "detached-head",
+      "difficulty": "medium",
+      "question": "You ran `git switch --detach a1b2c3d` to look at old code and made a commit there. Git warns about \"detached HEAD\". How do you keep that commit?",
+      "options": [
+        "Create a branch while you're on it: `git switch -c experiment`",
+        "Run `git commit --attach`",
+        "Nothing: commits in detached HEAD are automatically added to `main`",
+        "Run `git push` to save it"
+      ],
+      "answer": 0,
+      "explanation": "In detached HEAD, `HEAD` points straight at a commit instead of a branch. New commits there belong to no branch, so once you switch away nothing points to them and Git eventually deletes them. A branch gives them a name. Lost it already? `git reflog` still has the hash."
+    },
+    {
+      "id": "switch-with-changes",
+      "difficulty": "medium",
+      "question": "You have uncommitted changes in `app.js`, and `git switch main` refuses because `main` has a different version of `app.js`. What are your options?",
+      "options": [
+        "Commit the changes, or `git stash` them, then switch",
+        "Use `git switch --keep main`",
+        "Run `git fetch` first",
+        "Delete `.git/index` and try again"
+      ],
+      "answer": 0,
+      "explanation": "Git won't overwrite uncommitted work. Changes to files that are the same on both branches are carried along. For conflicting ones, commit them (perhaps as a WIP commit to amend later) or stash them. `git switch -f` would throw them away."
+    },
+    {
+      "id": "branch-contains",
+      "difficulty": "hard",
+      "question": "A bug fix was committed as `a1b2c3d`. Which command lists the branches that already contain that fix?",
+      "options": [
+        "`git branch -a --contains a1b2c3d`",
+        "`git branch --merged a1b2c3d`",
+        "`git log --branches a1b2c3d`",
+        "`git show --branches a1b2c3d`"
+      ],
+      "answer": 0,
+      "explanation": "`--contains` lists branches whose history includes that commit; `-a` adds remote branches. `git tag --contains a1b2c3d` answers the same question for releases. A cherry-picked copy has a different hash, so it won't count."
+    }
+  ]
+}

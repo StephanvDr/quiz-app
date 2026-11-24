@@ -128,6 +128,13 @@
       builtins: words('count sum avg min max coalesce row_number rank dense_rank lag lead date_trunc extract nullif round'),
       caseless: true,
     },
+    // Shell commands, tuned for git: `git` is the keyword, its subcommands the builtins,
+    // and options such as `--force` take the number colour.
+    shell: {
+      pattern: /((?<!\S)#[^\n]*)|('[^'\n]*'|"(?:\\.|[^"\\\n])*")|((?<![\w-])--?[A-Za-z0-9][\w-]*(?:=\S*)?)|([A-Za-z_][\w-]*)/g,
+      keywords: words('git'),
+      builtins: words('add am apply archive bisect blame branch bundle checkout cherry-pick clean clone commit config describe diff fetch format-patch fsck gc grep help init log ls-files maintenance merge mv notes pull push range-diff rebase reflog remote replace rerere reset restore revert rm shortlog show sparse-checkout stash status submodule switch tag worktree lfs cat-file rev-parse'),
+    },
   };
 
   function highlight(code, language) {
@@ -202,7 +209,9 @@
   }
 
   function cell(code, language, number) {
-    const prompt = language === 'python' ? `In [${number}]:` : esc(language.toUpperCase());
+    // Shell snippets get a `$` prompt when they are commands, none when they show file contents.
+    const prompt = language === 'python' ? `In [${number}]:`
+      : language === 'shell' ? (/^\s*git\b/.test(code) ? '$' : '') : esc(language.toUpperCase());
     return `<div class="cell">
       <span class="cell-prompt" aria-hidden="true">${prompt}</span>
       <pre tabindex="0"><code>${highlight(code, language)}</code></pre>

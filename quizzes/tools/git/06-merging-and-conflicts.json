@@ -1,0 +1,180 @@
+{
+  "topic": "Merging and conflicts",
+  "questions": [
+    {
+      "id": "merge-into-main",
+      "difficulty": "easy",
+      "question": "Your work on `feature` is done and you want it in `main`. Which sequence does that?",
+      "options": [
+        "`git switch main` then `git merge feature`",
+        "`git switch feature` then `git merge main`",
+        "`git merge main feature`",
+        "`git switch main` then `git pull feature`"
+      ],
+      "answer": 0,
+      "explanation": "`git merge X` brings X **into the current branch**. So switch to the branch that should receive the work first. Merging `main` into `feature` does the opposite: it brings `feature` up to date with `main`."
+    },
+    {
+      "id": "fast-forward-when",
+      "difficulty": "medium",
+      "question": "When does `git merge feature` result in a **fast-forward** instead of a merge commit?",
+      "options": [
+        "When the current branch has no new commits since `feature` branched off",
+        "When `feature` has only one commit",
+        "When there are no conflicts",
+        "When `feature` was pushed to the remote"
+      ],
+      "answer": 0,
+      "explanation": "If the current branch is a direct ancestor of `feature`, Git just moves the branch label forward to `feature`'s tip. No merge commit is needed. If both branches have new commits, Git creates a merge commit with two parents."
+    },
+    {
+      "id": "merge-no-ff",
+      "difficulty": "medium",
+      "question": "Your team wants every feature to show up as a merge commit in `main`, even when a fast-forward is possible. Which command?",
+      "options": [
+        "`git merge --no-ff feature`",
+        "`git merge --ff-only feature`",
+        "`git merge --squash feature`",
+        "`git merge -X ours feature`"
+      ],
+      "answer": 0,
+      "explanation": "`--no-ff` always creates a merge commit, so the history shows which commits belonged to the feature, and the whole feature can be reverted in one go. `--ff-only` does the opposite: it refuses to merge unless a fast-forward is possible."
+    },
+    {
+      "id": "merge-ff-only",
+      "difficulty": "medium",
+      "question": "You want to update local `main` to `origin/main`, but **only** if that doesn't create a merge commit. Which command?",
+      "options": [
+        "`git merge --ff-only origin/main`",
+        "`git merge --no-ff origin/main`",
+        "`git merge --squash origin/main`",
+        "`git reset --soft origin/main`"
+      ],
+      "answer": 0,
+      "explanation": "`--ff-only` fails instead of merging if your branch has diverged. Many people set `git config --global pull.ff only` so `git pull` never makes surprise merge commits."
+    },
+    {
+      "id": "conflict-markers",
+      "difficulty": "easy",
+      "question": "You ran `git merge feature` while on `main` and `price.py` has a conflict. Which line came from `main`?",
+      "code": [
+        "<<<<<<< HEAD",
+        "VAT = 0.21",
+        "=======",
+        "VAT = 0.09",
+        ">>>>>>> feature"
+      ],
+      "options": ["`VAT = 0.21`", "`VAT = 0.09`", "Both lines came from `feature`", "Neither: the markers show the original version"],
+      "answer": 0,
+      "explanation": "The part between `<<<<<<< HEAD` and `=======` is your current branch (`main`); the part between `=======` and `>>>>>>> feature` is the incoming branch. Edit the file to the version you want, and remove all three marker lines."
+    },
+    {
+      "id": "conflict-resolve-steps",
+      "difficulty": "easy",
+      "question": "You fixed the conflict in `price.py` and removed the markers. What's next to finish the merge?",
+      "options": [
+        "`git add price.py` then `git commit`",
+        "`git merge --continue price.py` straight away",
+        "`git push`",
+        "`git restore price.py`"
+      ],
+      "answer": 0,
+      "explanation": "`git add` marks the conflict as resolved. Once every conflicted file is added, `git commit` (or `git merge --continue`) creates the merge commit with a prepared message. `git status` lists any files that are still `both modified`."
+    },
+    {
+      "id": "merge-abort",
+      "difficulty": "easy",
+      "question": "A merge produced dozens of conflicts and you want to go back to how things were before you ran `git merge`. Which command?",
+      "options": ["`git merge --abort`", "`git merge --undo`", "`git revert HEAD`", "`git stash`"],
+      "answer": 0,
+      "explanation": "`git merge --abort` restores the state from before the merge. It works while the merge is still in progress (no merge commit yet). After the merge is committed, use `git reset --hard ORIG_HEAD` locally, or `git revert -m 1` if it's already pushed."
+    },
+    {
+      "id": "conflict-take-theirs",
+      "difficulty": "hard",
+      "question": "During a merge of `feature` into `main`, `package-lock.json` conflicts. You simply want `feature`'s version of that whole file. Which command?",
+      "options": [
+        "`git checkout --theirs package-lock.json` then `git add package-lock.json`",
+        "`git checkout --ours package-lock.json` then `git add package-lock.json`",
+        "`git merge --abort package-lock.json`",
+        "`git restore --staged package-lock.json`"
+      ],
+      "answer": 0,
+      "explanation": "During a merge, **ours** is the current branch (`main`) and **theirs** is the branch being merged (`feature`). `git restore --theirs <file>` works too. Careful: during a **rebase** the roles swap, because you're replaying your commits onto the other branch."
+    },
+    {
+      "id": "merge-squash",
+      "difficulty": "medium",
+      "question": "`feature` has 23 messy commits. You want all its changes on `main` as **one** new commit. Which command, run on `main`?",
+      "options": [
+        "`git merge --squash feature`, then `git commit`",
+        "`git merge --no-ff feature`",
+        "`git merge --one feature`",
+        "`git cherry-pick feature`"
+      ],
+      "answer": 0,
+      "explanation": "`--squash` stages the combined changes without committing and without recording a merge, so you commit them yourself as one commit. Because no merge is recorded, `git branch -d feature` will say it isn't merged; use `-D` once you've checked."
+    },
+    {
+      "id": "merge-commit-parents",
+      "difficulty": "medium",
+      "question": "How many parents does a normal merge commit have?",
+      "options": ["Two", "One", "None", "As many as the number of conflicts"],
+      "answer": 0,
+      "explanation": "The first parent is the branch you were on, the second is the branch you merged. `git log --first-parent main` follows only the first parents, which gives a clean list of what landed on `main`. A regular commit has one parent, and the very first commit has none."
+    },
+    {
+      "id": "three-way-merge",
+      "difficulty": "hard",
+      "question": "Which three versions does Git compare in a three-way merge?",
+      "options": [
+        "The tips of both branches and their common ancestor (the merge base)",
+        "The working tree, the index and `HEAD`",
+        "The local branch, the remote branch and the stash",
+        "The first, middle and last commit of the feature branch"
+      ],
+      "answer": 0,
+      "explanation": "For each change, Git checks the merge base: if only one side changed a part, that change wins automatically. A conflict only happens when both sides changed the same lines differently. `git merge-base main feature` prints that ancestor."
+    },
+    {
+      "id": "merge-strategy-option-theirs",
+      "difficulty": "hard",
+      "question": "What does this do when `main` and `feature` changed the same lines?",
+      "code": "git merge -X theirs feature",
+      "options": [
+        "Conflicting chunks are resolved with `feature`'s version; changes that don't conflict from both sides are kept",
+        "The whole result becomes exactly `feature`'s files, and `main`'s changes are dropped",
+        "The merge stops at the first conflict",
+        "`feature`'s commits are rebased onto `main`"
+      ],
+      "answer": 0,
+      "explanation": "`-X ours` / `-X theirs` only decide **conflicting** chunks. Everything else merges normally. Don't confuse it with `-s ours`, a strategy that keeps your tree entirely and ignores the other branch's changes."
+    },
+    {
+      "id": "list-conflicted-files",
+      "difficulty": "hard",
+      "question": "In the middle of a large merge, which command prints just the names of the files that still have conflicts?",
+      "options": [
+        "`git diff --name-only --diff-filter=U`",
+        "`git status --conflicts`",
+        "`git ls-files --others`",
+        "`git log --merge --stat`"
+      ],
+      "answer": 0,
+      "explanation": "`--diff-filter=U` keeps only unmerged files. `git status` shows them too, under \"Unmerged paths\" as `both modified`, but with everything else around them. `git mergetool` opens each conflicted file in a merge tool."
+    },
+    {
+      "id": "rerere",
+      "difficulty": "hard",
+      "question": "You keep resolving the same conflict again and again, for example while repeatedly rebasing a long-lived branch. Which Git feature can remember your resolution and reuse it?",
+      "options": [
+        "`rerere`, turned on with `git config --global rerere.enabled true`",
+        "`git stash`",
+        "`git merge --remember`",
+        "`git config --global merge.auto true`"
+      ],
+      "answer": 0,
+      "explanation": "**rerere** stands for \"reuse recorded resolution\". Once enabled, Git records how you resolved each conflict and applies the same resolution automatically the next time it sees the identical conflict. Always check the result before committing."
+    }
+  ]
+}

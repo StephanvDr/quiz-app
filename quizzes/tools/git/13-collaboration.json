@@ -1,0 +1,174 @@
+{
+  "topic": "Collaboration and pull requests",
+  "questions": [
+    {
+      "id": "github-flow",
+      "difficulty": "easy",
+      "question": "Which order matches the usual GitHub flow for a change?",
+      "options": [
+        "Branch from `main` → commit → push the branch → open a pull request → review → merge → delete the branch",
+        "Commit on `main` → push → open a pull request → create a branch",
+        "Fork → commit on `main` → force-push → merge",
+        "Open a pull request → branch → commit → push → merge"
+      ],
+      "answer": 0,
+      "explanation": "`main` always stays deployable, and every change goes through a short-lived branch and a reviewed pull request. Small, frequent pull requests are easier to review than large ones."
+    },
+    {
+      "id": "pr-is-hosting-feature",
+      "difficulty": "easy",
+      "question": "Which Git command opens a pull request?",
+      "options": [
+        "None: pull requests are a feature of hosting sites like GitHub and GitLab, not of Git itself",
+        "`git pull`",
+        "`git request-pull` creates the GitHub pull request",
+        "`git push --pr`"
+      ],
+      "answer": 0,
+      "explanation": "You push a branch with Git, then open the pull request on the website, or with GitHub's own `gh pr create` command. Despite its name, `git pull` just fetches and merges. (`git request-pull` exists, but only prints a summary to e-mail.)"
+    },
+    {
+      "id": "pr-update-after-review",
+      "difficulty": "easy",
+      "question": "A reviewer asks for changes on your open pull request. How do you update it?",
+      "options": [
+        "Commit the changes on the same branch and push; the pull request updates automatically",
+        "Close the pull request and open a new one with the changes",
+        "Push the changes to `main`",
+        "Create a new branch for each round of review"
+      ],
+      "answer": 0,
+      "explanation": "A pull request tracks a **branch**, not a fixed set of commits. Anything you push to it shows up in the pull request. If you rewrote the branch (rebase, amend), use `git push --force-with-lease`."
+    },
+    {
+      "id": "pr-update-with-main",
+      "difficulty": "medium",
+      "question": "While your pull request was open, `main` moved on and now there are conflicts. How do you bring your branch up to date locally?",
+      "options": [
+        "`git fetch origin`, then `git rebase origin/main` (or `git merge origin/main`), fix conflicts and push",
+        "`git pull` while on your feature branch, without arguments",
+        "Merge the pull request anyway; GitHub fixes the conflicts",
+        "`git reset --hard origin/main`, then push"
+      ],
+      "answer": 0,
+      "explanation": "Fetch first so `origin/main` is current. Rebasing gives a clean history but needs `--force-with-lease`; merging `main` in keeps history and needs a normal push. Ask your team which they prefer. `reset --hard` would throw away your work."
+    },
+    {
+      "id": "fork-vs-clone",
+      "difficulty": "easy",
+      "question": "What's the difference between forking and cloning?",
+      "options": [
+        "A fork is your own copy of a repository **on GitHub**; a clone is a copy **on your computer**",
+        "They're the same; fork is GitHub's word for clone",
+        "A fork only copies the latest commit; a clone copies the history",
+        "A clone can be pushed to the original; a fork can't be pushed at all"
+      ],
+      "answer": 0,
+      "explanation": "You fork when you can't push to the original project: you push to your fork and open a pull request from it. You then clone your fork to work on it locally, and add the original as the `upstream` remote."
+    },
+    {
+      "id": "squash-merged-branch-delete",
+      "difficulty": "hard",
+      "question": "Your pull request was merged on GitHub with **Squash and merge**. Locally, `git branch -d feature` says the branch is not fully merged. Why?",
+      "options": [
+        "Squashing created one new commit on `main`; your original commits are not in `main`'s history",
+        "GitHub hasn't finished merging yet",
+        "You need to run `git pull` on the feature branch first",
+        "Branches merged on GitHub can only be deleted on GitHub"
+      ],
+      "answer": 0,
+      "explanation": "Git checks whether the branch's commits are reachable from `main`, and after a squash they aren't, even though the changes are. Once you've checked the pull request was merged, delete it with `git branch -D feature`."
+    },
+    {
+      "id": "conventional-commits",
+      "difficulty": "easy",
+      "question": "Your team uses Conventional Commits. Which message fits a bug fix?",
+      "options": [
+        "`fix: round VAT to two decimals`",
+        "`feat: round VAT to two decimals`",
+        "`chore: fixed bug`",
+        "`bug(VAT) - fixed`"
+      ],
+      "answer": 0,
+      "explanation": "The format is `type(optional scope): description`. Common types: `feat` (new feature), `fix` (bug fix), `docs`, `refactor`, `test`, `chore`. A `!` after the type, or a `BREAKING CHANGE:` footer, marks a breaking change. Tools can generate changelogs and version numbers from this."
+    },
+    {
+      "id": "small-commits",
+      "difficulty": "easy",
+      "question": "Why do experienced developers prefer small, focused commits?",
+      "options": [
+        "They're easier to review, to revert on their own, and to pinpoint with `git bisect`",
+        "Git stores small commits more efficiently",
+        "Large commits are rejected by GitHub",
+        "Small commits don't need a message"
+      ],
+      "answer": 0,
+      "explanation": "One logical change per commit means one commit to revert when something goes wrong, and a precise answer from `git bisect` and `git blame`. `git add -p` helps split mixed work into focused commits."
+    },
+    {
+      "id": "closes-issue",
+      "difficulty": "medium",
+      "question": "How do you make GitHub close issue 42 automatically when your pull request is merged into the default branch?",
+      "options": [
+        "Write `Fixes #42` (or `Closes #42`) in the pull request description",
+        "Name the branch `issue-42`",
+        "Add the label `42` to the pull request",
+        "Run `git close 42` before pushing"
+      ],
+      "answer": 0,
+      "explanation": "GitHub recognises keywords such as `close`, `fix` and `resolve` (and their variants) followed by an issue reference, in the pull request description or in commit messages that land on the default branch."
+    },
+    {
+      "id": "co-author",
+      "difficulty": "medium",
+      "question": "You paired with a colleague on a commit. How do you credit them so GitHub shows both of you as authors?",
+      "options": [
+        "Add a trailer line `Co-authored-by: Name <email>` at the end of the commit message",
+        "Use `git commit --author` twice",
+        "Add their name to the branch name",
+        "Push the commit from both computers"
+      ],
+      "answer": 0,
+      "explanation": "Trailers go after a blank line at the end of the message. The email must match one linked to their GitHub account. A commit can have only one author, so co-authorship is recorded this way."
+    },
+    {
+      "id": "https-token",
+      "difficulty": "medium",
+      "question": "`git push` over HTTPS to GitHub asks for a password, and your account password is rejected. What should you use instead?",
+      "options": [
+        "A personal access token, or switch the remote to SSH with an SSH key",
+        "Your password with `--force`",
+        "The email address instead of the username",
+        "`git config --global user.password`"
+      ],
+      "answer": 0,
+      "explanation": "GitHub no longer accepts account passwords for Git operations. Use a personal access token as the password (a credential helper or the GitHub CLI can store it), or add an SSH key and use a `git@github.com:` URL. Git has no `user.password` setting."
+    },
+    {
+      "id": "fetch-pr-locally",
+      "difficulty": "hard",
+      "question": "You want to run pull request 57 locally, but it comes from someone else's fork. Which command fetches it into a local branch `pr-57`?",
+      "options": [
+        "`git fetch origin pull/57/head:pr-57`",
+        "`git pull origin 57`",
+        "`git switch pr/57`",
+        "`git clone --pr 57`"
+      ],
+      "answer": 0,
+      "explanation": "GitHub exposes every pull request on the base repository as the ref `refs/pull/<n>/head`, even when it comes from a fork. The refspec `pull/57/head:pr-57` fetches it into a new local branch. With the GitHub CLI: `gh pr checkout 57`."
+    },
+    {
+      "id": "protected-branch",
+      "difficulty": "medium",
+      "question": "Your team wants to make sure nobody pushes directly to `main` and every change is reviewed and passes CI. Where is this enforced?",
+      "options": [
+        "On the hosting side, with branch protection rules (or rulesets) for `main`",
+        "In each developer's `.gitconfig`",
+        "In the `.gitignore` file",
+        "With a `pre-commit` hook in `.git/hooks`"
+      ],
+      "answer": 0,
+      "explanation": "Branch protection on GitHub can require pull requests, approvals, passing status checks and linear history, and block force-pushes. Local hooks and settings can be skipped or are never shared, so they can't enforce a team rule."
+    }
+  ]
+}

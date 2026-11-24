@@ -1,0 +1,151 @@
+{
+  "topic": "Power tools",
+  "questions": [
+    {
+      "id": "git-grep",
+      "difficulty": "easy",
+      "question": "Which command searches all **tracked** files for `TODO`, skipping `node_modules/` and other ignored files?",
+      "options": ["`git grep TODO`", "`git log --grep=TODO`", "`git find TODO`", "`git status TODO`"],
+      "answer": 0,
+      "explanation": "`git grep` only looks at files Git tracks, so it's fast and skips build output. `-n` adds line numbers, and you can search an older version: `git grep TODO v1.0`."
+    },
+    {
+      "id": "ls-files",
+      "difficulty": "medium",
+      "question": "Which command lists every file Git is tracking?",
+      "options": ["`git ls-files`", "`git status --all`", "`git show --files`", "`git branch --files`"],
+      "answer": 0,
+      "explanation": "`git ls-files` prints tracked paths, one per line. `git ls-files --others --exclude-standard` lists untracked files that aren't ignored, and `git ls-files -i --exclude-standard -c` tracked files that match an ignore rule."
+    },
+    {
+      "id": "hooks-pre-commit",
+      "difficulty": "medium",
+      "question": "You want a script to run the linter automatically before every commit, and block the commit if it fails. Where does Git look for it?",
+      "options": [
+        "In `.git/hooks/pre-commit` (an executable script)",
+        "In `.gitignore`",
+        "In `.gitattributes` under `[lint]`",
+        "In `~/.gitconfig` under `core.lint`"
+      ],
+      "answer": 0,
+      "explanation": "If `pre-commit` exits with a non-zero code, the commit is aborted. Other hooks include `commit-msg` and `pre-push`. `.git/hooks` isn't committed, so teams share hooks with a tool like the `pre-commit` framework, or with `git config core.hooksPath .githooks`. `git commit --no-verify` skips them."
+    },
+    {
+      "id": "submodule-clone",
+      "difficulty": "hard",
+      "question": "You cloned a project that uses submodules, and the `vendor/lib` folder is empty. Which command fills it?",
+      "options": [
+        "`git submodule update --init --recursive`",
+        "`git pull --submodules`",
+        "`git clone vendor/lib`",
+        "`git fetch --all`"
+      ],
+      "answer": 0,
+      "explanation": "A submodule is another repository pinned at a specific commit inside yours. A normal clone only creates the empty folder. Next time, clone with `git clone --recurse-submodules <url>` to do both in one step."
+    },
+    {
+      "id": "lfs",
+      "difficulty": "medium",
+      "question": "Your repository needs large binary files (videos, PSDs, trained models) and clones are getting very slow. Which tool is built for this?",
+      "options": [
+        "Git LFS: `git lfs track '*.psd'`",
+        "`git gc --aggressive`",
+        "`git clone --depth 1` for everyone",
+        "Adding the files to `.gitattributes` as `binary`"
+      ],
+      "answer": 0,
+      "explanation": "Git LFS (Large File Storage) stores small pointer files in Git and keeps the real content on a separate server, downloading only the versions you check out. `git lfs track` writes a rule to `.gitattributes`, which you commit. Every version of a big file stored in normal Git stays in every clone forever."
+    },
+    {
+      "id": "sparse-checkout",
+      "difficulty": "hard",
+      "question": "In a huge monorepo you only work in `services/billing`. Which feature lets you check out just that folder?",
+      "options": [
+        "`git sparse-checkout set services/billing`",
+        "`git clone --path services/billing`",
+        "`git worktree add services/billing`",
+        "Adding everything else to `.gitignore`"
+      ],
+      "answer": 0,
+      "explanation": "Sparse checkout limits which folders appear in your working tree, while the history stays complete. Combine it with a partial clone (`git clone --filter=blob:none --sparse <url>`) to also avoid downloading the other files' contents."
+    },
+    {
+      "id": "archive-release",
+      "difficulty": "medium",
+      "question": "You need a zip of the project as it was at `v1.2.0`, without the `.git` folder. Which command?",
+      "options": [
+        "`git archive --format=zip -o shop-1.2.0.zip v1.2.0`",
+        "`git bundle create shop.zip v1.2.0`",
+        "`git clone --zip v1.2.0`",
+        "`git export v1.2.0 > shop.zip`"
+      ],
+      "answer": 0,
+      "explanation": "`git archive` packs a tree from any commit or tag, containing only tracked files. Files can be left out with `export-ignore` in `.gitattributes`. `git bundle` is different: it packs commits and history into a file you can clone from offline."
+    },
+    {
+      "id": "signed-commits",
+      "difficulty": "medium",
+      "question": "How do you prove that a commit really came from you, not from someone who just set `user.name` to your name?",
+      "options": [
+        "Sign it with a GPG or SSH key: `git commit -S`",
+        "Use `git commit --author` with your email",
+        "Push it over HTTPS",
+        "Add `Signed-off-by:` with `git commit -s`"
+      ],
+      "answer": 0,
+      "explanation": "Anyone can set any name and email, so `-S` adds a cryptographic signature that GitHub shows as \"Verified\". Turn it on everywhere with `git config --global commit.gpgsign true`. Lowercase `-s` only adds a `Signed-off-by` text line, a declaration used by some projects, not a signature."
+    },
+    {
+      "id": "filter-repo",
+      "difficulty": "hard",
+      "question": "A 2 GB `data.csv` was committed a year ago and deleted later, but every clone still downloads it. Which tool removes it from the entire history?",
+      "options": [
+        "`git filter-repo --path data.csv --invert-paths`",
+        "`git rm --cached data.csv`",
+        "`git revert` on the commit that added it",
+        "`git gc --prune=now`"
+      ],
+      "answer": 0,
+      "explanation": "`git filter-repo` (a separate install, recommended over the old `git filter-branch`) rewrites every commit without that file. All hashes change, so you must force-push and everyone must re-clone. `git rm` and `git revert` only add new commits; the file stays in the old ones."
+    },
+    {
+      "id": "blame-ignore-revs",
+      "difficulty": "hard",
+      "question": "A big \"reformat all code\" commit now shows up as the last change on every line in `git blame`. How do you make blame look past it?",
+      "options": [
+        "List its hash in `.git-blame-ignore-revs` and run `git config blame.ignoreRevsFile .git-blame-ignore-revs`",
+        "Revert the formatting commit",
+        "Use `git blame --since` with the date before the commit",
+        "Use `git log --follow` instead of blame"
+      ],
+      "answer": 0,
+      "explanation": "Blame then attributes those lines to the commit before the reformat. For a one-off, use `git blame --ignore-rev <hash> file`. GitHub's blame view also reads a `.git-blame-ignore-revs` file in the repository root."
+    },
+    {
+      "id": "maintenance",
+      "difficulty": "medium",
+      "question": "Commands in a large repository have become slow. Which command sets up background jobs that keep the repository optimised?",
+      "options": [
+        "`git maintenance start`",
+        "`git fsck --fast`",
+        "`git clean -fdx`",
+        "`git reset --hard`"
+      ],
+      "answer": 0,
+      "explanation": "`git maintenance start` registers the repository and schedules regular tasks (prefetching, packing, commit-graph updates). `git gc` does a one-off cleanup. `git fsck` only checks the repository's integrity."
+    },
+    {
+      "id": "switch-vs-checkout",
+      "difficulty": "easy",
+      "question": "Why did Git 2.23 add `git switch` and `git restore`?",
+      "options": [
+        "To split the overloaded `git checkout`: `switch` changes branches, `restore` restores files",
+        "Because `git checkout` was removed from Git",
+        "`switch` and `restore` only work with GitHub",
+        "They are faster versions that skip the staging area"
+      ],
+      "answer": 0,
+      "explanation": "`git checkout` does both jobs, so a typo can discard your edits when you meant to change branch. `git checkout` still works and appears in many tutorials: `checkout -b` ≈ `switch -c`, and `checkout -- file` ≈ `restore file`."
+    }
+  ]
+}

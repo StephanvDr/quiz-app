@@ -1,0 +1,165 @@
+{
+  "topic": "How Git works: objects, refs and revisions",
+  "questions": [
+    {
+      "id": "dot-git-folder",
+      "difficulty": "easy",
+      "question": "What happens if you delete the hidden `.git` folder of a project?",
+      "options": [
+        "The files stay, but all history, branches and Git settings of that copy are gone",
+        "Nothing: Git rebuilds it from your files",
+        "Only the remote settings are lost",
+        "The files are deleted too"
+      ],
+      "answer": 0,
+      "explanation": "The `.git` folder **is** the repository; the files around it are just one checked-out version. If the work was pushed, you can clone it again. That's also why copying a project folder including `.git` copies its full history."
+    },
+    {
+      "id": "commit-hash",
+      "difficulty": "medium",
+      "question": "A commit hash such as `a1b2c3d…` is computed from what?",
+      "options": [
+        "The commit's contents: its tree (files), parent hash(es), author, committer, dates and message",
+        "A random number generated at commit time",
+        "A counter that goes up by one per commit",
+        "The changed files only"
+      ],
+      "answer": 0,
+      "explanation": "Because the parent hash is included, a commit's hash depends on the whole history before it. Change anything, even an old message, and that commit and everything after it get new hashes. That's why amend and rebase \"rewrite\" history."
+    },
+    {
+      "id": "object-types",
+      "difficulty": "hard",
+      "question": "Which four kinds of objects does Git store in `.git/objects`?",
+      "options": [
+        "Blob, tree, commit and annotated tag",
+        "File, folder, branch and remote",
+        "Diff, patch, commit and branch",
+        "Snapshot, delta, index and ref"
+      ],
+      "answer": 0,
+      "explanation": "A **blob** holds a file's contents, a **tree** a folder listing (names pointing to blobs and subtrees), a **commit** points to one tree plus its parents and metadata, and an annotated **tag** points to a commit. Branches aren't objects; they're refs, small files holding a hash."
+    },
+    {
+      "id": "cat-file",
+      "difficulty": "hard",
+      "question": "Which command prints the raw contents of the current commit object: its tree, parent, author and message?",
+      "options": ["`git cat-file -p HEAD`", "`git show --raw HEAD`", "`git log -1 --tree`", "`git ls-files HEAD`"],
+      "answer": 0,
+      "explanation": "`git cat-file -p` pretty-prints any object. Try it on the tree hash it shows, then on a blob: you'll see exactly how Git stores a snapshot. `-t` prints the object's type."
+    },
+    {
+      "id": "rev-parse",
+      "difficulty": "medium",
+      "question": "A script needs the full hash of the current commit. Which command prints it?",
+      "options": ["`git rev-parse HEAD`", "`git log HEAD`", "`git status --hash`", "`git describe --full`"],
+      "answer": 0,
+      "explanation": "`git rev-parse` turns any revision name into a hash; `--short` gives the abbreviated form. `git rev-parse --abbrev-ref HEAD` prints the current branch name, and `git rev-parse --show-toplevel` the repository root."
+    },
+    {
+      "id": "branch-file",
+      "difficulty": "medium",
+      "question": "How is a local branch such as `main` stored inside `.git`?",
+      "options": [
+        "As a ref: a small file (or packed-refs entry) containing the hash of its latest commit",
+        "As a folder with a copy of every file",
+        "As a database table of commits",
+        "Inside every commit object"
+      ],
+      "answer": 0,
+      "explanation": "`cat .git/refs/heads/main` typically shows a 40-character hash. Committing writes a new commit object and updates that one line. That's why branching in Git is so fast."
+    },
+    {
+      "id": "tilde-ancestor",
+      "difficulty": "easy",
+      "question": "What does `HEAD~2` refer to?",
+      "options": [
+        "The grandparent of the current commit (two steps back along first parents)",
+        "The second branch in the repository",
+        "The commit two hours ago",
+        "The second parent of a merge commit"
+      ],
+      "answer": 0,
+      "explanation": "`~n` goes back n generations, always following the first parent. `HEAD~` is the same as `HEAD~1`, the parent. It works on any revision: `main~3`, `v1.0~1`."
+    },
+    {
+      "id": "caret-second-parent",
+      "difficulty": "hard",
+      "question": "`HEAD` is a merge commit. What does `HEAD^2` refer to?",
+      "options": [
+        "The merge's second parent: the tip of the branch that was merged in",
+        "The grandparent of `HEAD`",
+        "The same as `HEAD~2`",
+        "Two commits ahead of `HEAD`"
+      ],
+      "answer": 0,
+      "explanation": "`^n` picks the n-th **parent**; `~n` goes n **generations** back. `HEAD^` and `HEAD^1` both mean the first parent, the same as `HEAD~1`. So `git log HEAD^1..HEAD^2` lists what the merge brought in."
+    },
+    {
+      "id": "reflog-vs-ancestry",
+      "difficulty": "hard",
+      "question": "What is the difference between `HEAD@{1}` and `HEAD~1`?",
+      "options": [
+        "`HEAD@{1}` is where `HEAD` was before its last move (reflog); `HEAD~1` is the current commit's parent",
+        "They always point to the same commit",
+        "`HEAD@{1}` is the parent; `HEAD~1` the previous reflog entry",
+        "`HEAD@{1}` points to the remote; `HEAD~1` to the local branch"
+      ],
+      "answer": 0,
+      "explanation": "After a normal commit both point to the same place. After a `reset`, `switch` or `rebase` they differ: `HEAD@{1}` takes you back to wherever you were, which makes it the go-to for undoing those operations. `main@{yesterday}` uses the reflog with a time."
+    },
+    {
+      "id": "log-three-dots",
+      "difficulty": "hard",
+      "question": "Which commits does this list?",
+      "code": "git log --oneline --left-right main...feature",
+      "options": [
+        "Commits on either branch but not on both, marked `<` for `main` and `>` for `feature`",
+        "Only the commits on `feature` that aren't on `main`",
+        "All commits of both branches",
+        "Only the merge base of the two branches"
+      ],
+      "answer": 0,
+      "explanation": "In `git log`, `A...B` is the **symmetric difference**: what each side has that the other hasn't, i.e. how far they've diverged. `--left-right` marks which side each commit belongs to. In `git diff`, three dots mean something else: compare with the merge base."
+    },
+    {
+      "id": "amend-old-commit-stays",
+      "difficulty": "medium",
+      "question": "After `git commit --amend`, what happens to the original commit?",
+      "options": [
+        "It still exists, unreferenced, and is reachable through the reflog until garbage collection removes it",
+        "Git edits it in place, keeping the same hash",
+        "It's deleted immediately",
+        "It's moved to a branch called `ORIG_HEAD` permanently"
+      ],
+      "answer": 0,
+      "explanation": "Commits are immutable. Amend builds a new commit and moves the branch to it. The old one lingers, which is why you can undo an amend with `git reset --soft HEAD@{1}`. `git gc` eventually prunes unreachable objects."
+    },
+    {
+      "id": "merge-base",
+      "difficulty": "medium",
+      "question": "Which command prints the commit where `feature` branched off `main` (their most recent common ancestor)?",
+      "options": [
+        "`git merge-base main feature`",
+        "`git log --first main feature`",
+        "`git branch --base feature`",
+        "`git diff main...feature`"
+      ],
+      "answer": 0,
+      "explanation": "The merge base is what three-way merges and `main...feature` diffs are based on. A practical use is `git diff $(git merge-base main HEAD)`: everything you changed on your branch, including uncommitted work."
+    },
+    {
+      "id": "index-file",
+      "difficulty": "hard",
+      "question": "Where does the staging area physically live?",
+      "options": [
+        "In the binary file `.git/index`",
+        "In a folder `.git/staging/` with copies of the staged files",
+        "In memory, until you commit",
+        "In the stash"
+      ],
+      "answer": 0,
+      "explanation": "The index lists every tracked path with the hash of its staged blob, plus file metadata so Git can quickly see what changed. `git add` writes the blob to `.git/objects` and updates the index. `git ls-files --stage` prints it."
+    }
+  ]
+}
