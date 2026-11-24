@@ -1,0 +1,169 @@
+{
+  "topic": "Rebasing and rewriting history",
+  "questions": [
+    {
+      "id": "rebase-what",
+      "difficulty": "medium",
+      "question": "You're on `feature` and run `git rebase main`. What happens?",
+      "options": [
+        "Your `feature` commits are replayed on top of the latest `main`, as new commits with new hashes",
+        "`main` is merged into `feature` with a merge commit",
+        "`main` is moved to the tip of `feature`",
+        "The `feature` commits are copied onto `main` and `feature` is deleted"
+      ],
+      "answer": 0,
+      "explanation": "Rebase takes the commits that are on `feature` but not on `main`, sets them aside, moves `feature` to the tip of `main`, and re-applies them one by one. The result is a straight line, as if you had started your work from today's `main`. The commits are **new** objects, which is why rebasing changes hashes."
+    },
+    {
+      "id": "rebase-golden-rule",
+      "difficulty": "easy",
+      "question": "What is the golden rule of rebasing?",
+      "options": [
+        "Don't rebase commits that others have already pulled and built on",
+        "Always rebase before every commit",
+        "Never rebase a branch with more than ten commits",
+        "Only rebase `main` onto feature branches, never the other way round"
+      ],
+      "answer": 0,
+      "explanation": "Rebasing rewrites commits. If someone else has the old ones, their history and yours now disagree, and they get duplicate commits or painful conflicts. Rebasing your own branch before others use it is fine; rewriting shared `main` is not."
+    },
+    {
+      "id": "rebase-vs-merge",
+      "difficulty": "medium",
+      "question": "What is the main difference in the resulting history between merging `main` into your feature branch and rebasing it onto `main`?",
+      "options": [
+        "Merge keeps the true history and adds a merge commit; rebase gives a straight line without one",
+        "Merge rewrites your commits; rebase keeps them unchanged",
+        "Rebase can't handle conflicts; merge can",
+        "There is no difference in the history, only in the speed"
+      ],
+      "answer": 0,
+      "explanation": "Both bring in the same changes. Merging is safe for shared branches and records when integration happened. Rebasing gives a cleaner, linear history that's easier to read and bisect, at the cost of rewriting your commits."
+    },
+    {
+      "id": "interactive-squash",
+      "difficulty": "medium",
+      "question": "Before opening a pull request you want to combine your last three commits into one. Which command starts that?",
+      "options": [
+        "`git rebase -i HEAD~3`",
+        "`git commit --squash 3`",
+        "`git merge --squash HEAD~3`",
+        "`git reset --hard HEAD~3`"
+      ],
+      "answer": 0,
+      "explanation": "Interactive rebase opens a list of the commits, oldest first. Keep the first as `pick` and change the others to `squash` (combine and edit the messages) or `fixup` (combine and keep only the first message). Alternative without the editor: `git reset --soft HEAD~3`, then a single `git commit`."
+    },
+    {
+      "id": "fixup-vs-squash",
+      "difficulty": "medium",
+      "question": "In the interactive rebase list, what is the difference between `squash` and `fixup`?",
+      "options": [
+        "Both merge the commit into the one above; `fixup` throws away its message, `squash` lets you combine the messages",
+        "`squash` deletes the commit; `fixup` keeps it",
+        "`fixup` changes only the message; `squash` changes only the files",
+        "`squash` merges into the commit below; `fixup` into the commit above"
+      ],
+      "answer": 0,
+      "explanation": "`fixup` is ideal for \"fix typo\" commits whose message adds nothing. Other actions: `reword` (edit the message), `edit` (stop to change the commit), `drop` (remove it), and reordering the lines reorders the commits."
+    },
+    {
+      "id": "reword-old-commit",
+      "difficulty": "medium",
+      "question": "The message of the commit **four** commits back is wrong. Nothing is pushed. How do you fix only that message?",
+      "options": [
+        "`git rebase -i HEAD~4` and change that commit's `pick` to `reword`",
+        "`git commit --amend` four times",
+        "`git revert HEAD~4` and commit again",
+        "`git commit --amend HEAD~4`"
+      ],
+      "answer": 0,
+      "explanation": "`--amend` only touches the **last** commit. For older commits, interactive rebase lets you `reword` them. The commit and every commit after it get new hashes."
+    },
+    {
+      "id": "rebase-continue",
+      "difficulty": "easy",
+      "question": "`git rebase main` stopped with a conflict. You fixed the file. What now?",
+      "options": [
+        "`git add <file>` then `git rebase --continue`",
+        "`git commit` then `git rebase main` again",
+        "`git merge --continue`",
+        "`git push --force`"
+      ],
+      "answer": 0,
+      "explanation": "Rebase applies commits one at a time, so it can stop several times. After each fix: `git add`, then `--continue`. `git rebase --skip` drops the current commit, and `git rebase --abort` puts everything back as it was before the rebase."
+    },
+    {
+      "id": "rebase-abort",
+      "difficulty": "easy",
+      "question": "Halfway through a rebase you realise it was a bad idea. How do you get back to exactly where you started?",
+      "options": ["`git rebase --abort`", "`git rebase --skip`", "`git reset --soft HEAD~1`", "`git merge --abort`"],
+      "answer": 0,
+      "explanation": "`--abort` restores the branch to its state before the rebase began. If you only notice **after** the rebase finished, use `git reflog` to find the old tip, or `git reset --hard ORIG_HEAD` right after the rebase."
+    },
+    {
+      "id": "pull-rebase",
+      "difficulty": "medium",
+      "question": "Every `git pull` on `main` creates a \"Merge branch 'main' of github.com…\" commit because you had local commits. How do you put your commits on top of the remote ones instead?",
+      "options": [
+        "`git pull --rebase`",
+        "`git pull --no-commit`",
+        "`git fetch --merge`",
+        "`git pull --squash`"
+      ],
+      "answer": 0,
+      "explanation": "`git pull --rebase` fetches, then rebases your unpushed commits onto the updated remote branch. Make it the default with `git config --global pull.rebase true`. It's safe because the commits being rewritten haven't been pushed yet."
+    },
+    {
+      "id": "autosquash",
+      "difficulty": "hard",
+      "question": "During review you fix a bug in commit `a1b2c3d` of your branch. Which workflow folds the fix into that commit with the least manual editing?",
+      "options": [
+        "`git commit --fixup=a1b2c3d`, then `git rebase -i --autosquash main`",
+        "`git commit --amend a1b2c3d`",
+        "`git cherry-pick --fixup a1b2c3d`",
+        "`git revert a1b2c3d`, then commit the fix again"
+      ],
+      "answer": 0,
+      "explanation": "`--fixup` creates a commit titled `fixup! <original subject>`. With `--autosquash`, interactive rebase moves it right below the original and marks it `fixup` automatically. Set `git config --global rebase.autoSquash true` to make it the default."
+    },
+    {
+      "id": "rebase-onto",
+      "difficulty": "hard",
+      "question": "You branched `feature` off `refactor` by mistake; it should be based on `main`. Which command moves only `feature`'s own commits onto `main`?",
+      "options": [
+        "`git rebase --onto main refactor feature`",
+        "`git rebase main feature`",
+        "`git rebase refactor main`",
+        "`git merge --onto main feature`"
+      ],
+      "answer": 0,
+      "explanation": "`--onto <new base> <old base> <branch>` takes the commits in `old base..branch` (the ones on `feature` but not on `refactor`) and replays them on `new base`. A plain `git rebase main feature` would also carry along the `refactor` commits."
+    },
+    {
+      "id": "push-after-rebase",
+      "difficulty": "medium",
+      "question": "You rebased your own pull-request branch that was already pushed. `git push` is rejected. What's the right command?",
+      "options": [
+        "`git push --force-with-lease`",
+        "`git push --force`",
+        "`git pull`, then `git push`",
+        "`git push --rebase`"
+      ],
+      "answer": 0,
+      "explanation": "The rebased branch has new commits, so a normal push would \"lose\" the old ones on the remote and is rejected. `--force-with-lease` overwrites only if the remote still has what you last fetched, so you won't silently erase a colleague's push. Pulling would merge the old copies back in and duplicate your commits."
+    },
+    {
+      "id": "rebase-exec",
+      "difficulty": "hard",
+      "question": "Before pushing, you want to make sure the tests pass on **every** commit of your branch, not just the last one. Which command does that?",
+      "options": [
+        "`git rebase -i --exec 'pytest' main`",
+        "`git bisect run pytest`",
+        "`git log --exec pytest main..`",
+        "`git commit --verify-all`"
+      ],
+      "answer": 0,
+      "explanation": "`--exec` (`-x`) adds an `exec` line after each commit in the rebase plan. If the command fails, the rebase stops at that commit so you can fix it. A history where every commit passes makes `git bisect` reliable later."
+    }
+  ]
+}

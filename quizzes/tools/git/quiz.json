@@ -1,0 +1,8 @@
+{
+  "title": "Git",
+  "category": "Developer tools",
+  "badge": "git",
+  "language": "shell",
+  "description": "Pick the Git command that solves the problem: setting up, staging and committing, reading history, undoing mistakes, branching, merging, rebasing, working with remotes, and recovering lost work.",
+  "note": "Commands use the modern `git switch` and `git restore` where they exist (Git 2.23 and later); explanations mention the older `git checkout` form. `a1b2c3d` stands for any commit hash."
+}

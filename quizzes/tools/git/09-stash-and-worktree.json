@@ -1,0 +1,146 @@
+{
+  "topic": "Stash and worktrees",
+  "questions": [
+    {
+      "id": "stash-basic",
+      "difficulty": "easy",
+      "question": "You're halfway through a feature when an urgent bug comes in. You don't want to commit unfinished work. How do you set your changes aside and get a clean working tree?",
+      "options": ["`git stash`", "`git reset --hard`", "`git commit --temp`", "`git restore .`"],
+      "answer": 0,
+      "explanation": "`git stash` saves your uncommitted changes (staged and unstaged) on a stack and resets your files to the last commit. Fix the bug, then bring your work back with `git stash pop`. `reset --hard` and `restore .` would throw the changes away."
+    },
+    {
+      "id": "stash-pop-vs-apply",
+      "difficulty": "easy",
+      "question": "What is the difference between `git stash pop` and `git stash apply`?",
+      "options": [
+        "`pop` applies the stash and removes it from the list; `apply` applies it and keeps it",
+        "`apply` applies it and removes it; `pop` only shows it",
+        "`pop` applies the oldest stash; `apply` the newest",
+        "There is no difference"
+      ],
+      "answer": 0,
+      "explanation": "`apply` is useful when you want the same changes on several branches. Remove an entry later with `git stash drop`, or all of them with `git stash clear`."
+    },
+    {
+      "id": "stash-untracked",
+      "difficulty": "medium",
+      "question": "You ran `git stash`, but your new file `helpers.py` is still in your working tree. Why, and what should you have run?",
+      "options": [
+        "By default stash skips untracked files; use `git stash -u`",
+        "Stash only saves staged changes; use `git stash --all-files`",
+        "`helpers.py` is ignored; use `git stash -f`",
+        "Stash only works on Python files after `git add`"
+      ],
+      "answer": 0,
+      "explanation": "`-u` (`--include-untracked`) also stashes new files. `-a` (`--all`) goes further and includes ignored files. Alternatively, `git add helpers.py` first, because staged new files are stashed."
+    },
+    {
+      "id": "stash-list",
+      "difficulty": "easy",
+      "question": "Which command shows all the stashes you've saved?",
+      "options": ["`git stash list`", "`git stash show`", "`git log --stash`", "`git branch --stash`"],
+      "answer": 0,
+      "explanation": "Each entry is named `stash@{0}` (newest), `stash@{1}`, and so on, with the branch and commit it was made on. Stashes are local only; they're never pushed."
+    },
+    {
+      "id": "stash-message",
+      "difficulty": "medium",
+      "question": "You have several stashes and can't tell them apart. How do you save the next one with a description?",
+      "options": [
+        "`git stash push -m 'half-done login form'`",
+        "`git stash save --name 'half-done login form'`",
+        "`git stash -d 'half-done login form'`",
+        "`git commit --stash -m 'half-done login form'`"
+      ],
+      "answer": 0,
+      "explanation": "`git stash push -m` adds a message that shows in `git stash list`. `git stash save 'msg'` is the older, deprecated form. Plain `git stash` is short for `git stash push`."
+    },
+    {
+      "id": "stash-apply-specific",
+      "difficulty": "medium",
+      "question": "`git stash list` shows three entries and you need the oldest one, `stash@{2}`, without removing it. Which command?",
+      "options": [
+        "`git stash apply stash@{2}`",
+        "`git stash pop`",
+        "`git stash apply 3`",
+        "`git stash show stash@{2}`"
+      ],
+      "answer": 0,
+      "explanation": "Both `pop` and `apply` take a stash name and default to `stash@{0}`. Newer versions of Git also accept just the number: `git stash apply 2`."
+    },
+    {
+      "id": "stash-show-patch",
+      "difficulty": "medium",
+      "question": "Before applying a stash, you want to see exactly which lines it changes. Which command?",
+      "options": [
+        "`git stash show -p stash@{0}`",
+        "`git stash list -p`",
+        "`git diff stash`",
+        "`git stash apply --dry-run`"
+      ],
+      "answer": 0,
+      "explanation": "`git stash show` gives a `--stat` summary, and `-p` shows the full patch. A stash is stored as a commit, so `git diff stash@{0}` works too, but it compares it with your current working tree."
+    },
+    {
+      "id": "stash-path",
+      "difficulty": "medium",
+      "question": "You changed five files but want to stash only `config.yml`. Which command?",
+      "options": [
+        "`git stash push -- config.yml`",
+        "`git stash config.yml`",
+        "`git stash -u config.yml`",
+        "`git stash --only config.yml`"
+      ],
+      "answer": 0,
+      "explanation": "`git stash push` accepts paths after `--`. `git stash push -p` lets you pick changes chunk by chunk, like `git add -p`."
+    },
+    {
+      "id": "stash-pop-conflict",
+      "difficulty": "hard",
+      "question": "`git stash pop` runs into a merge conflict. What happens to the stash entry?",
+      "options": [
+        "It stays in the stash list; drop it yourself after resolving the conflict",
+        "It's dropped, and the conflict is all that remains",
+        "It's turned into a commit on the current branch",
+        "The pop is cancelled and nothing in your files changes"
+      ],
+      "answer": 0,
+      "explanation": "Git prints \"The stash entry is kept in case you need it again.\" Resolve the conflict, `git add` the file (or `git restore --staged` it if you don't want it staged), and run `git stash drop` once you're sure."
+    },
+    {
+      "id": "stash-branch",
+      "difficulty": "hard",
+      "question": "A stash from weeks ago no longer applies cleanly to your branch. Which command applies it on a new branch that starts at the commit where the stash was made?",
+      "options": [
+        "`git stash branch rescue-work stash@{0}`",
+        "`git switch -c rescue-work stash@{0}`",
+        "`git stash apply --branch rescue-work`",
+        "`git branch rescue-work` then `git stash pop`"
+      ],
+      "answer": 0,
+      "explanation": "`git stash branch` creates the branch at the stash's original commit, applies the stash there (where it always fits), and drops it if that works. Then merge or rebase that branch as usual."
+    },
+    {
+      "id": "worktree-add",
+      "difficulty": "hard",
+      "question": "You're mid-way through a big change and need to fix a bug on `main` **at the same time**, in a separate folder, without stashing or cloning again. Which command?",
+      "options": [
+        "`git worktree add ../shop-hotfix main`",
+        "`git clone --local . ../shop-hotfix`",
+        "`git stash branch ../shop-hotfix`",
+        "`git switch --folder ../shop-hotfix main`"
+      ],
+      "answer": 0,
+      "explanation": "A worktree is an extra working folder linked to the same repository: same history, different checked-out branch. One branch can be checked out in only one worktree at a time. Remove it when you're done with `git worktree remove ../shop-hotfix`; `git worktree list` shows them all."
+    },
+    {
+      "id": "stash-clear",
+      "difficulty": "easy",
+      "question": "Which command deletes **all** your stashes at once?",
+      "options": ["`git stash clear`", "`git stash drop --all`", "`git stash reset`", "`git clean -s`"],
+      "answer": 0,
+      "explanation": "`git stash clear` empties the list without asking. `git stash drop` removes one entry (the newest by default). Use them carefully: dropped stashes can only be dug up with `git fsck`, and only for a while."
+    }
+  ]
+}

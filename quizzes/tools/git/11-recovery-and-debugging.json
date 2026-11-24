@@ -1,0 +1,164 @@
+{
+  "topic": "Cherry-pick, bisect and recovery",
+  "questions": [
+    {
+      "id": "cherry-pick-one",
+      "difficulty": "easy",
+      "question": "A bug fix `a1b2c3d` was committed on `develop`, and you need just that fix on the `release` branch. Which command, run on `release`?",
+      "options": [
+        "`git cherry-pick a1b2c3d`",
+        "`git merge a1b2c3d`",
+        "`git rebase a1b2c3d`",
+        "`git pull develop a1b2c3d`"
+      ],
+      "answer": 0,
+      "explanation": "Cherry-pick applies the changes of one commit as a **new** commit (with a new hash) on the current branch. Merging that hash would bring in everything before it on `develop` as well."
+    },
+    {
+      "id": "cherry-pick-x",
+      "difficulty": "medium",
+      "question": "What does `-x` add when you run `git cherry-pick -x a1b2c3d`?",
+      "options": [
+        "A line `(cherry picked from commit a1b2c3d…)` to the new commit's message",
+        "It deletes the original commit from its branch",
+        "It cherry-picks the commit and all commits after it",
+        "It applies the changes without committing"
+      ],
+      "answer": 0,
+      "explanation": "The note makes it easy to see later where a fix came from, which is useful for release branches. Without committing would be `-n` (`--no-commit`)."
+    },
+    {
+      "id": "cherry-pick-range",
+      "difficulty": "hard",
+      "question": "You want to cherry-pick commits `A` through `C`, **including** `A`, where `A` is the oldest. Which command?",
+      "options": [
+        "`git cherry-pick A^..C`",
+        "`git cherry-pick A..C`",
+        "`git cherry-pick C..A`",
+        "`git cherry-pick A...C`"
+      ],
+      "answer": 0,
+      "explanation": "`A..C` means \"reachable from C but not from A\", which **excludes** `A`. `A^` is A's parent, so `A^..C` starts at `A`. If it stops on a conflict, resolve it, `git add`, and `git cherry-pick --continue`."
+    },
+    {
+      "id": "reflog-what",
+      "difficulty": "medium",
+      "question": "What does `git reflog` show?",
+      "options": [
+        "Every position `HEAD` has had in **your** repository: commits, checkouts, resets, rebases",
+        "The commit history of the remote",
+        "A list of deleted files",
+        "The log of all commands typed in the terminal"
+      ],
+      "answer": 0,
+      "explanation": "The reflog is Git's safety net. It's local (never pushed), and entries expire after 90 days by default. Every line has a name such as `HEAD@{3}` that you can use like a hash."
+    },
+    {
+      "id": "recover-reset-hard",
+      "difficulty": "medium",
+      "question": "You ran `git reset --hard HEAD~3` and realised those three commits were important. How do you get them back?",
+      "options": [
+        "Find the commit before the reset in `git reflog`, then `git reset --hard HEAD@{1}`",
+        "They're gone; Git deletes commits on `reset --hard`",
+        "`git revert HEAD~3`",
+        "`git pull --force`"
+      ],
+      "answer": 0,
+      "explanation": "The commits still exist; only the branch moved. `HEAD@{1}` is where `HEAD` was one step ago. Check `git reflog` to be sure which entry you want. Right after a reset, `ORIG_HEAD` points to the same place."
+    },
+    {
+      "id": "recover-deleted-branch",
+      "difficulty": "medium",
+      "question": "You deleted `feature/report` with `git branch -D` before it was merged. How do you bring it back?",
+      "options": [
+        "Find its last commit in `git reflog` and run `git branch feature/report <hash>`",
+        "`git branch --undelete feature/report`",
+        "`git fetch --deleted`",
+        "`git stash pop`"
+      ],
+      "answer": 0,
+      "explanation": "Deleting a branch only deletes the name. The output of `git branch -D` even prints the hash (`Deleted branch feature/report (was a1b2c3d)`). Recreate the name at that hash."
+    },
+    {
+      "id": "reflog-uncommitted",
+      "difficulty": "hard",
+      "question": "Can `git reflog` recover changes you never committed, after `git reset --hard`?",
+      "options": [
+        "No: the reflog only records commits; uncommitted edits to tracked files are gone",
+        "Yes: the reflog stores every saved version of each file",
+        "Yes, but only for the last 24 hours",
+        "Only if you have pushed before"
+      ],
+      "answer": 0,
+      "explanation": "Commit often and the reflog protects you. Content you had **staged** with `git add` was stored as a blob, so `git fsck --lost-found` can sometimes dig it up, but without file names. Your editor's local history is another last resort."
+    },
+    {
+      "id": "bisect-start",
+      "difficulty": "medium",
+      "question": "The tests passed at tag `v2.0` and fail now, 300 commits later. Which tool finds the commit that broke them, with a binary search?",
+      "options": [
+        "`git bisect`: `git bisect start`, `git bisect bad`, `git bisect good v2.0`",
+        "`git blame` on the test file",
+        "`git log --broken v2.0..`",
+        "`git diff v2.0` and read all changes"
+      ],
+      "answer": 0,
+      "explanation": "Bisect checks out a commit halfway between good and bad. You test it and answer `git bisect good` or `git bisect bad`, and it halves the range again. For 300 commits that takes about 9 steps."
+    },
+    {
+      "id": "bisect-steps",
+      "difficulty": "medium",
+      "question": "There are about 1000 commits between the good and the bad version. Roughly how many test steps does `git bisect` need?",
+      "options": ["About 10", "About 100", "About 500", "1000"],
+      "answer": 0,
+      "explanation": "Each step halves the range: 2^10 = 1024. That's what makes bisect so powerful on long histories, as long as every commit can be built and tested."
+    },
+    {
+      "id": "bisect-run",
+      "difficulty": "hard",
+      "question": "You have a script that exits with 0 when the bug is absent and 1 when it's present. How do you let `git bisect` find the bad commit on its own?",
+      "options": [
+        "After marking good and bad: `git bisect run ./check.sh`",
+        "`git bisect auto ./check.sh`",
+        "`git rebase --exec ./check.sh`",
+        "`git log --exec ./check.sh`"
+      ],
+      "answer": 0,
+      "explanation": "`git bisect run` runs the command on each candidate: exit code 0 means good, 1–127 bad, except 125 which means \"can't test this commit, skip it\". It prints the first bad commit at the end."
+    },
+    {
+      "id": "bisect-reset",
+      "difficulty": "easy",
+      "question": "Bisect found the culprit. How do you finish and return to the branch you were on?",
+      "options": ["`git bisect reset`", "`git bisect stop`", "`git switch -`", "`git reset --hard`"],
+      "answer": 0,
+      "explanation": "`git bisect reset` ends the session and checks out the branch you started from. Note the hash it found first, then look at it with `git show`."
+    },
+    {
+      "id": "find-deleted-file",
+      "difficulty": "hard",
+      "question": "`docs/setup.md` was deleted in some commit a while ago and you want it back. Which command finds the commit that deleted it?",
+      "options": [
+        "`git log --diff-filter=D -- docs/setup.md`",
+        "`git reflog docs/setup.md`",
+        "`git blame docs/setup.md`",
+        "`git restore --deleted docs/setup.md`"
+      ],
+      "answer": 0,
+      "explanation": "`--diff-filter=D` keeps commits where the path was **deleted**. Then restore it from that commit's parent, where it still existed: `git restore --source=<hash>^ -- docs/setup.md`."
+    },
+    {
+      "id": "secret-pushed",
+      "difficulty": "medium",
+      "question": "You pushed a commit containing a real API key to GitHub. What is the **first** thing to do?",
+      "options": [
+        "Revoke and replace the key at the provider",
+        "Run `git revert` on the commit",
+        "Delete the file and push again",
+        "Rewrite history with `git filter-repo` and force-push"
+      ],
+      "answer": 0,
+      "explanation": "Once pushed, assume the key is compromised: bots scan public repositories within minutes. Removing it from the history (with `git filter-repo` or BFG, then a force-push) is worth doing afterwards, but clones, forks and caches may still have it. A revert leaves the key in the history."
+    }
+  ]
+}

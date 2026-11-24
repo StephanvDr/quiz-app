@@ -1,0 +1,133 @@
+{
+  "topic": "Tags and releases",
+  "questions": [
+    {
+      "id": "tag-annotated-vs-lightweight",
+      "difficulty": "medium",
+      "question": "What is the difference between an annotated tag and a lightweight tag?",
+      "options": [
+        "An annotated tag is its own object with a tagger, date and message; a lightweight tag is just a name for a commit",
+        "A lightweight tag can be moved later; an annotated tag can't",
+        "An annotated tag includes the files; a lightweight tag only the hash",
+        "Lightweight tags are local only; annotated tags are pushed automatically"
+      ],
+      "answer": 0,
+      "explanation": "Use **annotated** tags (`git tag -a`) for releases: they record who tagged what and when, can be signed, and `git describe` uses them by default. Lightweight tags (`git tag name`) are fine as private bookmarks. Neither kind is pushed automatically."
+    },
+    {
+      "id": "tag-create-annotated",
+      "difficulty": "easy",
+      "question": "Which command creates an annotated tag `v1.2.0` on the current commit?",
+      "options": [
+        "`git tag -a v1.2.0 -m 'Release 1.2.0'`",
+        "`git tag v1.2.0 --annotate`",
+        "`git branch v1.2.0`",
+        "`git commit --tag v1.2.0`"
+      ],
+      "answer": 0,
+      "explanation": "`-a` makes it annotated and `-m` gives the message (without `-m` your editor opens). `-s` creates a signed tag instead. Tags conventionally start with `v` followed by a semantic version."
+    },
+    {
+      "id": "tag-push-one",
+      "difficulty": "easy",
+      "question": "You created tag `v1.2.0` and ran `git push`, but the tag isn't on GitHub. Why?",
+      "options": [
+        "`git push` doesn't send tags; push it explicitly with `git push origin v1.2.0`",
+        "Tags can only be created on GitHub's website",
+        "Tags are pushed only after the next commit",
+        "The tag must be lightweight to be pushed"
+      ],
+      "answer": 0,
+      "explanation": "Tags are pushed separately so you don't publish private ones by accident. `git push origin <tag>` pushes one tag. A release workflow often runs on exactly this event."
+    },
+    {
+      "id": "tag-push-follow-tags",
+      "difficulty": "hard",
+      "question": "Which command pushes your commits **and** the annotated tags that point at them, but not stray lightweight tags?",
+      "options": ["`git push --follow-tags`", "`git push --tags`", "`git push --all`", "`git push --mirror`"],
+      "answer": 0,
+      "explanation": "`--follow-tags` pushes annotated tags that point at commits being pushed. `--tags` pushes **every** tag, including old experiments. `--all` pushes all branches but no tags. Set `git config --global push.followTags true` to do it on every push."
+    },
+    {
+      "id": "tag-old-commit",
+      "difficulty": "medium",
+      "question": "You forgot to tag release 1.0.0, which was commit `a1b2c3d`. How do you tag it now?",
+      "options": [
+        "`git tag -a v1.0.0 a1b2c3d -m 'Release 1.0.0'`",
+        "`git switch a1b2c3d` then `git commit --tag v1.0.0`",
+        "`git tag -a v1.0.0 -m 'Release 1.0.0' --previous`",
+        "Not possible: tags can only be created on `HEAD`"
+      ],
+      "answer": 0,
+      "explanation": "Like `git branch`, `git tag` takes an optional commit after the name. The tag's own date is today, but it points at the old commit."
+    },
+    {
+      "id": "tag-list-pattern",
+      "difficulty": "easy",
+      "question": "How do you list only the tags of the 1.x releases?",
+      "options": ["`git tag -l 'v1.*'`", "`git tag v1.*`", "`git log --tags v1`", "`git show-tags 1`"],
+      "answer": 0,
+      "explanation": "`-l` (`--list`) with a glob pattern filters tags; quote the pattern so your shell doesn't expand it. Add `--sort=-v:refname` to sort by version number, newest first, instead of alphabetically."
+    },
+    {
+      "id": "tag-delete",
+      "difficulty": "medium",
+      "question": "You tagged the wrong commit as `v1.3.0` and already pushed the tag. How do you remove it locally and on the remote?",
+      "options": [
+        "`git tag -d v1.3.0` and `git push origin --delete v1.3.0`",
+        "`git tag -d v1.3.0` and `git push`",
+        "`git revert v1.3.0`",
+        "`git branch -D v1.3.0`"
+      ],
+      "answer": 0,
+      "explanation": "Deleting locally doesn't touch the remote, and vice versa. Anyone who already fetched the tag keeps their copy, so for published releases it's usually better to release `v1.3.1` than to move a tag."
+    },
+    {
+      "id": "describe-output",
+      "difficulty": "hard",
+      "question": "`git describe --tags` prints `v1.2.0-5-ga1b2c3d`. What does that mean?",
+      "options": [
+        "You are 5 commits after tag `v1.2.0`, at commit `a1b2c3d`",
+        "Tag `v1.2.0` was created 5 days ago by user `ga1b2c3d`",
+        "Version 1.2.0, build 5, on branch `ga1b2c3d`",
+        "Tag `v1.2.0` has 5 files changed in commit `a1b2c3d`"
+      ],
+      "answer": 0,
+      "explanation": "`describe` finds the nearest tag, counts the commits since, and appends `g` (for git) plus the short hash. On the tagged commit itself it prints just `v1.2.0`. Build scripts use it to stamp a version on the software."
+    },
+    {
+      "id": "checkout-tag",
+      "difficulty": "medium",
+      "question": "A customer reports a bug in version `v1.0.0`. How do you look at the code of that release?",
+      "options": [
+        "`git switch --detach v1.0.0`",
+        "`git switch v1.0.0`",
+        "`git reset --hard v1.0.0` on `main`",
+        "`git pull v1.0.0`"
+      ],
+      "answer": 0,
+      "explanation": "A tag isn't a branch, so `git switch` needs `--detach` (`git checkout v1.0.0` does the same). To fix the bug there, make a branch: `git switch -c hotfix/1.0.1 v1.0.0`. Resetting `main` would throw away everything after the release."
+    },
+    {
+      "id": "release-notes-range",
+      "difficulty": "medium",
+      "question": "For release notes you need every commit between `v1.1.0` and `v1.2.0`. Which command?",
+      "options": [
+        "`git log --oneline v1.1.0..v1.2.0`",
+        "`git log --oneline v1.2.0..v1.1.0`",
+        "`git diff v1.1.0 v1.2.0`",
+        "`git tag --between v1.1.0 v1.2.0`"
+      ],
+      "answer": 0,
+      "explanation": "`A..B` lists what's in B but not in A, so the commits that came after 1.1.0 up to 1.2.0. Add `--no-merges` to leave out merge commits, or use `git shortlog v1.1.0..v1.2.0` to group them by author."
+    },
+    {
+      "id": "semver-major",
+      "difficulty": "easy",
+      "question": "With semantic versioning, your library is at `2.4.1` and you remove a function other code relies on. What is the next version?",
+      "options": ["`3.0.0`", "`2.5.0`", "`2.4.2`", "`2.4.1-1`"],
+      "answer": 0,
+      "explanation": "Semantic versioning is `MAJOR.MINOR.PATCH`: **major** for breaking changes, **minor** for new features that are backwards compatible, **patch** for bug fixes. The lower numbers reset to 0 when a higher one goes up."
+    }
+  ]
+}

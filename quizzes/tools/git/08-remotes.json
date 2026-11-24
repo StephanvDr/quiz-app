@@ -1,0 +1,179 @@
+{
+  "topic": "Remotes: fetch, pull and push",
+  "questions": [
+    {
+      "id": "origin-meaning",
+      "difficulty": "easy",
+      "question": "What is `origin`?",
+      "options": [
+        "The default name Git gives to the remote you cloned from",
+        "The first commit in the repository",
+        "The `main` branch on GitHub",
+        "A reserved name that always points to GitHub"
+      ],
+      "answer": 0,
+      "explanation": "A remote is a named URL of another copy of the repository. `origin` is just a convention; you can rename it or add more remotes, such as `upstream` for the project you forked."
+    },
+    {
+      "id": "remote-v",
+      "difficulty": "easy",
+      "question": "Which command shows the remotes of your repository together with their URLs?",
+      "options": ["`git remote -v`", "`git branch -r`", "`git config remote`", "`git status --remote`"],
+      "answer": 0,
+      "explanation": "`-v` (verbose) lists each remote twice, with its fetch and push URL. `git remote show origin` gives more detail: tracked branches and whether they're up to date."
+    },
+    {
+      "id": "remote-add",
+      "difficulty": "easy",
+      "question": "You created an empty repository on GitHub and have a local repository with commits. Which command connects the two?",
+      "options": [
+        "`git remote add origin https://github.com/ada/shop.git`",
+        "`git clone https://github.com/ada/shop.git`",
+        "`git push https://github.com/ada/shop.git --init`",
+        "`git init https://github.com/ada/shop.git`"
+      ],
+      "answer": 0,
+      "explanation": "`git remote add <name> <url>` stores the URL under a name. Then push with `git push -u origin main`. Cloning would create a second, separate local repository."
+    },
+    {
+      "id": "push-upstream",
+      "difficulty": "easy",
+      "question": "What does `-u` do in this command?",
+      "code": "git push -u origin feature/login",
+      "options": [
+        "It sets `origin/feature/login` as the upstream, so later a plain `git push` and `git pull` know where to go",
+        "It updates the branch even if the remote has newer commits",
+        "It pushes only uncommitted changes",
+        "It pushes all branches"
+      ],
+      "answer": 0,
+      "explanation": "`-u` is `--set-upstream`. You need it once per new branch. Since Git 2.37, `git config --global push.autoSetupRemote true` does this automatically on the first push."
+    },
+    {
+      "id": "fetch-vs-pull",
+      "difficulty": "easy",
+      "question": "What is the difference between `git fetch` and `git pull`?",
+      "options": [
+        "`fetch` only downloads new commits and updates `origin/*`; `pull` fetches and then merges (or rebases) into your current branch",
+        "`fetch` downloads one branch; `pull` downloads all branches",
+        "`pull` only downloads; `fetch` downloads and merges",
+        "They do the same thing; `pull` is the older name"
+      ],
+      "answer": 0,
+      "explanation": "`git fetch` is always safe: your own branches and files don't change. It lets you inspect first, for example with `git log main..origin/main`, and integrate after. `git pull` = `git fetch` + `git merge` (or `git rebase` with `--rebase`)."
+    },
+    {
+      "id": "remote-tracking-branch",
+      "difficulty": "medium",
+      "question": "What is `origin/main` in your local repository?",
+      "options": [
+        "A read-only local copy of where `main` was on `origin` the last time you fetched",
+        "A live connection to the `main` branch on GitHub",
+        "Your local `main` branch after you push",
+        "A branch you can commit to that pushes automatically"
+      ],
+      "answer": 0,
+      "explanation": "Remote-tracking branches only move when you `fetch`, `pull` or `push`. That's why `git status` can say \"up to date with 'origin/main'\" while GitHub has newer commits: run `git fetch` to refresh."
+    },
+    {
+      "id": "push-rejected",
+      "difficulty": "easy",
+      "question": "`git push` fails with \"rejected … (fetch first)\": a colleague pushed to `main` before you. What do you do?",
+      "options": [
+        "`git pull` (or `git pull --rebase`), fix any conflicts, then `git push`",
+        "`git push --force`",
+        "Delete your local `main` and clone again",
+        "Wait a few minutes and push again"
+      ],
+      "answer": 0,
+      "explanation": "Git refuses a push that would throw away commits on the remote. Integrate them first, then push. Forcing would delete your colleague's work from the shared branch."
+    },
+    {
+      "id": "force-with-lease",
+      "difficulty": "medium",
+      "question": "Why is `git push --force-with-lease` safer than `git push --force`?",
+      "options": [
+        "It refuses to overwrite the remote branch if it has commits you haven't fetched",
+        "It asks for confirmation before pushing",
+        "It creates a backup branch on the remote",
+        "It only works on branches you created"
+      ],
+      "answer": 0,
+      "explanation": "`--force` overwrites whatever is there. `--force-with-lease` checks that the remote still points where your `origin/<branch>` says. If someone pushed in the meantime, the push is rejected. A `git fetch` updates that expectation, so check what came in before retrying."
+    },
+    {
+      "id": "fetch-prune",
+      "difficulty": "medium",
+      "question": "Branches deleted on GitHub still show up in `git branch -r`. Which command cleans those up?",
+      "options": ["`git fetch --prune`", "`git branch -D -r --all`", "`git gc`", "`git remote update --clean`"],
+      "answer": 0,
+      "explanation": "`--prune` (`-p`) deletes remote-tracking branches whose branch no longer exists on the remote. Enable it permanently with `git config --global fetch.prune true`. Your own local branches are left alone."
+    },
+    {
+      "id": "remote-set-url",
+      "difficulty": "medium",
+      "question": "The repository moved to a new GitHub organisation (or you're switching from HTTPS to SSH). How do you point `origin` at the new URL?",
+      "options": [
+        "`git remote set-url origin git@github.com:acme/shop.git`",
+        "`git remote add origin git@github.com:acme/shop.git`",
+        "`git clone git@github.com:acme/shop.git .`",
+        "`git config origin.url git@github.com:acme/shop.git`"
+      ],
+      "answer": 0,
+      "explanation": "`set-url` changes an existing remote. `remote add` fails because `origin` already exists. The setting itself lives at `remote.origin.url` in `.git/config`."
+    },
+    {
+      "id": "ahead-behind",
+      "difficulty": "easy",
+      "question": "`git status` says: \"Your branch is ahead of 'origin/main' by 2 commits.\" What does that mean?",
+      "options": [
+        "You have two local commits that aren't pushed yet",
+        "The remote has two commits you haven't pulled",
+        "Two files are modified but not committed",
+        "Your branch is two commits behind and must be rebased"
+      ],
+      "answer": 0,
+      "explanation": "\"Ahead\" means you have commits the remote doesn't; `git push` sends them. \"Behind\" means the remote has commits you don't. \"Have diverged\" means both, so you have to pull (merge or rebase) before you can push."
+    },
+    {
+      "id": "checkout-colleague-branch",
+      "difficulty": "medium",
+      "question": "A colleague pushed a branch `bugfix/vat` and asks you to test it. You don't have it locally yet. What do you run?",
+      "options": [
+        "`git fetch`, then `git switch bugfix/vat`",
+        "`git pull bugfix/vat`",
+        "`git switch origin/bugfix/vat` and commit there",
+        "`git clone` the repository again"
+      ],
+      "answer": 0,
+      "explanation": "`git fetch` downloads the new branch as `origin/bugfix/vat`. When no local branch has that name, `git switch bugfix/vat` creates one that tracks the remote branch automatically. Switching to `origin/bugfix/vat` directly would put you in detached HEAD."
+    },
+    {
+      "id": "fork-upstream",
+      "difficulty": "medium",
+      "question": "You cloned your **fork** of an open-source project. How do you get the new commits from the original project into your local `main`?",
+      "options": [
+        "`git remote add upstream <original url>`, `git fetch upstream`, then `git merge upstream/main`",
+        "`git pull origin main`",
+        "`git clone <original url>` into the same folder",
+        "`git fetch --all --fork`"
+      ],
+      "answer": 0,
+      "explanation": "Your fork is `origin`, and by convention the original project is `upstream`. Fetch from it, integrate it into your `main`, then `git push origin main` to update your fork on GitHub too. GitHub's \"Sync fork\" button does the server-side part."
+    },
+    {
+      "id": "push-different-name",
+      "difficulty": "hard",
+      "question": "What does this command do?",
+      "code": "git push origin HEAD:review/vat-fix",
+      "options": [
+        "Pushes your current commit to a branch called `review/vat-fix` on `origin`, whatever your local branch is called",
+        "Renames your current branch to `review/vat-fix`",
+        "Pushes the branch `HEAD` to `origin`",
+        "Deletes `review/vat-fix` on `origin`"
+      ],
+      "answer": 0,
+      "explanation": "A push takes a **refspec** `<local>:<remote>`. Left of the colon is what you send, right is the branch name on the remote. With nothing on the left (`:review/vat-fix`) it deletes that remote branch."
+    }
+  ]
+}

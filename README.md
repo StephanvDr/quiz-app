@@ -1,6 +1,6 @@
 # Code Quiz
 
-A multiple-choice quiz app for practising data, BI and machine-learning skills. Each
+A multiple-choice quiz app for practising data, BI, machine-learning and Git skills. Each
 question explains its answer, whether you got it right or not, so you learn from every miss.
 The app keeps track of what you've mastered and what you missed, per subject.
 
@@ -12,6 +12,7 @@ The app keeps track of what you've mastered and what you missed, per subject.
 | [ML pitfalls](#ml-pitfalls) | English | 104 | 7 |
 | [BI Drill-down](#bi-drill-down) | Dutch | 144 | 7 |
 | [Contoso LU1 deel 2](#contoso-lu1-deel-2) | Dutch | 169 | 11 |
+| [Git](#git) | English | 184 | 14 |
 
 ### Pandas
 
@@ -86,6 +87,30 @@ data, it runs on a small example instead.
 | US03, US04 en US05 | 15 |
 | Store Manager: US06 t/m US10 | 20 |
 | Conclusies | 14 |
+
+### Git
+
+Which Git command solves which problem: from first-time setup to rebasing, recovering lost
+commits with the reflog, and finding a bug with `git bisect`. Most questions describe a
+situation and ask for the command; the explanations also cover the older `git checkout`
+forms and the pitfalls.
+
+| Topic | Questions |
+| --- | ---: |
+| Setup and configuration | 14 |
+| Staging and committing | 14 |
+| Reading history and diffs | 14 |
+| Undoing changes | 13 |
+| Branches | 14 |
+| Merging and conflicts | 14 |
+| Rebasing and rewriting history | 13 |
+| Remotes: fetch, pull and push | 14 |
+| Stash and worktrees | 12 |
+| Tags and releases | 11 |
+| Cherry-pick, bisect and recovery | 13 |
+| How Git works: objects, refs and revisions | 13 |
+| Collaboration and pull requests | 13 |
+| Power tools | 12 |
 
 ## Install on Windows
 

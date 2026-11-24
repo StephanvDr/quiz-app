@@ -1,0 +1,170 @@
+{
+  "topic": "Undoing changes",
+  "questions": [
+    {
+      "id": "restore-discard",
+      "difficulty": "easy",
+      "question": "You made a mess of `app.js` and want it back as it was in the last commit. The changes aren't staged. Which command?",
+      "options": [
+        "`git restore app.js`",
+        "`git restore --staged app.js`",
+        "`git revert app.js`",
+        "`git reset app.js`"
+      ],
+      "answer": 0,
+      "explanation": "`git restore <file>` overwrites the working-tree copy with the staged version, which here is the last commit. The older form is `git checkout -- app.js`. This **throws your edits away**; Git can't get them back. `git revert` is for commits, not files."
+    },
+    {
+      "id": "amend-message",
+      "difficulty": "easy",
+      "question": "Your last commit message has a typo, and you haven't pushed yet. How do you fix it?",
+      "options": [
+        "`git commit --amend -m 'Fix rounding error'`",
+        "`git revert HEAD`",
+        "`git commit --fix -m 'Fix rounding error'`",
+        "`git reset --hard HEAD`"
+      ],
+      "answer": 0,
+      "explanation": "`--amend` replaces the last commit with a new one, with the new message plus whatever is staged now. Because it creates a new commit (with a new hash), don't amend commits that others have already pulled."
+    },
+    {
+      "id": "amend-forgot-file",
+      "difficulty": "medium",
+      "question": "You just committed, then noticed you forgot to include `tests/test_api.py`. Not pushed yet. How do you add it to that same commit, keeping the message?",
+      "options": [
+        "`git add tests/test_api.py` then `git commit --amend --no-edit`",
+        "`git commit tests/test_api.py --append`",
+        "`git add tests/test_api.py` then `git commit -m 'Add missing test'`",
+        "`git stash` then `git commit --amend`"
+      ],
+      "answer": 0,
+      "explanation": "Stage the forgotten file, then amend; `--no-edit` keeps the existing message. A separate commit also works, but amending keeps history tidy while the work is still private."
+    },
+    {
+      "id": "reset-soft",
+      "difficulty": "medium",
+      "question": "You want to undo the last commit but keep all its changes **staged**, for example to recommit them differently. Which command?",
+      "options": [
+        "`git reset --soft HEAD~1`",
+        "`git reset --hard HEAD~1`",
+        "`git reset HEAD~1`",
+        "`git revert HEAD`"
+      ],
+      "answer": 0,
+      "explanation": "`git reset` moves the current branch to another commit. `--soft` changes only the branch: index and working tree stay as they were, so the changes are staged. The default `--mixed` also resets the index (changes unstaged), and `--hard` resets the working tree too (changes gone)."
+    },
+    {
+      "id": "reset-mixed-default",
+      "difficulty": "medium",
+      "question": "What happens to the changes of the last commit after this command?",
+      "code": "git reset HEAD~1",
+      "options": [
+        "The commit is removed from the branch and its changes stay in your files, unstaged",
+        "The commit is removed and its changes are deleted",
+        "The commit stays, and a new commit that undoes it is added",
+        "The commit is removed and its changes stay staged"
+      ],
+      "answer": 0,
+      "explanation": "Without an option, `git reset` uses `--mixed`: the branch moves back one commit and the index is reset to match, but your working tree is untouched. You can then stage and commit the changes again, for example as several smaller commits."
+    },
+    {
+      "id": "reset-hard-danger",
+      "difficulty": "medium",
+      "question": "Which command throws away the last commit **and** every uncommitted change to tracked files?",
+      "options": [
+        "`git reset --hard HEAD~1`",
+        "`git reset --soft HEAD~1`",
+        "`git revert HEAD`",
+        "`git restore --staged .`"
+      ],
+      "answer": 0,
+      "explanation": "`--hard` resets branch, index and working tree. Uncommitted changes to tracked files are gone for good. The dropped commit itself can still be found with `git reflog` for a while, so `git reset --hard HEAD@{1}` undoes the reset."
+    },
+    {
+      "id": "reset-hard-untracked",
+      "difficulty": "hard",
+      "question": "You run `git reset --hard`. What happens to a new file that you never added?",
+      "options": [
+        "It stays: `reset --hard` only touches tracked files",
+        "It's deleted",
+        "It's moved to the stash",
+        "It's staged"
+      ],
+      "answer": 0,
+      "explanation": "Untracked files are not Git's business until you add them, so reset leaves them alone. To remove them as well, use `git clean`: first `git clean -n` to see what would go, then `git clean -fd`."
+    },
+    {
+      "id": "revert-pushed",
+      "difficulty": "easy",
+      "question": "A commit that broke the site is already pushed to the shared `main` branch. What's the safe way to undo it?",
+      "options": [
+        "`git revert <hash>`, then push",
+        "`git reset --hard HEAD~1`, then `git push --force`",
+        "`git commit --amend`, then push",
+        "Delete the branch on GitHub and push it again"
+      ],
+      "answer": 0,
+      "explanation": "`git revert` creates a **new** commit that applies the opposite of the old one. History isn't rewritten, so everyone can simply pull it. Resetting and force-pushing rewrites shared history and breaks your teammates' clones."
+    },
+    {
+      "id": "reset-vs-revert",
+      "difficulty": "medium",
+      "question": "Which statement about `git reset` and `git revert` is true?",
+      "options": [
+        "`reset` moves the branch back (rewriting history); `revert` adds a new commit that undoes an old one",
+        "`revert` moves the branch back; `reset` adds a new commit that undoes an old one",
+        "Both add a new commit; `reset` also deletes the old one",
+        "They're aliases for the same command"
+      ],
+      "answer": 0,
+      "explanation": "Rule of thumb: **reset** for local commits nobody else has, **revert** for commits that are already shared. `git revert` can also undo a commit from long ago while keeping everything after it."
+    },
+    {
+      "id": "revert-merge",
+      "difficulty": "hard",
+      "question": "You need to revert a **merge commit** `m1e2r3g` on `main`. `git revert m1e2r3g` fails with \"is a merge but no -m option was given\". What do you run?",
+      "options": [
+        "`git revert -m 1 m1e2r3g`",
+        "`git revert --merge m1e2r3g`",
+        "`git revert --no-edit m1e2r3g`",
+        "`git reset --hard m1e2r3g^`"
+      ],
+      "answer": 0,
+      "explanation": "A merge commit has two parents, so Git needs to know which side to keep. `-m 1` means \"keep the first parent\", the branch you merged **into** (`main`), and undo what the merged branch brought in. Note: if you later want to merge that branch again, you first have to revert the revert."
+    },
+    {
+      "id": "clean-dry-run",
+      "difficulty": "medium",
+      "question": "Your project is full of untracked build output. Which command shows what `git clean` **would** delete, without deleting anything?",
+      "options": ["`git clean -n`", "`git clean -f`", "`git clean -fdx`", "`git status --clean`"],
+      "answer": 0,
+      "explanation": "`-n` is a dry run. Then `git clean -f` deletes untracked files, `-d` includes untracked folders, and `-x` also deletes ignored files (like `node_modules/`). `git clean -i` asks per file. Deleted untracked files can't be recovered by Git."
+    },
+    {
+      "id": "restore-from-commit",
+      "difficulty": "medium",
+      "question": "You want `settings.py` back as it was two commits ago, and keep the rest of the project as it is. Which command?",
+      "options": [
+        "`git restore --source=HEAD~2 settings.py`",
+        "`git reset --hard HEAD~2`",
+        "`git revert HEAD~2`",
+        "`git switch HEAD~2 settings.py`"
+      ],
+      "answer": 0,
+      "explanation": "`--source` picks the commit to restore from; only that file changes in your working tree. Commit it to make the change permanent. The older form is `git checkout HEAD~2 -- settings.py`, which also stages it."
+    },
+    {
+      "id": "undo-staging-all",
+      "difficulty": "easy",
+      "question": "You staged a lot of files and want to unstage **all** of them while keeping your edits. Which command?",
+      "options": [
+        "`git restore --staged .`",
+        "`git restore .`",
+        "`git reset --hard`",
+        "`git clean -f`"
+      ],
+      "answer": 0,
+      "explanation": "`git restore --staged .` resets the index to the last commit and leaves the working tree alone. The classic equivalent is plain `git reset`. Both `git restore .` and `git reset --hard` would discard the edits themselves."
+    }
+  ]
+}

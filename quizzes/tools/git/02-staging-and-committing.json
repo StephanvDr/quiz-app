@@ -1,0 +1,168 @@
+{
+  "topic": "Staging and committing",
+  "questions": [
+    {
+      "id": "three-areas",
+      "difficulty": "easy",
+      "question": "Git has three places where a version of your files can be: the working tree, the repository, and one in between where you prepare the next commit. What is that middle one called?",
+      "options": [
+        "The staging area (also called the index)",
+        "The stash",
+        "The remote",
+        "The reflog"
+      ],
+      "answer": 0,
+      "explanation": "`git add` copies changes from the **working tree** into the **staging area** (index); `git commit` turns what's staged into a commit in the **repository**. Staging lets you choose exactly what goes into each commit, even part of a file."
+    },
+    {
+      "id": "status-short-unstaged",
+      "difficulty": "medium",
+      "question": "`git status -s` prints `` M app.js``, with a space before the `M`. What does that mean?",
+      "options": [
+        "`app.js` was modified but the change isn't staged",
+        "`app.js` was modified and the change is staged",
+        "`app.js` is new and untracked",
+        "`app.js` has a merge conflict"
+      ],
+      "answer": 0,
+      "explanation": "The short format has two columns: the left one is the staging area, the right one the working tree. ` M` (blank, M) means modified in the working tree only. `M ` means staged; `MM` means staged, then changed again; `A ` is a new staged file; `??` is untracked; `UU` is a conflict."
+    },
+    {
+      "id": "status-untracked",
+      "difficulty": "easy",
+      "question": "`git status -s` shows `?? notes.md`. What does `??` mean?",
+      "options": [
+        "Git isn't tracking the file yet",
+        "Git can't read the file",
+        "The file has a merge conflict",
+        "The file is ignored by `.gitignore`"
+      ],
+      "answer": 0,
+      "explanation": "Untracked files are new files that have never been added. `git add notes.md` starts tracking it. Ignored files don't appear at all unless you run `git status --ignored`."
+    },
+    {
+      "id": "add-all",
+      "difficulty": "easy",
+      "question": "You want to stage **everything**: new files, changes and deletions, anywhere in the repository. Which command does that?",
+      "options": ["`git add -A`", "`git add -u`", "`git add *`", "`git commit -a`"],
+      "answer": 0,
+      "explanation": "`git add -A` (`--all`) stages new, modified and deleted files in the whole repository. `git add -u` skips new files. `git add *` is expanded by the shell, so it misses dotfiles and doesn't stage deletions. `git add .` stages everything under the current folder."
+    },
+    {
+      "id": "add-update",
+      "difficulty": "medium",
+      "question": "You changed three tracked files and created a scratch file you don't want to commit. Which command stages the three changes but not the new file?",
+      "options": ["`git add -u`", "`git add -A`", "`git add .`", "`git add -N .`"],
+      "answer": 0,
+      "explanation": "`-u` (`--update`) only stages files Git already tracks, including deletions. New files stay untracked. `-N` (intent-to-add) records new files as empty placeholders, so they appear in `git diff`."
+    },
+    {
+      "id": "add-patch",
+      "difficulty": "medium",
+      "question": "One file contains a bug fix and an unrelated refactor. You want to commit only the bug fix lines first. Which command lets you pick the changes chunk by chunk?",
+      "options": ["`git add -p`", "`git add -f`", "`git add -A`", "`git commit --partial`"],
+      "answer": 0,
+      "explanation": "`git add -p` (`--patch`) shows each change (hunk) and asks: `y` to stage it, `n` to skip it, `s` to split it into smaller hunks, `e` to edit it. It's the best way to keep commits focused. `-f` forces adding an ignored file."
+    },
+    {
+      "id": "commit-am-untracked",
+      "difficulty": "medium",
+      "question": "You edited `app.js` and created a new file `util.js`. Which files end up in the commit?",
+      "code": "git commit -am 'Add util helpers'",
+      "options": [
+        "Only `app.js`",
+        "Both `app.js` and `util.js`",
+        "Only `util.js`",
+        "Neither: `-a` and `-m` can't be combined"
+      ],
+      "answer": 0,
+      "explanation": "`-a` stages changes to files Git already **tracks** before committing. New, untracked files are never included; you need `git add util.js` first."
+    },
+    {
+      "id": "commit-message-good",
+      "difficulty": "easy",
+      "question": "Which is the best subject line for a commit message?",
+      "options": [
+        "Fix rounding error in invoice totals",
+        "fixed stuff",
+        "Changed invoice.py, utils.py and test_invoice.py",
+        "WIP"
+      ],
+      "answer": 0,
+      "explanation": "A good subject says **what the commit does**, in the imperative (as if completing \"This commit will …\"), in about 50 characters. Git already records which files changed. Use the body, after a blank line, to explain *why*."
+    },
+    {
+      "id": "diff-staged",
+      "difficulty": "easy",
+      "question": "Before committing you want to review exactly what will go into the commit. Which command shows the staged changes?",
+      "options": ["`git diff --staged`", "`git diff`", "`git status`", "`git log -p`"],
+      "answer": 0,
+      "explanation": "`git diff --staged` (same as `--cached`) compares the staging area with the last commit. Plain `git diff` shows changes that are **not** staged yet. `git diff HEAD` shows both together."
+    },
+    {
+      "id": "unstage-file",
+      "difficulty": "easy",
+      "question": "You ran `git add .` and accidentally staged `secrets.txt`. How do you unstage it without losing its contents?",
+      "options": [
+        "`git restore --staged secrets.txt`",
+        "`git restore secrets.txt`",
+        "`git rm secrets.txt`",
+        "`git reset --hard secrets.txt`"
+      ],
+      "answer": 0,
+      "explanation": "`git restore --staged` takes the file out of the staging area; your edits stay in the working tree. The older equivalent is `git reset secrets.txt`. Plain `git restore secrets.txt` would throw away the working-tree changes, and `git rm` deletes the file. Then add it to `.gitignore`."
+    },
+    {
+      "id": "rm-file",
+      "difficulty": "easy",
+      "question": "You want to delete `old_report.py` from the project and stage the deletion in one step. Which command?",
+      "options": [
+        "`git rm old_report.py`",
+        "`git rm --cached old_report.py`",
+        "`git delete old_report.py`",
+        "`git clean old_report.py`"
+      ],
+      "answer": 0,
+      "explanation": "`git rm` deletes the file from disk and stages the deletion. Deleting it with your file manager and then running `git add -A` (or `git add old_report.py`) has the same result. `--cached` would keep the file on disk."
+    },
+    {
+      "id": "mv-rename",
+      "difficulty": "medium",
+      "question": "You renamed `helpers.py` to `utils.py` with your file manager and didn't use `git mv`. What does Git do?",
+      "options": [
+        "Once both changes are staged, Git detects the rename from the similar contents",
+        "Git loses the history of the file for good",
+        "Git refuses to commit until you run `git mv`",
+        "Git keeps tracking `helpers.py` under its old name"
+      ],
+      "answer": 0,
+      "explanation": "Git doesn't store renames. It sees a deletion and a new file and detects the rename when the contents are similar enough. `git mv a b` is just a shortcut for renaming plus staging both sides. Use `git log --follow utils.py` to see the history across the rename."
+    },
+    {
+      "id": "empty-folder",
+      "difficulty": "medium",
+      "question": "You create an empty folder `uploads/`, but `git status` doesn't mention it and it isn't in the commit. Why?",
+      "options": [
+        "Git tracks files, not folders, so an empty folder has nothing to track",
+        "Folders need `git add -r`",
+        "`uploads/` is in Git's built-in ignore list",
+        "New folders show up only after `git fetch`"
+      ],
+      "answer": 0,
+      "explanation": "A folder exists in Git only as the path of the files inside it. The usual convention is to add an empty placeholder file such as `uploads/.gitkeep`."
+    },
+    {
+      "id": "commit-snapshot",
+      "difficulty": "hard",
+      "question": "What does a Git commit store?",
+      "options": [
+        "A snapshot of the whole project, with unchanged files shared with earlier commits",
+        "Only the lines that changed since the previous commit",
+        "Only the files you changed, as complete copies",
+        "A list of the commands you ran since the previous commit"
+      ],
+      "answer": 0,
+      "explanation": "Each commit points to a full tree of the project, plus its parent commit(s), author, date and message. Files that didn't change point to the same stored content (blob), so snapshots are cheap. The diffs you see are computed on the fly by comparing snapshots."
+    }
+  ]
+}

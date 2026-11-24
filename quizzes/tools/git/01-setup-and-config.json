@@ -1,0 +1,178 @@
+{
+  "topic": "Setup and configuration",
+  "questions": [
+    {
+      "id": "config-identity-global",
+      "difficulty": "easy",
+      "question": "You just installed Git. Which command sets the name recorded on **every** commit you make on this computer?",
+      "options": [
+        "`git config --global user.name 'Ada Lovelace'`",
+        "`git config user.name 'Ada Lovelace'`",
+        "`git init --name 'Ada Lovelace'`",
+        "`git commit --author 'Ada Lovelace'`"
+      ],
+      "answer": 0,
+      "explanation": "`--global` writes to your user config (`~/.gitconfig`), which applies to every repository. Without `--global`, `git config` writes to `.git/config` of the current repository only. Set `user.email` the same way: `git config --global user.email ada@example.com`."
+    },
+    {
+      "id": "config-level-wins",
+      "difficulty": "medium",
+      "question": "`user.email` is set in the system config, your global config, and the repository's own `.git/config`. Which value does a commit in that repository use?",
+      "options": [
+        "The repository's own (`--local`) value",
+        "The global value",
+        "The system value",
+        "Git stops with an error about conflicting settings"
+      ],
+      "answer": 0,
+      "explanation": "Git reads system → global → local, and the most specific one wins. That makes it easy to use a work email in one repository: run `git config user.email ada@work.com` inside it, without `--global`."
+    },
+    {
+      "id": "config-show-origin",
+      "difficulty": "medium",
+      "question": "A setting behaves unexpectedly and you want to know which config file it comes from. Which command shows every setting together with its file?",
+      "options": [
+        "`git config --list --show-origin`",
+        "`git config --global --edit`",
+        "`git status --config`",
+        "`git help config`"
+      ],
+      "answer": 0,
+      "explanation": "`--show-origin` prints the file before each setting. To look at one key, use `git config --show-origin user.email`. `git config --global --edit` opens only the global file in your editor."
+    },
+    {
+      "id": "init-existing-folder",
+      "difficulty": "easy",
+      "question": "You have a project folder on disk that isn't under version control yet. How do you turn it into a Git repository?",
+      "options": [
+        "Run `git init` inside the folder",
+        "Run `git clone .` inside the folder",
+        "Run `git add .` inside the folder; Git creates the repository automatically",
+        "Run `git remote add origin` inside the folder"
+      ],
+      "answer": 0,
+      "explanation": "`git init` creates the hidden `.git` folder, which *is* the repository: all history, branches and config live there. Your files are untouched; nothing is tracked until you `git add` and `git commit`. `git clone` is for copying an existing repository."
+    },
+    {
+      "id": "clone-result",
+      "difficulty": "easy",
+      "question": "What does this command give you?",
+      "code": "git clone https://github.com/acme/shop.git webshop",
+      "options": [
+        "A folder `webshop` with the full history, a remote called `origin`, and the default branch checked out",
+        "A folder `shop` with only the latest version of the files",
+        "A folder `webshop` with the files but no `.git` folder",
+        "A new empty repository on GitHub called `webshop`"
+      ],
+      "answer": 0,
+      "explanation": "The last argument names the target folder; without it Git uses `shop`. A clone copies every commit, sets up `origin` pointing at the URL, creates remote-tracking branches such as `origin/main`, and checks out the default branch."
+    },
+    {
+      "id": "clone-shallow",
+      "difficulty": "medium",
+      "question": "A repository has 15 years of history and you only need the latest files, for a CI build. Which command downloads the least?",
+      "options": [
+        "`git clone --depth 1 <url>`",
+        "`git clone --bare <url>`",
+        "`git clone --single-branch <url>`",
+        "`git pull <url>`"
+      ],
+      "answer": 0,
+      "explanation": "`--depth 1` makes a **shallow clone** with only the most recent commit. `--single-branch` still downloads the full history of that one branch. `--bare` gets everything but without a working tree, which is what servers use."
+    },
+    {
+      "id": "default-branch-main",
+      "difficulty": "medium",
+      "question": "`git init` keeps creating a branch called `master`, but your team uses `main`. How do you change that for every new repository?",
+      "options": [
+        "`git config --global init.defaultBranch main`",
+        "`git branch -m master main`",
+        "`git config --global core.branch main`",
+        "`git init --global main`"
+      ],
+      "answer": 0,
+      "explanation": "`init.defaultBranch` sets the name of the first branch in new repositories. `git branch -m master main` renames the branch in the current repository only, which is the fix for one that already exists."
+    },
+    {
+      "id": "gitignore-pattern",
+      "difficulty": "easy",
+      "question": "Which line in `.gitignore` ignores every `.log` file, in any folder of the project?",
+      "options": ["`*.log`", "`/*.log`", "`.log`", "`logs/*`"],
+      "answer": 0,
+      "explanation": "A pattern without a slash matches in every folder. A leading slash anchors it to the folder of the `.gitignore` file, so `/*.log` only ignores logs in the root. A trailing slash (`build/`) matches folders only. A `!` in front re-includes a file: `!keep.log`."
+    },
+    {
+      "id": "gitignore-already-tracked",
+      "difficulty": "medium",
+      "question": "You added `config.env` to `.gitignore`, but `git status` still shows it as modified. It was committed last week. How do you stop tracking it but keep the file on disk?",
+      "options": [
+        "`git rm --cached config.env`, then commit",
+        "`git rm config.env`, then commit",
+        "`git restore config.env`",
+        "Nothing: Git picks up the `.gitignore` change after the next commit"
+      ],
+      "answer": 0,
+      "explanation": "`.gitignore` only applies to **untracked** files. A file that is already tracked stays tracked until you remove it from the index. `--cached` removes it from the index only, so the file stays on disk. Without `--cached`, `git rm` deletes the file too.\n\nIf the file holds a secret, it is still in the old commits: rotate the secret."
+    },
+    {
+      "id": "check-ignore",
+      "difficulty": "hard",
+      "question": "A new file doesn't show up in `git status` and you suspect a `.gitignore` rule somewhere. Which command tells you which rule, in which file, ignores it?",
+      "options": [
+        "`git check-ignore -v path/to/file`",
+        "`git status --ignored`",
+        "`git ls-files --others`",
+        "`git config --get core.excludesFile`"
+      ],
+      "answer": 0,
+      "explanation": "`git check-ignore -v` prints the file, line number and pattern that match, which is handy when rules come from nested `.gitignore` files or a global excludes file. `git status --ignored` lists ignored files but doesn't say why."
+    },
+    {
+      "id": "alias",
+      "difficulty": "easy",
+      "question": "You want to type `git st` instead of `git status`. Which command sets that up?",
+      "options": [
+        "`git config --global alias.st status`",
+        "`git alias st status`",
+        "`alias git st=status`",
+        "`git config --global st status`"
+      ],
+      "answer": 0,
+      "explanation": "Aliases live in config under `alias.<name>`. A popular one is `git config --global alias.lg 'log --oneline --graph --all'`. An alias that starts with `!` runs a shell command."
+    },
+    {
+      "id": "help-short",
+      "difficulty": "easy",
+      "question": "What's the quickest way to see the options of `git commit` as a short summary in the terminal?",
+      "options": ["`git commit -h`", "`git help commit`", "`git commit --list`", "`man git`"],
+      "answer": 0,
+      "explanation": "`-h` prints a compact usage summary for any subcommand. `git help commit` (or `git commit --help`) opens the full manual page, which is the place to go for the details."
+    },
+    {
+      "id": "core-editor",
+      "difficulty": "medium",
+      "question": "`git commit` without `-m` opens Vim, and you'd rather write messages in VS Code. Which setting do you need?",
+      "options": [
+        "`git config --global core.editor 'code --wait'`",
+        "`git config --global commit.editor code`",
+        "`git config --global core.editor code`",
+        "`git config --global user.editor 'code --wait'`"
+      ],
+      "answer": 0,
+      "explanation": "`core.editor` picks the editor for commit messages, interactive rebases and tags. `--wait` matters: without it VS Code returns immediately, and Git sees an empty message and aborts the commit."
+    },
+    {
+      "id": "line-endings",
+      "difficulty": "hard",
+      "question": "Windows and macOS teammates keep producing diffs where every line changed, only because of CRLF versus LF line endings. What is the most robust fix for the whole team?",
+      "options": [
+        "Commit a `.gitattributes` with `* text=auto`",
+        "Ask everyone to run `git config core.ignorecase true`",
+        "Add `*.txt` to `.gitignore`",
+        "Run `git diff --ignore-all-space` before every commit"
+      ],
+      "answer": 0,
+      "explanation": "`.gitattributes` is committed, so the rule applies to everyone. `* text=auto` lets Git store LF in the repository and convert on checkout as needed. The per-person alternative is `core.autocrlf` (`true` on Windows, `input` on macOS and Linux), but that depends on everyone setting it."
+    }
+  ]
+}
